@@ -1,0 +1,392 @@
+{% extends 'base.html' %} {% block content %}
+<style>
+  .thumbnails {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 2fr));
+    grid-gap: 100px;
+  }
+
+  .thumbnail {
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .thumbnail img,
+  .thumbnail video {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+
+  .thumbnail:hover::after {
+    content: attr(data-caption);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 5px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-size: 12px;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    overflow: auto;
+  }
+
+  .modal-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+
+  .modal-image {
+    max-width: 90%;
+    max-height: 90%;
+  }
+
+  .close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 30px;
+    color: #fff;
+    cursor: pointer;
+  }
+</style>
+<style>
+  .custom-link {
+    color: #17a2b8;
+    /* Цвет ссылки */
+    text-decoration: none;
+    /* Удаление подчеркивания */
+  }
+
+  .custom-link:hover {
+    color: #0d7377;
+    /* Цвет ссылки при наведении */
+    text-decoration: underline;
+    /* Подчеркивание при наведении */
+  }
+</style>
+<div class="row">
+  <div class="col-md-12">
+    <div class="card-body">
+      <div class="d-flex align-items-center">
+        <a type="button" href="/announcement/add/" class="btn btn-primary">
+          <i class="fas fa-plus"></i>
+          Добавить Объявление
+        </a>
+      </div>
+    </div>
+  </div>
+  <!-- /.col -->
+</div>
+<!-- /.row -->
+
+<!-- /.content-header -->
+
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+    <div class="card mx-0">
+      <!-- /.card-header -->
+      <div class="card-body">
+        <!-- Фильтры -->
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label for="nameFilter">Фильтр по названию:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="nameFilter"
+              placeholder="Введите название"
+            />
+          </div>
+          <div class="col-md-4">
+            <label for="tagFilter">Фильтр по тегам:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="tagFilter"
+              placeholder="Введите тег"
+            />
+          </div>
+        </div>
+        <!-- Таблица -->
+        <table class="table table-bordered w-100" id="announcementsTable">
+          <thead>
+            <tr>
+              <th>Название</th>
+              <th>Текст</th>
+              <th>Цена</th>
+              <th>Теги</th>
+              <th>Статус</th>
+              <th>Заметка</th>
+              <th style="width: 1000px">Медиа</th>
+              <th style="width: 40px">Действие</th>
+              <th>Статус публикации</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if announcements|length > 0 %} {% for announcement in
+            announcements %}
+            <tr class="announcement-row" data-id="{{announcement.id}}">
+              <td><a href="/announcement/edit/{{announcement.id}}" class="text">{{announcement.name}}</a></td>
+              <td data-toggle="tooltip" data-placement="top" title="{{announcement.text}}">
+                {{announcement.text|truncate(50, True, '...')}}
+              </td>
+
+              <td>{{announcement.price}}</td>
+              <td>{% for tag in announcement.tags%} {{tag.name}} {%endfor%}</td>
+              <td>{{announcement.status}}</td>
+              <td>{%if announcement.note == None %}
+                {% else %}
+                {{announcement.note}}
+                {% endif %}
+              </td>
+                <td>
+                  {%- for media in announcement.media -%}
+                  {%- if media.media_type == 'image' -%}
+                  <span class="media-links" data-toggle="modal" data-target="#mediaModal" data-src="{{media.url}}"
+                    data-media-index="{{ loop.index0 }}" data-announcement-id="{{ announcement.id }}">
+                    <img src="{{media.url}}" class="img-thumbnail" alt="image"
+                      style="width: 100px; height: 100px; object-fit: cover;">
+                  </ы>
+                  {%- elif media.media_type == 'video' -%}
+                  <span href="#" class="media-links" data-toggle="modal" data-target="#mediaModal" data-src="{{media.url}}"
+                    data-media-index="{{ loop.index0 }}" data-announcement-id="{{ announcement.id }}">
+                    <video width="100" height="100" style="object-fit: cover">
+                      <source src="{{media.url}}" type="video/mp4">
+                      Your browser does not support the video tag.
+                    </video>
+                  </span>
+                  {%- endif -%}
+                  {%- endfor -%}
+                </td>
+                <td>Тут будут кнопки</td>
+                  <!-- остальные поля -->
+                  <td id="status_{{ announcement.id }}"></td>
+            {% endfor %} {% else %}
+            <tr>
+              <td colspan="8" class="text-center">
+                <h4>Нет доступных объявлений</h4>
+              </td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- /.card-footer clearfix -->
+      <div class="card-footer clearfix">
+        <ul class="pagination pagination-sm m-0 float-right">
+          <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+            <a
+              class="page-link"
+              href="{{ request.url.path }}?page={{ current_page - 1 }}"
+            >
+              &laquo;
+            </a>
+          </li>
+          {% for page_number in range(1, total_pages + 1) %}
+          <li
+            class="page-item {% if current_page == page_number %}active{% endif %}"
+          >
+            <a
+              class="page-link"
+              href="{{ request.url.path }}?page={{ page_number }}"
+            >
+              {{ page_number }}
+            </a>
+          </li>
+          {% endfor %}
+          <li
+            class="page-item {% if current_page == total_pages %}disabled{% endif %}"
+          >
+            <a
+              class="page-link"
+              href="{{ request.url.path }}?page={{ current_page + 1 }}"
+            >
+              &raquo;
+            </a>
+          </li>
+        </ul>
+      </div>
+      <!-- /.card-footer clearfix -->
+    </div>
+  </div>
+  <!-- /.container-fluid -->
+</section>
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="mediaModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Media Viewer</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="media-container">
+          <!-- Content will be replaced dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="previous">
+          Previous
+        </button>
+        <button type="button" class="btn btn-primary" id="next">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Скрытые элементы для передачи данных из Python в JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- <script src="/static/js/filters.js"></script> -->
+<script>
+  $(document).ready(function () {
+    updateStatus();
+    setInterval(updateStatus, 60 * 1000);
+
+    function updateStatus() {
+      var visibleAnnouncementIds = Array.from(document.querySelectorAll('.announcement-row'))
+        .map(row => row.getAttribute('data-id'));
+
+      $.ajax({
+        url: '/announcement/',
+        type: 'GET',
+        traditional: true,
+        data: { ids: visibleAnnouncementIds },
+        success: function (data) {
+          var now = new Date();
+          data.forEach(function (announcementJson) {
+            var announcement = JSON.parse(announcementJson);
+            var statusElement = document.querySelector("#status_" + announcement.id);
+            var is_active = announcement.is_active;
+            var publicationDate = new Date(announcement.publication_date);
+
+            if (!is_active) {
+              statusElement.innerText = 'Снято с публикации';
+            } else if (publicationDate < now) {
+              statusElement.innerText = 'Опубликовано';
+            } else {
+              statusElement.innerText = 'Ожидает публикации';
+            }
+          });
+        }
+      });
+    }
+
+    function filterTable() {
+      const nameFilter = $("#nameFilter").val().toLowerCase();
+      const tagFilter = $("#tagFilter").val().toLowerCase();
+
+      $.ajax({
+        url: "/",
+        type: "GET",
+        data: {
+          name_filter: nameFilter,
+          tag_filter: tagFilter,
+        },
+        success: function (response) {
+          const newTable = $(response).find("#announcementsTable");
+          const newPagination = $(response).find(".card-footer");
+          $("#announcementsTable").replaceWith(newTable);
+          $(".card-footer").replaceWith(newPagination);
+
+          updateMediaMap();
+          updateStatus();
+        },
+      });
+    }
+
+    function updateMediaMap() {
+      var mediaMap = {};
+      $(".media-links").each(function () {
+        var rowId = $(this).data("announcement-id");
+        if (!(rowId in mediaMap)) {
+          mediaMap[rowId] = [];
+        }
+        mediaMap[rowId].push($(this).data("src"));
+      });
+    }
+
+    $("#nameFilter").on("input", filterTable);
+    $("#tagFilter").on("input", filterTable);
+
+    var currentMediaIndex = -1;
+    var currentRowId = null;
+    var mediaMap = {};
+
+    $(".media-links").each(function () {
+      var rowId = $(this).data("announcement-id");
+      if (!(rowId in mediaMap)) {
+        mediaMap[rowId] = [];
+      }
+      mediaMap[rowId].push($(this).data("src"));
+    });
+
+    $("#mediaModal").on("show.bs.modal", function (event) {
+      var button = $(event.relatedTarget);
+      currentRowId = button.data("announcement-id");
+      currentMediaIndex = button.data("media-index");
+      var src = button.data("src");
+      loadMedia(src);
+    });
+
+    $("#previous").on("click", function () {
+      if (currentMediaIndex > 0) {
+        currentMediaIndex--;
+        loadMedia(mediaMap[currentRowId][currentMediaIndex]);
+      }
+    });
+
+    $("#next").on("click", function () {
+      if (currentMediaIndex < mediaMap[currentRowId].length - 1) {
+        currentMediaIndex++;
+        loadMedia(mediaMap[currentRowId][currentMediaIndex]);
+      }
+    });
+
+    function loadMedia(src) {
+      var mediaHtml;
+      if (src.endsWith(".mp4") || src.endsWith(".mov")) {
+        mediaHtml =
+          '<video controls><source src="' +
+          src +
+          '" type="video/mp4">Your browser does not support the video tag.</video>';
+      } else {
+        mediaHtml = '<img src="' + src + '" class="img-fluid">';
+      }
+      $("#mediaModal").find(".modal-body").html(mediaHtml);
+    }
+  });
+</script>
+
+{% endblock content %}

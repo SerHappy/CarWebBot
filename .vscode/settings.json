@@ -1,0 +1,14 @@
+{
+    "mypy.configFile": "pyproject.toml",
+    "flake8.args": [
+        "--config=../.flake8"
+    ],
+    "mypy.dmypyExecutable": "/usr/bin/dmypy",
+    "isort.args": [
+        "--profile",
+        "black"
+    ],
+    "cSpell.words": [
+        "uvicorn"
+    ],
+}
