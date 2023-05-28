@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Машины</title>
+    <title>CarWebBot</title>
 
     <!-- AdminLTE CSS -->
     <link
@@ -23,29 +23,22 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css"
     />
-
-    <!-- Bootstrap CSS -->
-    <!-- <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
-      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-      crossorigin="anonymous"
-    /> -->
+    <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css"
+  integrity="sha512-jU/7UFiaW5UBGODEopEqnbIAHOI8fO6T99m7Tsmqs2gkdujByJfkCbbfPSN4Wlqlb9TGnsuC0YgUgWkRBK7B9A=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+/>
     <!-- Select2 -->
-    {% comment %} <link
+    <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css"
       integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
-    /> {% endcomment %}
-    {% comment %} <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css"
-      integrity="sha512-kq3FES+RuuGoBW3a9R2ELYKRywUEQv0wvPTItv3DSGqjpbNtGWVdvT8qwdKkqvPzT93jp8tSF4+oN4IeTEIlQA=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    /> {% endcomment %}
+    />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
     <!-- JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
@@ -57,15 +50,7 @@
     <!-- AdminLTE JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.1.0/js/adminlte.min.js"></script>
     <!-- dropzonejs -->
-    <style>
-      .dz-upload {
-        display: none !important;
-      }
-      dz-progress {
-        /* progress bar covers file name */
-        display: none !important;
-      }
-    </style>
+    {% block extra_head %} {% endblock %}
   </head>
   <body class="hold-transition sidebar-mini">
     <div class="wrapper">
@@ -83,8 +68,13 @@
         <!-- Right navbar links -->
         <ul class="navbar-nav ml-auto">
           <li class="nav-item">
-            <a class="nav-link" href="#">Имя пользователя</a>
+            <a class="nav-link" href="#">{{ user }}</a>
           </li>
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
+          </li>
+          {% endif %}
         </ul>
       </nav>
       <!-- End Header -->
@@ -92,7 +82,7 @@
       <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <!-- Brand Logo -->
         <a href="#" class="brand-link">
-          <span class="brand-text font-weight-light">Машины</span>
+          <span class="brand-text font-weight-light">CarWebBot</span>
         </a>
         <div class="sidebar">
           <!-- Sidebar Menu -->
@@ -110,7 +100,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/announcement/add" class="nav-link">
+                <a href="/announcements/add/" class="nav-link">
                   <i class="nav-icon fas fa-plus"></i>
                   <p>Создать</p>
                 </a>
@@ -141,7 +131,7 @@
           <!-- Add your footer content here -->
         </div>
         <!-- Default to the left -->
-        <strong>&copy; 2023 My Website</strong>
+        <strong>&copy; 2023 CarWebBot</strong>
       </footer>
       <!-- End Footer -->
     </div>

@@ -9,6 +9,10 @@
         "black"
     ],
     "cSpell.words": [
+        "подпапки",
+        "dropzone",
+        "Pydantic",
+        "pytz",
         "uvicorn"
     ],
 }

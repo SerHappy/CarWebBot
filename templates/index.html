@@ -144,7 +144,7 @@
             <tr class="announcement-row" data-id="{{announcement.id}}">
               <td><a href="/announcement/edit/{{announcement.id}}" class="text">{{announcement.name}}</a></td>
               <td data-toggle="tooltip" data-placement="top" title="{{announcement.text}}">
-                {{announcement.text|truncate(50, True, '...')}}
+                {{announcement.text|truncatechars:50}}
               </td>
 
               <td>{{announcement.price}}</td>
@@ -162,7 +162,6 @@
                     data-media-index="{{ loop.index0 }}" data-announcement-id="{{ announcement.id }}">
                     <img src="{{media.url}}" class="img-thumbnail" alt="image"
                       style="width: 100px; height: 100px; object-fit: cover;">
-                  </ы>
                   {%- elif media.media_type == 'video' -%}
                   <span href="#" class="media-links" data-toggle="modal" data-target="#mediaModal" data-src="{{media.url}}"
                     data-media-index="{{ loop.index0 }}" data-announcement-id="{{ announcement.id }}">
@@ -177,6 +176,7 @@
                 <td>Тут будут кнопки</td>
                   <!-- остальные поля -->
                   <td id="status_{{ announcement.id }}"></td>
+              </tr>
             {% endfor %} {% else %}
             <tr>
               <td colspan="8" class="text-center">

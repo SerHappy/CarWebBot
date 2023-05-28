@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/links.css' %}">
+<link rel="stylesheet" href="{% static 'css/modal.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"><div class="row">
+  <div class="col-md-12">
+    <div class="card-body">
+      <div class="d-flex align-items-center">
+        <a type="button" href="/announcements/add/" class="btn btn-primary">
+          <i class="fas fa-plus"></i>
+          Добавить Объявление
+        </a>
+      </div>
+    </div>
+  </div>
+  <!-- /.col -->
+</div>
+<!-- /.row -->
+
+<!-- /.content-header -->
+<style>
+.inactive-row {
+  background-color: #f2f2f2;
+}
+</style>
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+    <div class="card mx-0">
+      <!-- /.card-header -->
+      <div class="card-body">
+        <!-- Фильтры -->
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label for="nameFilter">Фильтр по названию:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="nameFilter"
+              placeholder="Введите название"
+            />
+          </div>
+          <div class="col-md-4">
+            <label for="tagFilter">Фильтр по тегам:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="tagFilter"
+              placeholder="Введите тег"
+            />
+          </div>
+        </div>
+        <!-- Таблица -->
+        <table class="table table-bordered w-100" id="announcementsTable">
+        <thead>
+          <tr>
+            <th>Название</th>
+            <th>Текст</th>
+            <th>Цена</th>
+            <th>Теги</th>
+            <th>Статус</th>
+            <th>Заметка</th>
+            <th style="width: 1000px">Медиа</th>
+            <th style="width: 40px">Действие</th>
+            <th>Статус публикации</th>
+          </tr>
+        </thead>
+       <tbody>
+        {% if announcements|length > 0 %}
+        {% for announcement in announcements %}
+        <tr class="announcement-row {% if not announcement.is_active %}inactive-row{% endif %}" data-id="{{announcement.id}}" data-announcement-id="{{announcement.id}}">
+          <td>
+            <a href="/announcements/edit/{{announcement.id}}" class="text">
+                <i class="fas fa-pencil-alt"></i>
+                {{announcement.name}}
+            </a>
+        </td>
+          <td
+            data-toggle="tooltip"
+            data-placement="top"
+            data-announcement-id="{{announcement.id}}"
+            title="{{announcement.text}}"
+          >
+            {{announcement.text|truncatechars:50}}
+          </td>
+          <td>{{announcement.price}}</td>
+          <td>
+            {% for tag in announcement.tags.all %}
+              {{tag.name}}
+            {% endfor %}
+          </td>
+          <td>{{announcement.status}}</td>
+          <td>
+            {% if announcement.note == None %}
+            {% else %}
+            {{announcement.note}}
+            {% endif %}
+          </td>
+          <td>
+            {% for media in announcement.media.all %}
+            {% if media.media_type == 'PHOTO' %}
+            <span
+              class="media-links"
+              data-toggle="modal"
+              data-target="#mediaModal"
+              data-src="{{media.file.url}}"
+              data-media-index="{{ loop.index0 }}"
+              data-announcement-id="{{ announcement.id }}"
+            >
+              <img
+                src="{{media.file.url}}"
+                class="img-thumbnail"
+                alt="image"
+                style="width: 100px; height: 100px; object-fit: cover"
+              />
+            </span>
+            {% elif media.media_type == 'VIDEO' %}
+            <span
+              href="#"
+              class="media-links"
+              data-toggle="modal"
+              data-target="#mediaModal"
+              data-src="{{media.file.url}}"
+              data-media-index="{{ loop.index0 }}"
+              data-announcement-id="{{ announcement.id }}"
+            >
+              <video width="100" height="100" style="object-fit: cover">
+                <source src="{{media.file.url}}" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </span>
+            {% endif %}
+            {% endfor %}
+          </td>
+          <td>
+            <!-- Buttons -->
+            <button type="button" class="btn btn-primary btn-sm" id="republishModalButton" data-toggle="modal" data-target="#republicationModal" title="Переопубликовать">
+              <i class="fa fa-refresh"></i>
+            </button>
+            <button type="button" class="btn btn-warning btn-sm" data-toggle="tooltip" data-placement="top" title="Снять с публикации">
+              <i class="fa fa-ban"></i>
+            </button>
+          </td>
+          <!-- остальные поля -->
+          <td id="status_{{ announcement.id }}"></td>
+        </tr>
+        {% endfor %} {% else %}
+        <tr>
+          <td colspan="9" class="text-center py-5">
+            <i class="fa fa-frown-o fa-3x mb-3" aria-hidden="true"></i>
+            <h4>Нет доступных объявлений</h4>
+            <p class="text-muted">Новые объявления скоро появятся. Пожалуйста, проверьте позже.</p>
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+      </table>
+      </div>
+
+      {% include 'pagination.html' %}
+    </div>
+  </div>
+  <!-- /.container-fluid -->
+</section>
+
+{% include "modal_viewer.html" %}
+{% include "republish_modal.html" %}
+
+<script src="{% static '/js/pagination_and_filters.js' %}"></script>
+<script src="{% static '/js/status_update.js' %}"></script>
+<script src="{% static "js/media_viewer.js" %}"></script>
+<script src="{% static "js/actions.js" %}"></script>
+<script>
+  $(document).ready(function () {
+    console.log("ready!");
+    updateStatuses();
+    handlePaginationEvents();
+    updateMediaMap();
+    setInterval(updateStatuses, 60 * 1000);
+  });
+  $(document).ajaxStop(function () {
+    console.log("ajaxStop!");
+    handlePaginationEvents();
+  });
+</script>
+{% endblock content %}

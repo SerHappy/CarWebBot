@@ -1,0 +1,13 @@
+.custom-link {
+    color: #17a2b8;
+    /* Цвет ссылки */
+    text-decoration: none;
+    /* Удаление подчеркивания */
+}
+
+.custom-link:hover {
+    color: #0d7377;
+    /* Цвет ссылки при наведении */
+    text-decoration: underline;
+    /* Подчеркивание при наведении */
+}
