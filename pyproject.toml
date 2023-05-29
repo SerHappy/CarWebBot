@@ -15,19 +15,17 @@ jinja2 = "^3.1.2"
 flake8 = "^6.0.0"
 black = "^23.3.0"
 isort = "^5.12.0"
-tortoise-orm = "^0.19.3"
 python-multipart = "^0.0.6"
 gunicorn = "^20.1.0"
 aiomysql = "^0.1.1"
 types-pytz = "^2023.3.0.0"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
-python-jose = {extras = ["cryptography"], version = "^3.3.0"}
-fastapi-jwt-auth = "^0.5.0"
 python-decouple = "^3.8"
 django = "^4.2.1"
 django-debug-toolbar = "^4.1.0"
 loguru = "^0.7.0"
 mysqlclient = "^2.1.1"
+djlint = "^1.29.0"
 
 [tool.isort]
 profile = "black"
