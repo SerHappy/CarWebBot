@@ -1,83 +1,75 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block content %}
-
-<link rel="stylesheet" href="/static/css/dropzone.css" />
-<div class="container-fluid">
-  <div class="card-body">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="card card-primary">
-          <div class="card-header">
-            <h3 class="card-title">Создание объявления</h3>
+  {% load static %}
+  <link rel="stylesheet" href="{% static "css/dropzone.css" %}" />
+  <div class="container-fluid">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Создание объявления</h3>
+            </div>
+            <form id="announcement-form"
+                  name="announcement-form"
+                  method="post"
+                  enctype="multipart/form-data"
+                  action="{{ action }}">
+              {% csrf_token %}
+              <div id="form-card-body" class="card-body">
+                {% include "announcement/form_data/name.html" %}
+                {% include "announcement/form_data/text.html" %}
+                {% include "announcement/form_data/price.html" %}
+                {% include "announcement/form_data/status.html" %}
+                {% include "announcement/form_data/tags.html" %}
+                {% include "announcement/form_data/note.html" %}
+                {% include "announcement/form_data/media.html" %}
+                {% include "announcement/form_data/publication_date.html" %}
+                {% include "announcement/form_data/timezone.html" %}
+              </div>
+              <div class="card-footer">
+                {% if "add" in action %}
+                  <button type="submit" class="btn btn-primary">Опубликовать</button>
+                {% else %}
+                  <button type="submit" class="btn btn-primary">Сохранить</button>
+                {% endif %}
+                {% if "edit" in action %}
+                  <button type="button" class="btn btn-primary" id="editButton" disabled>Отредактировать (выкл)</button>
+                  <button type="button"
+                          class="btn btn-primary"
+                          id="republishButton"
+                          data-toggle="modal"
+                          data-target="#republishModal"
+                          disabled>Переопубликовать (выкл)</button>
+                  <button type="button" class="btn btn-primary" id="deleteButton" disabled>Удалить (выкл)</button>
+                  <span id="editError" style="color: red;"></span>
+                {% endif %}
+              </div>
+            </form>
           </div>
-          <form
-            id="announcement-form"
-            name="announcement-form"
-            method="post"
-            enctype="multipart/form-data"
-            action="{{ action }}"
-          >
-            {% csrf_token %}
-            <div id="form-card-body" class="card-body">
-              {% include 'announcement/form_data/name.html' %}
-              {% include 'announcement/form_data/text.html' %}
-              {% include 'announcement/form_data/price.html' %}
-              {% include 'announcement/form_data/status.html' %}
-              {% include 'announcement/form_data/tags.html' %}
-              {% include 'announcement/form_data/note.html' %}
-              {% include 'announcement/form_data/media.html' %}
-              {% include 'announcement/form_data/publication_date.html' %}
-              {% include "announcement/form_data/timezone.html" %}
-            </div>
-            <div class="card-footer">
-              {% if "add" in action %}
-                <button type="submit" class="btn btn-primary">
-                  Опубликовать
-                </button>
-              {% else %}
-                <button type="submit" class="btn btn-primary">
-                  Сохранить
-                </button>
-              {% endif %}
-              {% if "edit" in action %}
-              <button type="button" class="btn btn-primary" id="editButton" disabled>
-                Отредактировать (выкл)
-              </button>
-              <button type="button" class="btn btn-primary" id="republishButton" data-toggle="modal" data-target="#republishModal" disabled>
-                Переопубликовать (выкл)
-              </button>
-              <button type="button" class="btn btn-primary" id="deleteButton" disabled>
-                Удалить (выкл)
-              </button>
-              <span id="editError" style="color: red;"></span>
-              {% endif %}
-            </div>
-          </form>
         </div>
       </div>
     </div>
   </div>
-</div>
-{% include 'announcement/create_tag_modal.html' %}
-<script
-  src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"
-  integrity="sha512-U2WE1ktpMTuRBPoCFDzomoIorbOyUv0sP8B+INA3EzNAhehbzED1rOJg6bCqPf/Tuposxb5ja/MAUnC8THSbLQ=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-></script>
-<script
-  src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.min.js"
-  integrity="sha512-mh+AjlD3nxImTUGisMpHXW03gE6F4WdQyvuFRkjecwuWLwD2yCijw4tKA3NsEFpA1C3neiKhGXPSIGSfCYPMlQ=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="/static/js/dropzone.js"></script>
-<script src="/static/js/tag_creation.js"></script>
-<script src="/static/js/datetime_datepicker.js"></script>
-<script src="/static/js/timezone.js"></script>
-<script src="/static/js/auto_resize.js"></script>
-<script>
+  {% include "announcement/create_tag_modal.html" %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"
+          integrity="sha512-U2WE1ktpMTuRBPoCFDzomoIorbOyUv0sP8B+INA3EzNAhehbzED1rOJg6bCqPf/Tuposxb5ja/MAUnC8THSbLQ=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.min.js"
+          integrity="sha512-mh+AjlD3nxImTUGisMpHXW03gE6F4WdQyvuFRkjecwuWLwD2yCijw4tKA3NsEFpA1C3neiKhGXPSIGSfCYPMlQ=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"
+          integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"></script>
+  <script src="/static/js/dropzone.js"></script>
+  <script src="/static/js/tag_creation.js"></script>
+  <script src="/static/js/datetime_datepicker.js"></script>
+  <script src="/static/js/timezone.js"></script>
+  <script src="/static/js/auto_resize.js"></script>
+  <script>
   let tagSelect = $("#tags").select2();
   $(document).ready(function () {
     // Event handler for form submission
@@ -155,5 +147,5 @@
       document.querySelector(".card-title").textContent = "Создание объявления";
     }
   });
-</script>
+  </script>
 {% endblock content %}

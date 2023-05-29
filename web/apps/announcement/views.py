@@ -23,7 +23,7 @@ import pytz
 
 
 @login_required(login_url="/user/login/")
-def publish_announcement(request, pk) -> HttpResponse:
+def publish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     announcement = get_object_or_404(Announcement, pk=pk)
     announcement.is_published = True
     announcement.save()
@@ -31,7 +31,7 @@ def publish_announcement(request, pk) -> HttpResponse:
 
 
 @login_required(login_url="/user/login/")
-def enable_announcement(request, pk) -> HttpResponse:
+def enable_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     announcement = get_object_or_404(Announcement, pk=pk)
     announcement.is_active = True
     announcement.save()
@@ -55,7 +55,7 @@ def _get_status(announcement: Announcement) -> Literal["Снято с публи
 
 
 @login_required(login_url="/user/login/")
-def republish_announcement(request, pk) -> HttpResponse:
+def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     announcement = get_object_or_404(Announcement, pk=pk)
     print(request.POST)
     new_date = request.POST.get("datetime")
@@ -182,7 +182,7 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
 
         return render(request, "announcement/announcement_form.html", ctx)
 
-    def post(self, request, pk: int) -> HttpResponse:
+    def post(self, request: HttpRequest, pk: int) -> HttpResponse:
         name = request.POST.get("name")
         text = request.POST.get("text")
         tags = request.POST.getlist("tags")
@@ -225,7 +225,17 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
             Media.objects.create(media_type=media_type, file=file, announcement=announcement)
 
         tags = Tag.objects.all()
-        ctx = {"tags": tags, "announcement": announcement}
+        announcement_json = serialize("json", [announcement])
+        announcement_tags = announcement.tags.all()
+        announcement_media = announcement.media.all()
+        media_json = serialize("json", announcement_media)
+        ctx = {
+            "action": f"/announcements/edit/{announcement.pk}/",
+            "announcement": announcement_json,
+            "announcement_tags": announcement_tags,
+            "tags": tags,
+            "media": media_json,
+        }
         return render(request, "announcement/announcement_form.html", ctx)
 
 

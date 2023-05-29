@@ -27,7 +27,7 @@ urlpatterns = [
     path("", RedirectView.as_view(url="announcements/all/"), name="index"),
     path("announcements/", include("apps.announcement.urls")),
     path("user/", include("apps.users.urls")),
-    path("admin/", admin.site.urls),
+    path("admin/", admin.site.urls, name="admin"),
 ]
 
 
@@ -41,3 +41,6 @@ if settings.DEBUG:
             },
         ),
     ]
+    urlpatterns += [
+    path('__debug__/', include('debug_toolbar.urls')),
+]

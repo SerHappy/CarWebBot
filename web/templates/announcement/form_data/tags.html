@@ -1,26 +1,19 @@
 <div class="form-group">
   <label for="tags">Теги</label>
-  <select
-    class="select2"
-    id="tags"
-    name="tags"
-    multiple="multiple"
-    style="width: 100%"
-    data-placeholder="Выберите теги"
-  >
-  {% for tag in tags %}
-    <option value="{{ tag.id }}" {% if tag in announcement_tags %}selected{% endif %}>{{ tag.name }}</option>
-  {% endfor %}
+  <select class="select2"
+          id="tags"
+          name="tags"
+          multiple="multiple"
+          style="width: 100%"
+          data-placeholder="Выберите теги">
+    {% for tag in tags %}
+      <option value="{{ tag.id }}"
+              {% if tag in announcement_tags %}selected{% endif %}>{{ tag.name }}</option>
+    {% endfor %}
   </select>
-  <small class="form-text text-muted">
-    Если нужного тега нет, то его можно создать
-  </small>
-  <button
-    type="button"
-    class="btn btn-primary"
-    data-toggle="modal"
-    data-target="#createTagModal"
-  >
-    Создать тег
-  </button>
+  <small class="form-text text-muted">Если нужного тега нет, то его можно создать</small>
+  <button type="button"
+          class="btn btn-primary"
+          data-toggle="modal"
+          data-target="#createTagModal">Создать тег</button>
 </div>
