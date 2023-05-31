@@ -11,9 +11,11 @@
     ],
     "cSpell.words": [
         "подпапки",
+        "Addedfile",
         "dropzone",
         "Pydantic",
         "pytz",
+        "queuecomplete",
         "uvicorn"
     ],
     "[html][django-html][handlebars][hbs][mustache][jinja][jinja-html][nj][njk][nunjucks][twig]": {
