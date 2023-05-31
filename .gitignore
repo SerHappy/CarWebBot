@@ -3,3 +3,4 @@
 resourses/
 __pycache__/
 media/
+celerybeat-schedule
