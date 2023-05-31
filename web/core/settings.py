@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "apps.announcement",
     "apps.users",
+    "apps.bot",
 ]
 
 MIDDLEWARE = [
