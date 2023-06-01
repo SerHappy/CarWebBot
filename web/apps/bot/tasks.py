@@ -1,11 +1,10 @@
-from .models import Announcement
+from .views import publish_announcement_to_channel
+from apps.announcement.models import Announcement
 from celery import shared_task
+from decouple import config
 from django.utils import timezone
 from loguru import logger
 from telebot import TeleBot
-from decouple import config
-
-
 
 
 @shared_task
@@ -20,10 +19,5 @@ def publish_announcements() -> None:
     logger.info(f"Announcements to publish: {announcements_to_publish.count()}")
     logger.debug("Before loop")
     for announcement in announcements_to_publish:
-        message = f"Название: {announcement.name}\nТекст:{announcement.text}\nЦена:{announcement.price}"
-        logger.debug("Before sending message")
-        bot.send_message(config("CHANNEL_NAME"), message)
-        logger.debug("After sending message")
-        announcement.is_published = True
-        announcement.save()
+        publish_announcement_to_channel(announcement)
     logger.debug("After loop")

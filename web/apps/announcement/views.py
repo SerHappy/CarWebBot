@@ -1,6 +1,8 @@
 from .models import Announcement
 from .models import Media
 from .models import Tag
+from .services import get_status
+from apps.bot.views import delete_announcement_from_channel
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -13,45 +15,26 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
-from django.utils import timezone
 from django.views.generic import ListView
 from django.views.generic import View
 from loguru import logger
-from typing import Literal
 
 import pytz
 
 
-@login_required(login_url="/user/login/")
-def publish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
-    announcement = get_object_or_404(Announcement, pk=pk)
-    announcement.is_published = True
-    announcement.save()
-    return HttpResponse(status=200)
+# @login_required(login_url="/user/login/")
+# def enable_announcement(request: HttpRequest, pk: int) -> HttpResponse:
+#     announcement = get_object_or_404(Announcement, pk=pk)
+#     announcement.is_active = True
+#     announcement.save()
+#     return HttpResponse(status=200)
 
 
 @login_required(login_url="/user/login/")
-def enable_announcement(request: HttpRequest, pk: int) -> HttpResponse:
+def takeoff_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     announcement = get_object_or_404(Announcement, pk=pk)
-    announcement.is_active = True
-    announcement.save()
+    delete_announcement_from_channel(announcement)
     return HttpResponse(status=200)
-
-
-def _get_status(announcement: Announcement) -> Literal["Снято с публикации", "Опубликовано", "Ожидает публикации"]:
-    now = timezone.now()
-    if not announcement.is_active:
-        if announcement.is_published:
-            announcement.is_published = False
-            announcement.save()
-        return "Снято с публикации"
-    elif announcement.publication_date < now:
-        if not announcement.is_published:
-            announcement.is_published = True
-            announcement.save()
-        return "Опубликовано"
-    else:
-        return "Ожидает публикации"
 
 
 @login_required(login_url="/user/login/")
@@ -73,16 +56,16 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
 @login_required(login_url="/user/login/")
 def get_announcement_status(request: HttpRequest, pk: int) -> JsonResponse:
     announcement = get_object_or_404(Announcement, pk=pk)
-    status = _get_status(announcement)
+    status = get_status(announcement)
     return JsonResponse({"status": status})
 
 
-@login_required(login_url="/user/login/")
-def disable_announcement(request: HttpRequest, pk: int) -> HttpResponse:
-    announcement = get_object_or_404(Announcement, pk=pk)
-    announcement.is_active = False
-    announcement.save()
-    return HttpResponse(status=200)
+# @login_required(login_url="/user/login/")
+# def disable_announcement(request: HttpRequest, pk: int) -> HttpResponse:
+#     announcement = get_object_or_404(Announcement, pk=pk)
+#     announcement.is_active = False
+#     announcement.save()
+#     return HttpResponse(status=200)
 
 
 class AnnouncementListView(LoginRequiredMixin, ListView):

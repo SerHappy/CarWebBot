@@ -52,18 +52,17 @@ exclude = '''
   | \.venv
   | \.env
   | logs
-  | deprecated
 )/
 '''
 
 [tool.mypy]
 python_version = "3.11"
-files = "*.py"
+files = "web/*.py"
 ignore_missing_imports = true
 warn_return_any = true
 warn_unused_configs = true
 warn_unused_ignores = true
-exclude = '''(deprecated|migrations|alembic|app)/$'''
+exclude = '''(migrations)/$'''
 
 [build-system]
 requires = ["poetry-core"]

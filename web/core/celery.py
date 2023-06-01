@@ -13,7 +13,7 @@ app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
     "publish_every_minute": {
-        "task": "apps.announcement.tasks.publish_announcements",
+        "task": "apps.bot.tasks.publish_announcements",
         "schedule": crontab(),
     },
 }

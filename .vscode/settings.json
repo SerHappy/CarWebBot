@@ -17,6 +17,7 @@
         "Pydantic",
         "pytz",
         "queuecomplete",
+        "takeoff",
         "uvicorn"
     ],
     "[html][django-html][handlebars][hbs][mustache][jinja][jinja-html][nj][njk][nunjucks][twig]": {
@@ -24,5 +25,7 @@
     },
     "[django-html]": {
         "editor.defaultFormatter": "monosans.djlint"
-    }
+    },
+    "git.decorations.enabled": true,
+    "python.linting.flake8Enabled": false,
 }

@@ -127,7 +127,7 @@
                     <td>
                       <!-- Buttons -->
                       <button type="button"
-                              class="btn btn-primary btn-sm"
+                              class="btn btn-primary btn-sm republish-button"
                               id="republishModalButton"
                               data-toggle="modal"
                               data-target="#republicationModal"
@@ -135,7 +135,8 @@
                         <i class="fa fa-refresh"></i>
                       </button>
                       <button type="button"
-                              class="btn btn-warning btn-sm"
+                              class="btn btn-warning btn-sm takeoff-button"
+                              id="takeoffButton"
                               data-toggle="tooltip"
                               data-placement="top"
                               title="Снять с публикации">
@@ -168,7 +169,7 @@
   <script src="{% static '/js/pagination_and_filters.js' %}"></script>
   <script src="{% static '/js/status_update.js' %}"></script>
   <script src="{% static "js/media_viewer.js" %}"></script>
-  <script src="{% static "js/actions.js" %}"></script>
+  <script src="{% static 'js/actions.js' %}"></script>
   <script>
   $(document).ready(function () {
     console.log("ready!");
