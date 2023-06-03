@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block content %}
+  {% load static %}
+  <link rel="stylesheet" href="{% static "css/dropzone.css" %}" />
+  <div class="container-fluid">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Редактирование объявления</h3>
+            </div>
+            <form id="announcement-form"
+                  name="announcement-form"
+                  method="post"
+                  enctype="multipart/form-data"
+                  action="{{ action }}">
+              {% csrf_token %}
+              <div id="form-card-body" class="card-body">
+                {% include "announcement/form_data/name.html" %}
+                {% include "announcement/form_data/text.html" %}
+                {% include "announcement/form_data/price.html" %}
+                {% include "announcement/form_data/status.html" %}
+                {% include "announcement/form_data/tags.html" %}
+                {% include "announcement/form_data/note.html" %}
+                {% include "announcement/form_data/media.html" %}
+                {% include "announcement/form_data/added_date.html" %}
+                {% include "announcement/form_data/timezone.html" %}
+              </div>
+              <div class="card-footer">
+                <button type="submit"
+                        class="btn btn-primary mr-2"
+                        id="editButton"
+                        data-toggle="tooltip"
+                        data-placement="top"
+                        title="">Отредактировать</button>
+                <button type="button"
+                        class="btn btn-primary republish-button mr-2"
+                        id="republishButtonModal"
+                        data-toggle="modal"
+                        data-target="#republishModal">Переопубликовать</button>
+                <button type="button"
+                        class="btn btn-primary"
+                        id="deleteModalButton"
+                        data-announcement-id="{{ announcement_id }}">Удалить</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% include "announcement/create_tag_modal.html" %}
+  {% include "delete_modal.html" %}
+  {% include "republish_modal.html" %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"
+          integrity="sha512-U2WE1ktpMTuRBPoCFDzomoIorbOyUv0sP8B+INA3EzNAhehbzED1rOJg6bCqPf/Tuposxb5ja/MAUnC8THSbLQ=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.min.js"
+          integrity="sha512-mh+AjlD3nxImTUGisMpHXW03gE6F4WdQyvuFRkjecwuWLwD2yCijw4tKA3NsEFpA1C3neiKhGXPSIGSfCYPMlQ=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"
+          integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"></script>
+  <script src="/static/js/dropzone.js"></script>
+  <script src="/static/js/tag_creation.js"></script>
+  <script src="/static/js/auto_resize.js"></script>
+  <script>
+  let tagSelect = $("#tags").select2();
+  $(document).ready(function () {
+    $(document).on('click', '.republish-button', function () {
+    let announcement = JSON.parse('{{announcement|escapejs|safe}}');
+    console.log(announcement);
+    let announcementId = announcement[0].pk;
+    let cookie = document.cookie
+    let csrfToken = cookie.substring(cookie.indexOf('=') + 1)
+    // Показать модальное окно
+    $("#republishModal").modal('show');
+
+    // Когда кнопка в модальном окне нажата...
+    $("#republishButton").click(function () {
+      console.log("Republish button clicked");
+      let republishDatetime = $("#new_publication_date").val();
+      let timezone = $("#timezone").val();
+      $.ajax({
+        url: '/announcements/republish/' + announcementId + '/',
+        type: 'POST',
+        beforeSend: function (xhr) {
+          // Добавить CSRF токен в заголовки запроса
+          xhr.setRequestHeader("X-CSRFToken", csrfToken);
+        },
+        data: {
+          datetime: republishDatetime,
+          timezone: timezone
+        },
+        success: function () {
+          alert('Объявление было успешно переопубликовано');
+          window.location.href = "/";
+        },
+        error: function () {
+          alert('Произошла ошибка при переопубликовании объявления');
+        }
+      });
+
+      // Скрыть модальное окно
+      $("#republishModal").modal('hide');
+    });
+  });
+    // Event handler for form submission
+    $("#createTagForm").submit(function (event) {
+      event.preventDefault();
+      console.log("Form submitted");
+      createTag();
+    });
+
+    // Event handler for "Create" button click
+    $("#createTagButton").click(function () {
+      console.log("Create button clicked");
+      createTag();
+    });
+    let tagSelect = $("#tags").select2({
+      theme: "bootstrap4",
+      formatNoMatches: "Nothing found",
+    });
+  });
+  let initialFileCount = 0;
+  let shouldSubmitForm = false;
+  let existingFiles = []; // Массив для хранения уже существующих файлов
+  let isExistingFileBeingAdded = false;
+  document.addEventListener("DOMContentLoaded", function () {
+    let announcement = JSON.parse('{{announcement|escapejs|safe}}');
+    if (announcement != null) {
+      let announcementFields = announcement[0].fields;
+      document.querySelector("input#name").value = announcementFields.name;
+      document.querySelector("textarea#text").value = announcementFields.text;
+      var textArea = document.querySelector("textarea#text");
+      window.autoResize(textArea);
+      document.querySelector("input#price").value = announcementFields.price;
+      document.querySelector("input#status").value = announcementFields.status;
+      let media = JSON.parse('{{media|escapejs|safe}}');
+      console.log(media);
+      if (media) {
+        initialFileCount = media.length;
+        console.log("Existing files:")
+        console.log(existingFiles);
+        media.forEach(function (mediaFile) {
+          mediaFileFields = mediaFile.fields;
+          let mockFile = {
+            name: "/media/" + mediaFileFields.file,
+            size: 12345,
+            type: mediaFileFields.media_type,
+            isMock: true,
+          };
+          console.log(mockFile);
+          let absoluteURL = new URL("/media/" + mediaFileFields.file, window.location.origin);
+          isExistingFileBeingAdded = true;
+          myDropzone.displayExistingFile(mockFile, absoluteURL.href);
+          isExistingFileBeingAdded = false;
+
+          if (
+            !existingFiles.find(
+              (existingFile) => existingFile.name === mockFile.name
+            )
+          ) {
+            document.querySelector("#existing-files").value += mediaFileFields.file + ",";
+            existingFiles.push(mockFile);
+          }
+        });
+      }
+      document.querySelector("input#note").value = announcementFields.note;
+
+      let pubDateWithClientTimezone = new Date(announcementFields.publication_date);
+      console.log(pubDateWithClientTimezone);
+      let day = pubDateWithClientTimezone.getDate().toString().padStart(2, "0");
+      let month = (pubDateWithClientTimezone.getMonth() + 1).toString().padStart(2, "0");
+      let year = pubDateWithClientTimezone.getFullYear();
+      let hours = pubDateWithClientTimezone.getHours().toString().padStart(2, "0");
+      let minutes = pubDateWithClientTimezone.getMinutes().toString().padStart(2, "0");
+
+      document.querySelector(
+        "input#publication_date"
+      ).value = `${day}.${month}.${year} ${hours}:${minutes}`;
+    }
+  });
+  </script>
+{% endblock content %}

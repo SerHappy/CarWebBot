@@ -16,6 +16,11 @@ class Tag(models.Model):
 
 
 class Announcement(models.Model):
+    class ProcessingStatus(models.TextChoices):
+        PENDING = "P", "Pending"
+        PROCESSING = "R", "Processing"
+        DONE = "D", "Done"
+
     name: str = models.CharField(max_length=255, null=False)
     text: str = models.TextField(null=True)
     price: str = models.CharField(max_length=255, null=True)
@@ -26,6 +31,13 @@ class Announcement(models.Model):
     publication_date: str = models.DateTimeField(auto_now_add=False, null=True)
     is_published: bool = models.BooleanField(default=False)
     is_active: bool = models.BooleanField(default=True)
+    processing_status = models.CharField(
+        max_length=1,
+        choices=ProcessingStatus.choices,
+        default=ProcessingStatus.PENDING,
+    )
+    modified_at: str = models.DateTimeField(auto_now=True)
+    created_at: str = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-publication_date"]
@@ -37,12 +49,9 @@ class Announcement(models.Model):
 @deconstructible
 class UniquePathAndRename(object):
     def __call__(self, instance: "Media", filename: str) -> str:
-        ext = filename.split(".")[-1]  # Получаем расширение файла
-        # Устанавливаем новое имя файла
+        ext = filename.split(".")[-1]
         filename = f"{uuid.uuid4()}.{ext}"
-        # Используем ID объявления для создания подпапки
         subdir = str(instance.announcement.id)
-        # Возвращаем путь к файлу
         return os.path.join(subdir, filename)
 
 

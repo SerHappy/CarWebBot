@@ -2,7 +2,9 @@ from .models import Announcement
 from .models import Media
 from .models import Tag
 from .services import get_status
+from apps.bot.tasks import publish_announcements
 from apps.bot.views import delete_announcement_from_channel
+from apps.bot.views import edit_announcement_in_channel
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,20 +16,13 @@ from django.http import HttpRequest
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
 from django.shortcuts import render
 from django.views.generic import ListView
 from django.views.generic import View
 from loguru import logger
 
 import pytz
-
-
-# @login_required(login_url="/user/login/")
-# def enable_announcement(request: HttpRequest, pk: int) -> HttpResponse:
-#     announcement = get_object_or_404(Announcement, pk=pk)
-#     announcement.is_active = True
-#     announcement.save()
-#     return HttpResponse(status=200)
 
 
 @login_required(login_url="/user/login/")
@@ -38,9 +33,22 @@ def takeoff_announcement(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @login_required(login_url="/user/login/")
+def delete_announcement(request: HttpRequest, pk: int) -> HttpResponse:
+    announcement = get_object_or_404(Announcement, pk=pk)
+    delete_announcement_from_channel(announcement)
+    media = announcement.media.all()
+    for m in media:
+        m.file.delete()
+        m.delete()
+    announcement.delete()
+    return HttpResponse(status=200)
+
+
+@login_required(login_url="/user/login/")
 def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     announcement = get_object_or_404(Announcement, pk=pk)
-    print(request.POST)
+    if announcement.is_published:
+        delete_announcement_from_channel(announcement)
     new_date = request.POST.get("datetime")
     timezone = request.POST.get("timezone")
     pytz_timezone = pytz.timezone(timezone)
@@ -49,6 +57,9 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     date_with_tz = pytz_timezone.localize(date_without_tz)
     date_utc = date_with_tz.astimezone(pytz.UTC)
     announcement.publication_date = date_utc
+    announcement.processing_status = Announcement.ProcessingStatus.PENDING
+    announcement.is_published = False
+    announcement.is_active = True
     announcement.save()
     return HttpResponse(status=200)
 
@@ -60,19 +71,11 @@ def get_announcement_status(request: HttpRequest, pk: int) -> JsonResponse:
     return JsonResponse({"status": status})
 
 
-# @login_required(login_url="/user/login/")
-# def disable_announcement(request: HttpRequest, pk: int) -> HttpResponse:
-#     announcement = get_object_or_404(Announcement, pk=pk)
-#     announcement.is_active = False
-#     announcement.save()
-#     return HttpResponse(status=200)
-
-
 class AnnouncementListView(LoginRequiredMixin, ListView):
     login_url = "/user/login/"
     model = Announcement
     template_name = "index.html"
-    paginate_by = 2
+    paginate_by = 5
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -139,9 +142,7 @@ class AnnouncementCreation(LoginRequiredMixin, View):
             media_type = Media.MediaType.PHOTO if content_type == "image" else Media.MediaType.VIDEO
             Media.objects.create(media_type=media_type, file=file, announcement=announcement)
 
-        tags = Tag.objects.all()
-        ctx = {"tags": tags, "announcement": "null"}
-        return render(request, "announcement/announcement_form.html", ctx)
+        return redirect("announcement-list")
 
 
 class AnnouncementUpdate(LoginRequiredMixin, View):
@@ -153,17 +154,17 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
         announcement_tags = announcement.tags.all()
         announcement_media = announcement.media.all()
         media_json = serialize("json", announcement_media)
-        print(media_json)
         all_tags = Tag.objects.all()
         ctx = {
             "action": f"/announcements/edit/{announcement.pk}/",
+            "announcement_id": announcement.pk,
             "announcement": announcement_json,
             "announcement_tags": announcement_tags,
             "tags": all_tags,
             "media": media_json,
         }
 
-        return render(request, "announcement/announcement_form.html", ctx)
+        return render(request, "announcement/announcement_update.html", ctx)
 
     def post(self, request: HttpRequest, pk: int) -> HttpResponse:
         name = request.POST.get("name")
@@ -172,13 +173,6 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
         price = request.POST.get("price")
         status = request.POST.get("status")
         note = request.POST.get("note", None)
-        publication_date_row = request.POST.get("publication_date")
-        timezone = request.POST.get("timezone")
-        pytz_timezone = pytz.timezone(timezone)
-        date_format = "%d.%m.%Y %H:%M"
-        date_without_tz = datetime.strptime(publication_date_row, date_format)
-        date_with_tz = pytz_timezone.localize(date_without_tz)
-        date_utc = date_with_tz.astimezone(pytz.UTC)
 
         announcement = Announcement.objects.get(pk=pk)
         announcement.name = name
@@ -186,7 +180,6 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
         announcement.price = price
         announcement.status = status
         announcement.note = note
-        announcement.publication_date = date_utc
         announcement.save()
 
         announcement.tags.set(tags)
@@ -198,7 +191,7 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
         for file_name in current_files:
             if file_name not in existing_files:
                 media = Media.objects.get(file=file_name, announcement=announcement)
-                media.file.delete()  # This should also remove the file from the filesystem
+                media.file.delete()
                 media.delete()
 
         # Handle new media files
@@ -207,19 +200,9 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
             media_type = Media.MediaType.PHOTO if content_type == "image" else Media.MediaType.VIDEO
             Media.objects.create(media_type=media_type, file=file, announcement=announcement)
 
-        tags = Tag.objects.all()
-        announcement_json = serialize("json", [announcement])
-        announcement_tags = announcement.tags.all()
-        announcement_media = announcement.media.all()
-        media_json = serialize("json", announcement_media)
-        ctx = {
-            "action": f"/announcements/edit/{announcement.pk}/",
-            "announcement": announcement_json,
-            "announcement_tags": announcement_tags,
-            "tags": tags,
-            "media": media_json,
-        }
-        return render(request, "announcement/announcement_form.html", ctx)
+        edit_announcement_in_channel(announcement)
+
+        return redirect("announcement-list")
 
 
 class TagCreation(LoginRequiredMixin, View):

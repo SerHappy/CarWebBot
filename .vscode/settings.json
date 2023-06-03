@@ -3,8 +3,8 @@
     "flake8.args": [
         "--config=../.flake8"
     ],
-    // "mypy.dmypyExecutable": "/usr/bin/dmypy",
-    "mypy.dmypyExecutable": "/run/media/serhappy/Data/Projects/Python/CarWebBot/.venv/bin/dmypy",
+    "mypy.dmypyExecutable": "/usr/bin/dmypy",
+    // "mypy.dmypyExecutable": "/run/media/serhappy/Data/Projects/Python/CarWebBot/.venv/bin/dmypy",
     "isort.args": [
         "--profile",
         "black"

@@ -83,7 +83,10 @@
                         title="{{ announcement.text }}">{{ announcement.text|truncatechars:50 }}</td>
                     <td>{{ announcement.price }}</td>
                     <td>
-                      {% for tag in announcement.tags.all %}{{ tag.name }}{% endfor %}
+                      {% for tag in announcement.tags.all %}
+                        {{ tag.name }}
+                        <br>
+                      {% endfor %}
                     </td>
                     <td>{{ announcement.status }}</td>
                     <td>

@@ -28,22 +28,7 @@
                 {% include "announcement/form_data/timezone.html" %}
               </div>
               <div class="card-footer">
-                {% if "add" in action %}
-                  <button type="submit" class="btn btn-primary">Опубликовать</button>
-                {% else %}
-                  <button type="submit" class="btn btn-primary">Сохранить</button>
-                {% endif %}
-                {% if "edit" in action %}
-                  <button type="button" class="btn btn-primary" id="editButton" disabled>Отредактировать (выкл)</button>
-                  <button type="button"
-                          class="btn btn-primary"
-                          id="republishButton"
-                          data-toggle="modal"
-                          data-target="#republishModal"
-                          disabled>Переопубликовать (выкл)</button>
-                  <button type="button" class="btn btn-primary" id="deleteButton" disabled>Удалить (выкл)</button>
-                  <span id="editError" style="color: red;"></span>
-                {% endif %}
+                <button type="submit" class="btn btn-primary">Опубликовать</button>
               </div>
             </form>
           </div>
@@ -92,60 +77,5 @@
   let shouldSubmitForm = false;
   let existingFiles = []; // Массив для хранения уже существующих файлов
   let isExistingFileBeingAdded = false;
-  document.addEventListener("DOMContentLoaded", function () {
-    let announcement = JSON.parse('{{announcement|escapejs|safe}}');
-    if (announcement != null) {
-      let announcementFields = announcement[0].fields;
-      document.querySelector(".card-title").textContent =
-        "Редактирование объявления";
-      document.querySelector("input#name").value = announcementFields.name;
-      document.querySelector("textarea#text").value = announcementFields.text;
-      var textArea = document.querySelector("textarea#text");
-      window.autoResize(textArea);
-      document.querySelector("input#price").value = announcementFields.price;
-      document.querySelector("input#status").value = announcementFields.status;
-      let media = JSON.parse('{{media|escapejs|safe}}');
-      console.log(media);
-      if (media) {
-        media.forEach(function (mediaFile) {
-          mediaFileFields = mediaFile.fields;
-          let mockFile = {
-            name: "/media/" + mediaFileFields.file,
-            size: 12345,
-            type: mediaFileFields.media_type,
-          };
-          console.log(mockFile);
-          let absoluteURL = new URL("/media/" + mediaFileFields.file, window.location.origin);
-          isExistingFileBeingAdded = true;
-          myDropzone.displayExistingFile(mockFile, absoluteURL.href);
-          isExistingFileBeingAdded = false;
-
-          if (
-            !existingFiles.find(
-              (existingFile) => existingFile.name === mockFile.name
-            )
-          ) {
-            document.querySelector("#existing-files").value += mediaFileFields.file + ",";
-            existingFiles.push(mockFile);
-          }
-        });
-      }
-      document.querySelector("input#note").value = announcementFields.note;
-
-      let pubDateWithClientTimezone = new Date(announcementFields.publication_date);
-      console.log(pubDateWithClientTimezone);
-      let day = pubDateWithClientTimezone.getDate().toString().padStart(2, "0");
-      let month = (pubDateWithClientTimezone.getMonth() + 1).toString().padStart(2, "0");
-      let year = pubDateWithClientTimezone.getFullYear();
-      let hours = pubDateWithClientTimezone.getHours().toString().padStart(2, "0");
-      let minutes = pubDateWithClientTimezone.getMinutes().toString().padStart(2, "0");
-
-      document.querySelector(
-        "input#publication_date"
-      ).value = `${day}.${month}.${year} ${hours}:${minutes}`;
-    } else {
-      document.querySelector(".card-title").textContent = "Создание объявления";
-    }
-  });
   </script>
 {% endblock content %}
