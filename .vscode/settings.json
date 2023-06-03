@@ -14,6 +14,7 @@
         "Addedfile",
         "Dcisd",
         "dropzone",
+        "LOGURU",
         "Pydantic",
         "pytz",
         "queuecomplete",
