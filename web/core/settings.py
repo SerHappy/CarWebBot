@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+from .loguru_setup import setup_logger
 from decouple import config
+from dj_easy_log import load_loguru
 from pathlib import Path
 
 import os
@@ -150,3 +152,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+load_loguru(globals(), configure_func=setup_logger)
