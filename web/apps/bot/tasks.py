@@ -2,12 +2,10 @@ from .views import publish_announcement_to_channel
 from apps.announcement.models import Announcement
 from celery import shared_task
 from core.loguru_setup import setup_logger
-from dj_easy_log import load_loguru
 from django.utils import timezone
 from loguru import logger
 
-
-load_loguru(globals(), configure_func=setup_logger)
+setup_logger(logger)
 
 
 @shared_task

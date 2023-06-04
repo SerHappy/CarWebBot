@@ -5,12 +5,16 @@ from decouple import config
 from django.db.models import QuerySet
 from loguru import logger
 from telebot import TeleBot
+from telebot.apihelper import ApiTelegramException
 from telebot.types import InputMediaPhoto
 from telebot.types import InputMediaVideo
 from typing import Literal
 from typing import LiteralString
 
+import time
 
+
+# Инициализируем очередь сообщений
 bot = TeleBot(config("TELEGRAM_BOT_TOKEN"))
 
 
@@ -44,12 +48,28 @@ def save_media_to_db(announcement: Announcement, media_message, media_to_send) -
 
 
 def send_media(announcement: Announcement, media_to_send: list[tuple[Media, InputMediaPhoto]]) -> None:
-    logger.info(f"Sending media to channel {config('CHANNEL_ID')}")
-    media_message = bot.send_media_group(config("CHANNEL_ID"), [x[1] for x in media_to_send])
-    logger.info(f"Media sent {media_message}")
-    logger.debug("Saving media to database")
-    save_media_to_db(announcement, media_message, media_to_send)
-    logger.debug("Media saved to database")
+    max_attempts = 5
+    attempt = 0
+    while attempt < max_attempts:
+        try:
+            logger.info(f"Sending media to channel {config('CHANNEL_ID')}")
+            media_message = bot.send_media_group(config("CHANNEL_ID"), [x[1] for x in media_to_send])
+            logger.info(f"Media sent {media_message}")
+            logger.debug("Saving media to database")
+            save_media_to_db(announcement, media_message, media_to_send)
+            logger.debug("Media saved to database")
+            break
+        except ApiTelegramException as e:
+            logger.error(f"Error while sending media: {e}")
+            if e.error_code == 429:
+                attempt += 1
+                retry_after = int(e.description.split(" ")[-1]) + 1
+                logger.warning(f"Received 429 error from Telegram. Sleeping for {retry_after} seconds...")
+                time.sleep(retry_after)
+                logger.warning("Waking up and trying again...")
+            else:
+                logger.critical("Error is not 429. Stopping...")
+                break
 
 
 def create_media(media_file: Media) -> InputMediaPhoto | InputMediaVideo:
@@ -118,8 +138,24 @@ def publish_announcement_to_channel(announcement: Announcement) -> None:
     message = create_announcement_message(announcement)
     logger.debug("Text message created")
     _publish_announcement_media(announcement)
-    logger.debug("Media published")
-    text_message = bot.send_message(config("CHANNEL_ID"), message)
+    max_attempts = 5
+    attempt = 0
+    while attempt < max_attempts:
+        try:
+            logger.debug(f"Sending message to channel {config('CHANNEL_ID')}")
+            text_message = bot.send_message(config("CHANNEL_ID"), message)
+            logger.debug(f"Message sent {text_message}")
+            break
+        except ApiTelegramException as e:
+            if e.error_code == 429:
+                attempt += 1
+                retry_after = int(e.description.split(" ")[-1]) + 1
+                logger.warning(f"Received 429 error from Telegram. Sleeping for {retry_after} seconds...")
+                time.sleep(retry_after)
+                logger.warning("Waking up and trying again...")
+            else:
+                logger.critical("Error is not 429. Stopping...")
+                break
     logger.info(f"Announcement {announcement.name} published")
     announcement.is_published = True
     announcement.save()
@@ -138,9 +174,27 @@ def delete_announcement_from_channel(announcement: Announcement) -> None:
     published_messages: QuerySet[PublishedMessage] = announcement.published_messages.all()
     logger.debug(f"Deleting {published_messages.count()} messages")
     for message in published_messages:
-        bot.delete_message(config("CHANNEL_ID"), message.message_id)
-        message.delete()
-        logger.debug(f"Message {message.message_id} deleted from channel and database")
+        max_attempts = 5
+        attempt = 0
+        while attempt < max_attempts:
+            try:
+                bot.delete_message(config("CHANNEL_ID"), message.message_id)
+                message.delete()
+                logger.debug(f"Message {message.message_id} deleted from channel and database")
+                break
+            except ApiTelegramException as e:
+                if e.error_code == 429:
+                    attempt += 1
+                    retry_after = int(e.description.split(" ")[-1]) + 1
+                    logger.warning(f"Received 429 error from Telegram. Sleeping for {retry_after} seconds...")
+                    time.sleep(retry_after)
+                    logger.warning("Waking up and trying again...")
+                elif e.error_code == 400:
+                    logger.warning(f"Message {message.message_id} already deleted from channel")
+                    break
+                else:
+                    logger.critical("Error is not 429 or 400. Stopping...")
+                    break
     announcement.is_published = False
     announcement.is_active = False
     announcement.save()
@@ -161,27 +215,57 @@ def edit_announcement_in_channel(announcement: Announcement) -> None:
             if message.media != None:
                 logger.debug(f"Not changing media for message {message.message_id}")
                 continue
-            try:
-                logger.debug(f"Editing media for message {message.message_id}")
-                bot.edit_message_media(
-                    chat_id=config("CHANNEL_ID"),
-                    message_id=message.message_id,
-                    media=create_media(media[index]),
-                )
-                logger.debug(f"Media edited for message {message.message_id}")
-                PublishedMessage.objects.filter(message_id=message.message_id).update(media=media[index])
-                logger.debug(f"Media saved to database for message {message.message_id}")
-            except Exception as e:
-                logger.error(f"Error while editing message {message.message_id}: {e}\nSkipping...")
+            max_attempts = 5
+            attempt = 0
+            while attempt < max_attempts:
+                try:
+                    logger.debug(f"Editing media for message {message.message_id}")
+                    bot.edit_message_media(
+                        chat_id=config("CHANNEL_ID"),
+                        message_id=message.message_id,
+                        media=create_media(media[index]),
+                    )
+                    logger.debug(f"Media edited for message {message.message_id}")
+                    PublishedMessage.objects.filter(message_id=message.message_id).update(media=media[index])
+                    logger.debug(f"Media saved to database for message {message.message_id}")
+                    break
+                except ApiTelegramException as e:
+                    if e.error_code == 429:
+                        attempt += 1
+                        retry_after = int(e.description.split(" ")[-1]) + 1
+                        logger.warning(f"Received 429 error from Telegram. Sleeping for {retry_after} seconds...")
+                        time.sleep(retry_after)
+                        logger.warning("Waking up and trying again...")
+                    elif e.error_code == 400:
+                        logger.warning(f"Message {message.message_id} can't be edited. Skipping...")
+                        break
+                    else:
+                        logger.critical("Error is not 429 or 400. Stopping...")
+                        break
         else:
-            try:
-                logger.debug(f"Editing text for message {message.message_id}")
-                bot.edit_message_text(
-                    create_announcement_message(announcement),
-                    config("CHANNEL_ID"),
-                    message.message_id,
-                )
-                logger.debug(f"Text edited for message {message.message_id}")
-            except Exception as e:
-                logger.error(f"Error while editing message {message.message_id}: {e}\nSkipping...")
+            max_attempts = 5
+            attempt = 0
+            while attempt < max_attempts:
+                try:
+                    logger.debug(f"Editing text for message {message.message_id}")
+                    bot.edit_message_text(
+                        create_announcement_message(announcement),
+                        config("CHANNEL_ID"),
+                        message.message_id,
+                    )
+                    logger.debug(f"Text edited for message {message.message_id}")
+                    break
+                except ApiTelegramException as e:
+                    if e.error_code == 429:
+                        attempt += 1
+                        retry_after = int(e.description.split(" ")[-1]) + 1
+                        logger.warning(f"Received 429 error from Telegram. Sleeping for {retry_after} seconds...")
+                        time.sleep(retry_after)
+                        logger.warning("Waking up and trying again...")
+                    elif e.error_code == 400:
+                        logger.warning(f"Message {message.message_id} can't be edited. Skipping...")
+                        break
+                    else:
+                        logger.critical("Error is not 429 or 400. Stopping...")
+                        break
     logger.info(f"Announcement {announcement.name} edited")

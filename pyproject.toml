@@ -32,6 +32,7 @@ pytelegrambotapi = "^4.12.0"
 python-telegram-bot = "^20.3"
 telethon = "^1.28.5"
 django-easy-logging = "^0.60"
+eventlet = "^0.33.3"
 
 [tool.isort]
 profile = "black"
