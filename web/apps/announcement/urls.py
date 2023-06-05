@@ -4,11 +4,11 @@
 from .views import AnnouncementCreation
 from .views import AnnouncementListView
 from .views import AnnouncementUpdate
+from .views import delete_announcement
 from .views import get_announcement_status
 from .views import republish_announcement
 from .views import TagCreation
 from .views import takeoff_announcement
-from .views import delete_announcement
 from django.urls import path
 
 

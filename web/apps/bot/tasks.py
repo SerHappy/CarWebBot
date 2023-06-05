@@ -5,6 +5,7 @@ from core.loguru_setup import setup_logger
 from django.utils import timezone
 from loguru import logger
 
+
 setup_logger(logger)
 
 

@@ -49,6 +49,24 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     announcement = get_object_or_404(Announcement, pk=pk)
     if announcement.is_published:
         delete_announcement_from_channel(announcement)
+    name = request.POST.get("name")
+    text = request.POST.get("text")
+    tags = request.POST.getlist("tags")
+    if tags == [""]:
+        tags = []
+    price = request.POST.get("price")
+    status = request.POST.get("status")
+    note = request.POST.get("note", None)
+
+    announcement = Announcement.objects.get(pk=pk)
+    announcement.name = name
+    announcement.text = text
+    announcement.price = price
+    announcement.status = status
+    announcement.note = note
+    announcement.save()
+
+    announcement.tags.set(tags)
     new_date = request.POST.get("datetime")
     timezone = request.POST.get("timezone")
     pytz_timezone = pytz.timezone(timezone)
@@ -57,6 +75,22 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     date_with_tz = pytz_timezone.localize(date_without_tz)
     date_utc = date_with_tz.astimezone(pytz.UTC)
     announcement.publication_date = date_utc
+    # Handle existing media files
+    existing_files = request.POST.get("existing_files").split(",") if request.POST.get("existing_files") else []
+    current_files = [media.file.name for media in announcement.media.all()]
+
+    for file_name in current_files:
+        if file_name not in existing_files:
+            media = Media.objects.get(file=file_name, announcement=announcement)
+            media.file.delete()
+            media.delete()
+
+    # Handle new media files
+    for file in request.FILES.getlist("media"):
+        content_type = file.content_type.split("/")[0]
+        media_type = Media.MediaType.PHOTO if content_type == "image" else Media.MediaType.VIDEO
+        Media.objects.create(media_type=media_type, file=file, announcement=announcement)
+
     announcement.processing_status = Announcement.ProcessingStatus.PENDING
     announcement.is_published = False
     announcement.is_active = True

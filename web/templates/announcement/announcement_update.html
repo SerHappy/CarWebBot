@@ -79,38 +79,52 @@
     let announcementId = announcement[0].pk;
     let cookie = document.cookie
     let csrfToken = cookie.substring(cookie.indexOf('=') + 1)
-    // Показать модальное окно
+
     $("#republishModal").modal('show');
 
-    // Когда кнопка в модальном окне нажата...
     $("#republishButton").click(function () {
-      console.log("Republish button clicked");
-      let republishDatetime = $("#new_publication_date").val();
-      let timezone = $("#timezone").val();
-      $.ajax({
-        url: '/announcements/republish/' + announcementId + '/',
-        type: 'POST',
-        beforeSend: function (xhr) {
-          // Добавить CSRF токен в заголовки запроса
-          xhr.setRequestHeader("X-CSRFToken", csrfToken);
-        },
-        data: {
-          datetime: republishDatetime,
-          timezone: timezone
-        },
-        success: function () {
-          alert('Объявление было успешно переопубликовано');
-          window.location.href = "/";
-        },
-        error: function () {
-          alert('Произошла ошибка при переопубликовании объявления');
-        }
-      });
+  console.log("Republish button clicked");
+  let republishDatetime = $("#new_publication_date").val();
+  let timezone = $("#timezone").val();
 
-      // Скрыть модальное окно
-      $("#republishModal").modal('hide');
-    });
+  let formData = new FormData();
+  formData.append('datetime', republishDatetime);
+  formData.append('timezone', timezone);
+
+  // Добавить файлы из формы Dropzone
+  myDropzone.getAcceptedFiles().forEach(function (file) {
+    formData.append('media', file);
   });
+
+  // Добавить данные из формы 'announcement-form'
+  let formElement = document.querySelector('#announcement-form');
+  let formInputs = formElement.querySelectorAll('input, textarea, select');
+  for(let i = 0; i < formInputs.length; i++){
+    formData.append(formInputs[i].name, formInputs[i].value);
+  }
+  console.log("announcementId: " + announcementId);
+  $.ajax({
+    url: '/announcements/republish/' + announcementId + '/',
+    type: 'POST',
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader("X-CSRFToken", csrfToken);
+    },
+    data: formData,
+    processData: false,  // tell jQuery not to process the data
+    contentType: false,  // tell jQuery not to set contentType
+    success: function () {
+      window.location.href = "/";
+    },
+    error: function () {
+      alert('Произошла ошибка при переопубликовании объявления');
+    }
+  });
+
+  $("#republishModal").modal('hide');
+});
+
+});
+
     // Event handler for form submission
     $("#createTagForm").submit(function (event) {
       event.preventDefault();
