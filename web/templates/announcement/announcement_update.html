@@ -81,48 +81,57 @@
     let csrfToken = cookie.substring(cookie.indexOf('=') + 1)
 
     $("#republishModal").modal('show');
-
     $("#republishButton").click(function () {
-  console.log("Republish button clicked");
-  let republishDatetime = $("#new_publication_date").val();
-  let timezone = $("#timezone").val();
+    console.log("Republish button clicked");
+    let republishDatetime = $("#new_publication_date").val();
+    let timezone = $("#timezone").val();
 
-  let formData = new FormData();
-  formData.append('datetime', republishDatetime);
-  formData.append('timezone', timezone);
+    let formData = new FormData();
+    formData.append('datetime', republishDatetime);
+    formData.append('timezone', timezone);
 
-  // Добавить файлы из формы Dropzone
-  myDropzone.getAcceptedFiles().forEach(function (file) {
-    formData.append('media', file);
-  });
+    // Добавить файлы из формы Dropzone
+    myDropzone.getAcceptedFiles().forEach(function (file) {
+        formData.append('media', file);
+    });
 
-  // Добавить данные из формы 'announcement-form'
-  let formElement = document.querySelector('#announcement-form');
-  let formInputs = formElement.querySelectorAll('input, textarea, select');
-  for(let i = 0; i < formInputs.length; i++){
-    formData.append(formInputs[i].name, formInputs[i].value);
-  }
-  console.log("announcementId: " + announcementId);
-  $.ajax({
-    url: '/announcements/republish/' + announcementId + '/',
-    type: 'POST',
-    beforeSend: function (xhr) {
-      xhr.setRequestHeader("X-CSRFToken", csrfToken);
-    },
-    data: formData,
-    processData: false,  // tell jQuery not to process the data
-    contentType: false,  // tell jQuery not to set contentType
-    success: function () {
-      window.location.href = "/";
-    },
-    error: function () {
-      alert('Произошла ошибка при переопубликовании объявления');
+    var existingFilesValue = document.querySelector("#existing-files").value;
+    console.log("Existing files value: " + existingFilesValue);
+
+    // Проверка наличия файлов в formData
+    if (!formData.has('media') && existingFilesValue.trim() == "") {
+        console.log("No files for upload, displaying error");
+        alert("Загрузка файла обязательна!");
+        return;
     }
-  });
 
-  $("#republishModal").modal('hide');
+    // Добавить данные из формы 'announcement-form'
+    let formElement = document.querySelector('#announcement-form');
+    let formInputs = formElement.querySelectorAll('input, textarea, select');
+    for(let i = 0; i < formInputs.length; i++){
+        formData.append(formInputs[i].name, formInputs[i].value);
+    }
+    console.log("announcementId: " + announcementId);
+
+    $.ajax({
+        url: '/announcements/republish/' + announcementId + '/',
+        type: 'POST',
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRFToken", csrfToken);
+        },
+        data: formData,
+        processData: false,  // tell jQuery not to process the data
+        contentType: false,  // tell jQuery not to set contentType
+        success: function () {
+            window.location.href = "/";
+        },
+        error: function () {
+            alert('Произошла ошибка при переопубликовании объявления');
+        }
+    });
+
+    $("#republishModal").modal('hide');
 });
-
 });
 
     // Event handler for form submission
