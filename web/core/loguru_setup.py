@@ -9,4 +9,9 @@ def setup_logger(logger, settings_dict=None) -> None:
         enqueue=True,
         compression="zip",
         level=config("LOGURU_LEVEL"),
+        format=config("LOGURU_FORMAT"),
+        colorize=True,
+        serialize = True,
+        diagnose = True,
+        backtrace = True,
     )
