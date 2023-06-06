@@ -7,6 +7,9 @@ import uuid
 
 class Tag(models.Model):
     name: str = models.CharField(max_length=50, unique=True)
+    is_active: bool = models.BooleanField(default=True)
+    modified_at: str = models.DateTimeField(auto_now=True)
+    created_at: str = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["name"]
@@ -28,7 +31,6 @@ class Announcement(models.Model):
     status: str = models.CharField(max_length=50, null=True)
     media: "Media"
     note: str = models.TextField(null=True)
-    publication_date: str = models.DateTimeField(auto_now_add=False, null=True)
     is_published: bool = models.BooleanField(default=False)
     is_active: bool = models.BooleanField(default=True)
     processing_status = models.CharField(
@@ -36,6 +38,8 @@ class Announcement(models.Model):
         choices=ProcessingStatus.choices,
         default=ProcessingStatus.PENDING,
     )
+    publication_date: str = models.DateTimeField(auto_now_add=False, null=True)
+    modified_count: int = models.IntegerField(default=0)
     modified_at: str = models.DateTimeField(auto_now=True)
     created_at: str = models.DateTimeField(auto_now_add=True)
 
@@ -68,6 +72,7 @@ class Media(models.Model):
     announcement: "Announcement" = models.ForeignKey(
         Announcement, related_name="media", null=False, on_delete=models.CASCADE
     )
+    created_at: str = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return f"Media {self.file} for announcement {self.announcement.name}"

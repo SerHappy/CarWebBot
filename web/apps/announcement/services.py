@@ -8,6 +8,6 @@ def get_status(announcement: Announcement) -> Literal["Снято с публи�
     if not announcement.is_active:
         return "Снято с публикации"
     if announcement.is_published:
-        return "Опубликовано"
+        return "Опубликовано в "
     if not announcement.is_published:
         return "Ожидает публикации"

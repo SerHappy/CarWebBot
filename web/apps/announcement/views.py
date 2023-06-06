@@ -115,7 +115,8 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
 def get_announcement_status(request: HttpRequest, pk: int) -> JsonResponse:
     announcement = get_object_or_404(Announcement, pk=pk)
     status = get_status(announcement)
-    return JsonResponse({"status": status})
+    publication_date = announcement.publication_date
+    return JsonResponse({"status": status, "publication_date": publication_date})
 
 
 class AnnouncementListView(LoginRequiredMixin, ListView):
