@@ -38,6 +38,7 @@ class Announcement(models.Model):
         choices=ProcessingStatus.choices,
         default=ProcessingStatus.PENDING,
     )
+    published_message_link: str = models.CharField(max_length=255, null=True)
     publication_date: str = models.DateTimeField(auto_now_add=False, null=True)
     modified_count: int = models.IntegerField(default=0)
     modified_at: str = models.DateTimeField(auto_now=True)

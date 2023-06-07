@@ -6,6 +6,7 @@ from apps.bot.tasks import publish_announcements
 from apps.bot.views import delete_announcement_from_channel
 from apps.bot.views import edit_announcement_in_channel
 from datetime import datetime
+from datetime import timedelta
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage
@@ -174,7 +175,15 @@ class AnnouncementCreation(LoginRequiredMixin, View):
         date_format = "%d.%m.%Y %H:%M"
         date_without_tz = datetime.strptime(publication_date_row, date_format)
         date_with_tz = pytz_timezone.localize(date_without_tz)
+
+        # Check if the publication time is less than the current time
+        if date_with_tz < datetime.now(pytz_timezone):
+            # Set the publication time to the next minute from the current time
+            now = datetime.now(pytz_timezone)
+            date_with_tz = now.replace(second=0, microsecond=0) + timedelta(minutes=1)
+
         date_utc = date_with_tz.astimezone(pytz.UTC)
+
         announcement = Announcement.objects.create(
             name=name,
             text=text,

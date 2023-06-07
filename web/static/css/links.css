@@ -11,3 +11,7 @@
     text-decoration: underline;
     /* Подчеркивание при наведении */
 }
+
+.show-button {
+    display: inline-block;
+}

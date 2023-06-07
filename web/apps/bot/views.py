@@ -157,6 +157,7 @@ def publish_announcement_to_channel(announcement: Announcement) -> None:
                 logger.critical("Error is not 429. Stopping...")
                 break
     logger.info(f"Announcement {announcement.name} published")
+    announcement.published_message_link = f"https://t.me/{config('CHANNEL_NAME')}/{text_message.message_id}"
     announcement.is_published = True
     announcement.save()
     logger.debug("Announcement saved to database")
@@ -210,38 +211,49 @@ def edit_announcement_in_channel(announcement: Announcement) -> None:
     media: QuerySet[Media] = announcement.media.all()
     logger.debug(f"Media to edit: {media.count()}")
 
+    current_media_count = announcement.media.filter(media_type__in=["PHOTO", "VIDEO"]).count()
+
     for index, message in enumerate(published_messages):
         if message.type == PublishedMessage.MessageType.MEDIA:
-            if message.media != None:
-                logger.debug(f"Not changing media for message {message.message_id}")
-                continue
-            max_attempts = 5
-            attempt = 0
-            while attempt < max_attempts:
+            if index >= current_media_count:
                 try:
-                    logger.debug(f"Editing media for message {message.message_id}")
-                    bot.edit_message_media(
-                        chat_id=config("CHANNEL_ID"),
-                        message_id=message.message_id,
-                        media=create_media(media[index]),
-                    )
-                    logger.debug(f"Media edited for message {message.message_id}")
-                    PublishedMessage.objects.filter(message_id=message.message_id).update(media=media[index])
-                    logger.debug(f"Media saved to database for message {message.message_id}")
-                    break
+                    logger.debug(f"Deleting message {message.message_id}")
+                    bot.delete_message(chat_id=config("CHANNEL_ID"), message_id=message.message_id)
+                    PublishedMessage.delete(message)
+                    logger.debug(f"Message {message.message_id} deleted")
                 except ApiTelegramException as e:
-                    if e.error_code == 429:
-                        attempt += 1
-                        retry_after = int(e.description.split(" ")[-1]) + 1
-                        logger.warning(f"Received 429 error from Telegram. Sleeping for {retry_after} seconds...")
-                        time.sleep(retry_after)
-                        logger.warning("Waking up and trying again...")
-                    elif e.error_code == 400:
-                        logger.warning(f"Message {message.message_id} can't be edited. Skipping...")
+                    logger.error(f"Failed to delete message {message.message_id}: {e}")
+            else:
+                if message.media != None:
+                    logger.debug(f"Not changing media for message {message.message_id}")
+                    continue
+                max_attempts = 5
+                attempt = 0
+                while attempt < max_attempts:
+                    try:
+                        logger.debug(f"Editing media for message {message.message_id}")
+                        bot.edit_message_media(
+                            chat_id=config("CHANNEL_ID"),
+                            message_id=message.message_id,
+                            media=create_media(media[index]),
+                        )
+                        logger.debug(f"Media edited for message {message.message_id}")
+                        PublishedMessage.objects.filter(message_id=message.message_id).update(media=media[index])
+                        logger.debug(f"Media saved to database for message {message.message_id}")
                         break
-                    else:
-                        logger.critical("Error is not 429 or 400. Stopping...")
-                        break
+                    except ApiTelegramException as e:
+                        if e.error_code == 429:
+                            attempt += 1
+                            retry_after = int(e.description.split(" ")[-1]) + 1
+                            logger.warning(f"Received 429 error from Telegram. Sleeping for {retry_after} seconds...")
+                            time.sleep(retry_after)
+                            logger.warning("Waking up and trying again...")
+                        elif e.error_code == 400:
+                            logger.warning(f"Message {message.message_id} can't be edited. Skipping...")
+                            break
+                        else:
+                            logger.critical("Error is not 429 or 400. Stopping...")
+                            break
         else:
             max_attempts = 5
             attempt = 0

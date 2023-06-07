@@ -150,15 +150,11 @@ function checkFileCountAndUpdateButton() {
   console.log(myDropzone.files);
   console.log("mockFileCount: " + mockFileCount);
     // Если текущее количество файлов отличается от изначального, делаем кнопку неактивной
-    if (currentFileCount != initialFileCount) {
-      console.log("File count differs from initial, disabling editButton");
+    if (currentFileCount > initialFileCount) {
+      console.log("File count more chat initialFileCount, disabling editButton");
       editButton.setAttribute('disabled', 'disabled');
-      if (currentFileCount > initialFileCount) {
-        editButton.setAttribute('title', 'Количество файлов увеличилось, редактирование невозможно. Было: ' + initialFileCount + ', стало ' + currentFileCount + '');
-      } else {
-        editButton.setAttribute('title', 'Количество файлов уменьшилось, редактирование невозможно. Было ' + initialFileCount + ', стало ' + currentFileCount + '');
-      }
-    } else {
+      editButton.setAttribute('title', 'Количество файлов увеличилось, редактирование невозможно. Было: ' + initialFileCount + ', стало ' + currentFileCount + '');
+    }  else {
       // Иначе делаем кнопку активной
       console.log("File count is the same as initial, enabling editButton");
       editButton.removeAttribute('disabled');

@@ -70,7 +70,8 @@
                 {% for announcement in announcements %}
                   <tr class="announcement-row {% if not announcement.is_active %}inactive-row{% endif %}"
                       data-id="{{ announcement.id }}"
-                      data-announcement-id="{{ announcement.id }}">
+                      data-announcement-id="{{ announcement.id }}"
+                      data-published-message-link="{{ announcement.published_message_link }}">
                     <td>
                       <a href="{% url 'announcement-edit' announcement.id %}" class="text">
                         <i class="fas fa-pencil-alt"></i>
@@ -147,7 +148,14 @@
                       </button>
                     </td>
                     <!-- остальные поля -->
-                    <td id="status_{{ announcement.id }}"></td>
+                    <td id="status_{{ announcement.id }}">
+                      <span id="status_text_{{ announcement.id }}">{{ announcement.status }}</span>
+                      <button type="button"
+                              class="btn btn-sm btn-secondary copy-button"
+                              title="Скопировать ссылку на сообщение">
+                        <i class="fa fa-copy"></i>
+                      </button>
+                    </td>
                   </tr>
                 {% endfor %}
               {% else %}
@@ -169,8 +177,8 @@
   </section>
   {% include "modal_viewer.html" %}
   {% include "republish_modal.html" %}
-  <script src="{% static '/js/pagination_and_filters.js' %}"></script>
-  <script src="{% static '/js/status_update.js' %}"></script>
+  <script src="{% static 'js/pagination_and_filters.js' %}"></script>
+  <script src="{% static 'js/status_update.js' %}"></script>
   <script src="{% static "js/media_viewer.js" %}"></script>
   <script src="{% static 'js/actions.js' %}"></script>
   <script>
@@ -180,6 +188,15 @@
     handlePaginationEvents();
     updateMediaMap();
     setInterval(updateStatuses, 60 * 1000);
+    $(".copy-button").click(function() {
+    var announcementRow = $(this).closest(".announcement-row");
+    var publishedMessageLink = announcementRow.data("published-message-link");
+    navigator.clipboard.writeText(publishedMessageLink).then(function() {
+      alert("Ссылка на сообщение скопирована!");
+    }, function(err) {
+      alert("Не удалось скопировать ссылку: " + err);
+    });
+  });
   });
   $(document).ajaxStop(function () {
     console.log("ajaxStop!");
