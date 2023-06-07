@@ -101,6 +101,8 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
 
         # Handle new media files
         for file in request.FILES.getlist("media"):
+            file.name = file.name.lower()
+
             content_type = file.content_type.split("/")[0]
             media_type = Media.MediaType.PHOTO if content_type == "image" else Media.MediaType.VIDEO
             Media.objects.create(media_type=media_type, file=file, announcement=announcement)
@@ -195,6 +197,8 @@ class AnnouncementCreation(LoginRequiredMixin, View):
         announcement.tags.set(tags)
 
         for file in request.FILES.getlist("media"):
+            file.name = file.name.lower()
+
             content_type = file.content_type.split("/")[0]
             media_type = Media.MediaType.PHOTO if content_type == "image" else Media.MediaType.VIDEO
             Media.objects.create(media_type=media_type, file=file, announcement=announcement)
@@ -253,6 +257,8 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
 
         # Handle new media files
         for file in request.FILES.getlist("media"):
+            file.name = file.name.lower()
+
             content_type = file.content_type.split("/")[0]
             media_type = Media.MediaType.PHOTO if content_type == "image" else Media.MediaType.VIDEO
             Media.objects.create(media_type=media_type, file=file, announcement=announcement)
