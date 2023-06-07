@@ -30,7 +30,7 @@ $(document).ready(function () {
     $("#republishModal").modal('show');
 
     // Когда кнопка в модальном окне нажата...
-    $("#republishButton").click(function () {
+   $("#republishButton").off('click').click(function () {
       let republishDatetime = $("#new_publication_date").val();
       let timezone = $("#timezone").val();
       $.ajax({
