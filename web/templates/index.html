@@ -198,14 +198,30 @@
     updateMediaMap();
     setInterval(updateStatuses, 60 * 1000);
     $(".copy-button").click(function() {
-    var announcementRow = $(this).closest(".announcement-row");
-    var publishedMessageLink = announcementRow.data("published-message-link");
-    navigator.clipboard.writeText(publishedMessageLink).then(function() {
-      alert("Ссылка на сообщение скопирована!");
-    }, function(err) {
-      alert("Не удалось скопировать ссылку: " + err);
-    });
-  });
+      var announcementRow = $(this).closest(".announcement-row");
+  var publishedMessageLink = announcementRow.data("published-message-link");
+
+  // Создаем временный textarea для копирования текста
+  var tempElement = document.createElement("textarea");
+  tempElement.value = publishedMessageLink;
+
+  // Добавляем элемент в DOM
+  document.body.appendChild(tempElement);
+
+  // Выделяем текст в элементе
+  tempElement.select();
+
+ // Копируем текст в буфер обмена
+  try {
+    document.execCommand("copy");
+    alert("Ссылка на сообщение скопирована!");
+  } catch (err) {
+   alert("Не удалось скопировать ссылку: " + err);
+  }
+
+ // Удаляем временный элемент
+  document.body.removeChild(tempElement);
+});
   });
   $(document).ajaxStop(function () {
     console.log("ajaxStop!");
