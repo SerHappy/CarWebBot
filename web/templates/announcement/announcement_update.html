@@ -180,8 +180,21 @@
             isMock: true,
           };
           console.log(mockFile);
-          let absoluteURL = new URL("/media/" + mediaFileFields.file, window.location.origin);
+         let absoluteURL;
+      if (typeof mediaFileFields.file === 'string') {
+          console.log('mediaFileFields.file is a string: ', mediaFileFields.file);
+          console.log('window.location.origin: ', window.location.origin);
+          absoluteURL = new URL("/media/" + mediaFileFields.file, window.location.origin);
+          console.log('absoluteURL: ', absoluteURL);
+      } else {
+          console.log('mediaFileFields.file is not a string: ', mediaFileFields.file);
+      }
+
+      if (absoluteURL) {
+          console.log("absoluteURL.href: " + absoluteURL.href);
+      }
           isExistingFileBeingAdded = true;
+          console.log("absoluteURL.href before displayExistingFile call: " + absoluteURL.href);
           myDropzone.displayExistingFile(mockFile, absoluteURL.href);
           isExistingFileBeingAdded = false;
 
@@ -208,6 +221,7 @@
       document.querySelector(
         "input#publication_date"
       ).value = `${day}.${month}.${year} ${hours}:${minutes}`;
+      console.log("Publication date: " + document.querySelector("input#publication_date").value);
     }
   });
   </script>

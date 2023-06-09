@@ -18,6 +18,28 @@ var myDropzone = new Dropzone("#dropzoneForm", {
   acceptedFiles: "image/jpeg,video/mp4",
   paramName: "media",
 });
+// myDropzone.options.thumbnail = function(file, dataUrl) {
+//   if (file.previewElement) {
+//       console.log("Adding thumbnail");
+//         var imagesContainer = file.previewElement.querySelector("[data-dz-thumbnail]");
+//         imagesContainer.alt = file.name;
+//         console.log("File type: " + file.type);
+//         // Если файл является видео, создать видео элемент для превью
+//     if (file.type.match(/video.*/)) {
+//           console.log("File is video");
+//             var video = document.createElement('video');
+//       video.src = dataUrl;
+//       console.log("Video src: " + video.src);
+//             video.width = imagesContainer.width;
+//             video.height = imagesContainer.height;
+//             imagesContainer.replaceWith(video);
+//         } else {
+//             // Если файл является изображением
+//             console.log("File is image");
+//             imagesContainer.src = dataUrl;
+//         }
+//     }
+// };
 console.log("Adding event listener for form submit");
 document
   .querySelector("#announcement-form")
@@ -61,6 +83,9 @@ myDropzone.on("queuecomplete", function () {
 
 myDropzone.on("addedfile", function (file) {
   console.log("Addedfile event triggered for file: " + file.name);
+  if (file.type.match(/video.*/)) {
+    file.previewElement.querySelector("[data-dz-thumbnail]").parentElement.innerHTML = `<div class="video-placeholder">Видео</div>`;
+  }
 
   if (!isExistingFileBeingAdded) {
     if (
