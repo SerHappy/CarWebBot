@@ -1,0 +1,248 @@
+# Инструкция по развертыванию проекта
+
+## Шаг 1: Подготовка
+
+Обновите вашу систему:
+
+```bash
+sudo apt update
+sudo apt upgrade
+```
+
+Установите необходимые пакеты:
+
+```bash
+sudo apt install python3-pip python3-dev libmysqlclient-dev libssl-dev mysql-server default-libmysqlclient-dev nginx curl redis-server
+```
+
+## Шаг 2: Установка Poetry
+
+```bash
+curl -sSL https://install.python-poetry.org | python3 -
+```
+
+Добавьте Poetry в вашу PATH переменную ([документация](https://python-poetry.org/docs/)).
+
+## Шаг 3: Клонирование вашего проекта с GitHub
+
+```bash
+cd /var/www
+git clone https://github.com/SerHappy/CarWebBot.git
+```
+
+## Шаг 4: Установка зависимостей проекта
+
+```bash
+cd CarWebBot
+poetry install
+```
+
+## Шаг 5: Настройка переменных окружения
+
+Текущий проект использует файл `.env` для управления переменными окружения. Для того чтобы проект работал корректно, нужно создать этот файл и заполнить его правильными значениями.
+
+```bash
+cd /var/www/CarWebBot/web
+mv .env-example .env
+nano .env
+```
+
+Добавьте в файл следующие значения (замените `value` на соответствующие значения для вашего проекта):
+
+```bash
+SECRET_KEY=value
+ALLOWED_HOSTS=value
+DEBUG=value
+TELEGRAM_BOT_TOKEN=value
+CHANNEL_ID=value
+CHANNEL_NAME=value
+LOGURU_PATH=value
+LOGURU_LEVEL=value
+```
+
+Сохраните и закройте файл.
+
+## Шаг 6: Настройка MySQL
+
+Запустите скрипт безопасной установки для MySQL:
+
+```bash
+sudo mysql_secure_installation
+```
+
+Войдите в MySQL:
+
+```bash
+sudo mysql
+```
+
+Создайте базу данных:
+
+```bash
+CREATE DATABASE cars;
+```
+
+## Шаг 7: Настройка Redis
+
+Отредактируйте конфигурацию Redis:
+
+```bash
+sudo nano /etc/redis/redis.conf
+```
+
+Замените строку `supervised no` на `supervised systemd`.
+
+Перезапустите Redis:
+
+```bash
+sudo systemctl restart redis.service
+```
+
+## Шаг 8: Настройка Gunicorn
+
+Создайте новый файл gunicorn.service:
+
+```bash
+sudo nano /etc/systemd/system/gunicorn.service
+```
+
+Добавьте следующие строки в файл:
+
+```bash
+[Unit]
+Description=gunicorn daemon
+After=network.target
+
+[Service]
+User=root
+Group=www-data
+WorkingDirectory=/var/www/CarWebBot/web
+ExecStart=/var/www/CarWebBot/env/bin/gunicorn --access-logfile - --workers 3 --bind unix:/var/www/CarWebBot/web/CarWebBot.sock core.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Запустите Gunicorn и добавьте его в автозагрузку:
+
+```bash
+sudo systemctl start gunicorn
+sudo systemctl enable gunicorn
+```
+
+## Шаг 9: Настройка Nginx
+
+Создайте новый файл конфигурации Nginx:
+
+```bash
+sudo nano /etc/nginx/sites-available/CarWebBot
+```
+
+Добавьте следующие строки в файл:
+
+```bash
+server {
+    listen 80;
+    server_name your_domain;
+
+
+
+ access_log /var/log/nginx/access.log;
+
+    location /static/ {
+        alias /var/www/CarWebBot/web/static/;
+    }
+
+    location /media/ {
+        alias /var/www/CarWebBot/web/media/;
+    }
+
+    location / {
+        proxy_pass http://unix:/var/www/CarWebBot/web/CarWebBot.sock;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+Создайте символическую ссылку на файл конфигурации Nginx:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/CarWebBot /etc/nginx/sites-enabled/
+```
+
+Проверьте наличие ошибок в конфигурации Nginx:
+
+```bash
+sudo nginx -t
+```
+
+Если все в порядке, перезапустите Nginx:
+
+```bash
+sudo systemctl restart nginx
+```
+
+## Шаг 10: Настройка Celery и Celery Beat
+
+Создайте новый файл celery.service:
+
+```bash
+sudo nano /etc/systemd/system/celery.service
+```
+
+Добавьте следующие строки в файл:
+
+```bash
+[Unit]
+Description=Celery Service
+After=network.target
+
+[Service]
+User=root
+Group=www-data
+WorkingDirectory=/var/www/CarWebBot/web
+ExecStart=/var/www/CarWebBot/env/bin/celery -A core worker --loglevel=info
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Запустите службу Celery:
+
+```bash
+sudo systemctl start celery
+sudo systemctl enable celery
+```
+
+Создайте новый файл celerybeat.service:
+
+```bash
+sudo nano /etc/systemd/system/celerybeat.service
+```
+
+Добавьте следующие строки в файл:
+
+```bash
+[Unit]
+Description=Celery Beat Service
+After=network.target
+
+[Service]
+User=root
+Group=www-data
+WorkingDirectory=/var/www/CarWebBot/web
+ExecStart=/var/www/CarWebBot/env/bin/celery -A core beat --loglevel=info
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Запустите службу Celery Beat:
+
+```bash
+sudo systemctl start celerybeat
+sudo systemctl enable celerybeat
+```
+
+После завершения этих шагов, проект должен быть развернут и готов к использованию.

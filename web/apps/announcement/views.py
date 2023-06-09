@@ -60,6 +60,12 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
         date_format = "%d.%m.%Y %H:%M"
         date_without_tz = datetime.strptime(new_date, date_format)
         date_with_tz = pytz_timezone.localize(date_without_tz)
+        # Check if the publication time is less than the current time
+        if date_with_tz < datetime.now(pytz_timezone):
+            # Set the publication time to the next minute from the current time
+            now = datetime.now(pytz_timezone)
+            date_with_tz = now.replace(second=0, microsecond=0) + timedelta(minutes=1)
+
         date_utc = date_with_tz.astimezone(pytz.UTC)
         announcement.publication_date = date_utc
     else:
@@ -87,7 +93,15 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
         date_format = "%d.%m.%Y %H:%M"
         date_without_tz = datetime.strptime(new_date, date_format)
         date_with_tz = pytz_timezone.localize(date_without_tz)
+
+        # Check if the publication time is less than the current time
+        if date_with_tz < datetime.now(pytz_timezone):
+            # Set the publication time to the next minute from the current time
+            now = datetime.now(pytz_timezone)
+            date_with_tz = now.replace(second=0, microsecond=0) + timedelta(minutes=1)
+
         date_utc = date_with_tz.astimezone(pytz.UTC)
+
         announcement.publication_date = date_utc
         # Handle existing media files
         existing_files = request.POST.get("existing_files").split(",") if request.POST.get("existing_files") else []

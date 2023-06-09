@@ -11,6 +11,9 @@ $(document).ready(function () {
       beforeSend: function (xhr) {
         xhr.setRequestHeader("X-CSRFToken", csrfToken);
       },
+      success: function () {
+        updateStatuses();
+      },
       error: function () {
         alert('Произошла ошибка при снятии объявления с публикации');
       }
@@ -40,6 +43,9 @@ $(document).ready(function () {
           datetime: republishDatetime,
           timezone: timezone
         },
+        success: function () {
+        updateStatuses();
+      },
         error: function () {
           alert('Произошла ошибка при переопубликовании объявления');
         }
