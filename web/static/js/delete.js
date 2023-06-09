@@ -17,7 +17,6 @@ $(document).ready(function () {
                     xhr.setRequestHeader("X-CSRFToken", csrfToken);
                 },
                 success: function () {
-                    alert('Объявление было успешно удалено');
                     window.location.href = "/";
                 },
                 error: function () {
