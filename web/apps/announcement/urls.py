@@ -1,6 +1,3 @@
-# from .views import publish_announcement
-# from .views import disable_announcement
-# from .views import enable_announcement
 from .views import AnnouncementCreation
 from .views import AnnouncementListView
 from .views import AnnouncementUpdate

@@ -265,7 +265,7 @@ def _publish_announcement_media(announcement: Announcement) -> None:
         _send_more_than_ten_media(announcement, media)
 
 
-def _prepare_announcement_tags(announcement: Announcement) -> LiteralString | Literal["Тегов нет"]:
+def _prepare_announcement_tags(announcement: Announcement) -> LiteralString:
     """
     Подготавливает строку тегов для данного объявления.
 
@@ -278,11 +278,11 @@ def _prepare_announcement_tags(announcement: Announcement) -> LiteralString | Li
     """
     tags = announcement.tags.all()
     if tags:
-        return f"Теги: {', '.join([tag.name for tag in tags])}"
-    return "Тегов нет"
+        return f"{', '.join([tag.name for tag in tags])}"
+    return ""
 
 
-def _prepare_announcement_text(announcement: Announcement) -> LiteralString | Literal["Текста нет"]:
+def _prepare_announcement_text(announcement: Announcement) -> LiteralString:
     """
     Подготавливает текст объявления.
 
@@ -294,8 +294,8 @@ def _prepare_announcement_text(announcement: Announcement) -> LiteralString | Li
         если текст отсутствует.
     """
     if announcement.text:
-        return f"Текст: {announcement.text}"
-    return "Текста нет"
+        return f"{announcement.text}"
+    return ""
 
 
 def _create_announcement_message(announcement: Announcement) -> str:
@@ -309,8 +309,7 @@ def _create_announcement_message(announcement: Announcement) -> str:
         str: Текстовое сообщение, готовое к отправке.
     """
     return (
-        "Название:"
-        f" {announcement.name}\n{_prepare_announcement_text(announcement)}\n{_prepare_announcement_tags(announcement)}"
+        f"{_prepare_announcement_tags(announcement)}\n{announcement.name}\n{_prepare_announcement_text(announcement)}"
     )
 
 
