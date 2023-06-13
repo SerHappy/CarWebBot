@@ -278,7 +278,7 @@ def _prepare_announcement_tags(announcement: Announcement) -> LiteralString:
     """
     tags = announcement.tags.all()
     if tags:
-        return f"{', '.join([tag.name for tag in tags])}"
+        return f"{', '.join([tag.name for tag in tags])}\n"
     return ""
 
 
@@ -294,7 +294,7 @@ def _prepare_announcement_text(announcement: Announcement) -> LiteralString:
         если текст отсутствует.
     """
     if announcement.text:
-        return f"{announcement.text}"
+        return f"{announcement.text}\n"
     return ""
 
 
@@ -309,7 +309,7 @@ def _create_announcement_message(announcement: Announcement) -> str:
         str: Текстовое сообщение, готовое к отправке.
     """
     return (
-        f"{_prepare_announcement_tags(announcement)}\n{announcement.name}\n{_prepare_announcement_text(announcement)}"
+        f"{_prepare_announcement_tags(announcement)}{announcement.name}\n{_prepare_announcement_text(announcement)}🤖"
     )
 
 
