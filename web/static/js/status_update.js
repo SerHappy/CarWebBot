@@ -27,15 +27,20 @@ window.updateStatuses = function() {
 
         // Переводим дату в нужный формат
         let date = new Date(data.publication_date);
+        let day = date.getDate();
+        let month = (date.getMonth() < 10 ? '0' : '') + (date.getMonth() + 1);
+        let year = date.getFullYear();
         let hours = date.getHours();
         let minutes = date.getMinutes();
+        let dateString = day + "." + month + "." + year;
         let timeString = hours + ":" + (minutes < 10 ? '0' : '') + minutes;
-        console.log("Time string:", timeString);
+        let publicationDate = dateString + " в " + timeString;
+        console.log("Time string:", publicationDate);
 
         // Если статус равен "Опубликовано" или "Ожидает публикации", добавляем время публикации
         if (["опубликовано", "ожидает публикации"].includes(data.status.toLowerCase())) {
             console.log("Add publication time");
-            data.status += " в " + timeString;
+            data.status += " " + publicationDate;
         }
 
         // Обновить статус в таблице
