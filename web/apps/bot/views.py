@@ -364,7 +364,7 @@ def _perform_action_with_retries(action: Callable[..., Any], *args: Any, **kwarg
             if not _handle_telegram_exception(e):
                 break
         attempt += 1
-    raise RuntimeError("Max attempts reached in _perform_action_with_retries")
+    return None
 
 
 def publish_announcement_to_channel(announcement: Announcement) -> None:
