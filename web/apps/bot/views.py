@@ -8,9 +8,9 @@ from telebot import TeleBot
 from telebot.apihelper import ApiTelegramException
 from telebot.types import InputMediaPhoto
 from telebot.types import InputMediaVideo
+from telebot.types import Message
 from typing import Any
 from typing import Callable
-from typing import Literal
 from typing import LiteralString
 
 import time
@@ -40,6 +40,10 @@ def _handle_telegram_exception(e: ApiTelegramException) -> bool:
     if e.error_code == 400:
         logger.warning(f"Received 400 error from Telegram.")
         return False
+    if e.error_code == 502:
+        logger.warning(f"Received 502 error from Telegram.")
+        time.sleep(1)
+        return True
     else:
         logger.critical(f"Error is not 429. Error: {e}. Stopping...")
         return False
@@ -144,7 +148,7 @@ def _create_media_list(media: QuerySet[Media]) -> list[tuple[Media, InputMediaPh
     return media_to_send
 
 
-def _create_published_message(announcement: Announcement, sent_media, media_to_send_item) -> None:
+def _create_published_message(announcement: Announcement, sent_media: Message, media_to_send_item: Media) -> None:
     """
     Создает запись `PublishedMessage` в базе данных.
 
@@ -154,8 +158,11 @@ def _create_published_message(announcement: Announcement, sent_media, media_to_s
         media_to_send_item (Media): Элемент медиа-данных, который нужно сохранить.
     """
     logger.debug(f"Saving media from message id {sent_media.message_id}")
+    logger.debug(f"sent_media: {sent_media}")
+    logger.debug(f"Media to send item: {media_to_send_item}")
     PublishedMessage.objects.create(
         announcement=announcement,
+        channel_id=sent_media.chat.id,
         message_id=sent_media.message_id,
         media=media_to_send_item,
         type=PublishedMessage.MessageType.MEDIA,
@@ -163,7 +170,11 @@ def _create_published_message(announcement: Announcement, sent_media, media_to_s
     logger.debug(f"Media from message id {sent_media.message_id} saved to database")
 
 
-def _save_media_to_db(announcement: Announcement, media_message, media_to_send) -> None:
+def _save_media_to_db(
+    announcement: Announcement,
+    media_message: PublishedMessage,
+    media_to_send: list[tuple[Media, InputMediaPhoto | InputMediaVideo]],
+) -> None:
     """
     Сохраняет медиа-файлы в базе данных.
 
@@ -177,7 +188,7 @@ def _save_media_to_db(announcement: Announcement, media_message, media_to_send) 
         _create_published_message(announcement, sent_media, media_to_send[index][0])
 
 
-def _send_media_with_retries(media_to_send: list[tuple[Media, InputMediaPhoto | InputMediaVideo]]) -> None:
+def _send_media_with_retries(media_to_send: list[tuple[Media, InputMediaPhoto | InputMediaVideo]]) -> list[Message]:
     """
     Отправляет медиа в Telegram с несколькими попытками.
 
@@ -340,6 +351,7 @@ def _update_announcement_and_save_message(announcement: Announcement, text_messa
     announcement.save()
     PublishedMessage.objects.create(
         announcement=announcement,
+        channel_id=config("CHANNEL_ID"),
         message_id=text_message.message_id,
         type=PublishedMessage.MessageType.TEXT,
     )
@@ -408,7 +420,7 @@ def delete_announcement_from_channel(announcement: Announcement) -> None:
     published_messages: QuerySet[PublishedMessage] = announcement.published_messages.all()
     logger.debug(f"Deleting {published_messages.count()} messages")
     for message in published_messages:
-        _perform_action_with_retries(bot.delete_message, config("CHANNEL_ID"), message.message_id)
+        _perform_action_with_retries(bot.delete_message, message.channel_id, message.message_id)
         message.delete()
         logger.debug(f"Message {message.message_id} deleted from channel and database")
     _update_announcement_status(announcement, is_published=False, is_active=False)
@@ -426,7 +438,7 @@ def _update_announcement_media(message: PublishedMessage, new_media: Media) -> N
     logger.debug(f"Editing media for message {message.message_id}")
     _perform_action_with_retries(
         bot.edit_message_media,
-        chat_id=config("CHANNEL_ID"),
+        chat_id=message.channel_id,
         message_id=message.message_id,
         media=_create_media(new_media),
     )
@@ -445,7 +457,7 @@ def _delete_announcement_message(message: PublishedMessage) -> None:
     logger.debug(f"Deleting message {message.message_id}")
     _perform_action_with_retries(
         bot.delete_message,
-        chat_id=config("CHANNEL_ID"),
+        chat_id=message.channel_id,
         message_id=message.message_id,
     )
     PublishedMessage.delete(message)
@@ -497,7 +509,7 @@ def _edit_announcement_text(announcement: Announcement) -> None:
         new_text = _create_announcement_message(announcement)
         _perform_action_with_retries(
             bot.edit_message_text,
-            chat_id=config("CHANNEL_ID"),
+            chat_id=text_message.channel_id,
             message_id=text_message.message_id,
             text=new_text,
         )
