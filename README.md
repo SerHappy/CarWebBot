@@ -1,4 +1,4 @@
-# Инструкция по развертыванию проекта
+# Инструкция по развертыванию проекта (Ubuntu server)
 
 ## Шаг 1: Подготовка
 
@@ -9,10 +9,18 @@ sudo apt update
 sudo apt upgrade
 ```
 
-Установите необходимые пакеты:
+Установите Python 3.11:
 
 ```bash
-sudo apt install python3-pip python3-dev libmysqlclient-dev libssl-dev mysql-server default-libmysqlclient-dev nginx curl redis-server
+sudo apt install software-properties-common -y
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt install python3.11
+```
+
+Установите необходимые пакеты
+
+```bash
+sudo apt install python3-pip libpython3.11-dev libmysqlclient-dev libssl-dev mysql-server default-libmysqlclient-dev nginx curl redis-server
 ```
 
 ## Шаг 2: Установка Poetry
@@ -22,6 +30,12 @@ curl -sSL https://install.python-poetry.org | python3 -
 ```
 
 Добавьте Poetry в вашу PATH переменную ([документация](https://python-poetry.org/docs/)).
+
+Сконфигурируйте Poetry так, чтобы он создавал виртуальное окружение внутри проекта:
+
+```bash
+poetry config virtualenvs.in-project true
+```
 
 ## Шаг 3: Клонирование вашего проекта с GitHub
 
@@ -82,6 +96,25 @@ sudo mysql
 CREATE DATABASE cars;
 ```
 
+Если вы столкнулись с ошибкой при установке MySQL ("SET PASSWORD has no significance for user 'root'@'localhost'"), выполните следующую команду:
+
+```bash
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password by 'password';
+```
+
+Выйдите из MySQL:
+
+```bash
+exit;
+```
+
+Создайте и примените миграции:
+
+```bash
+cd /var/www/CarWebBot
+poetry run python3.11 web/manage.py migrate
+```
+
 ## Шаг 7: Настройка Redis
 
 Отредактируйте конфигурацию Redis:
@@ -115,9 +148,11 @@ After=network.target
 
 [Service]
 User=root
+
+
 Group=www-data
 WorkingDirectory=/var/www/CarWebBot/web
-ExecStart=/var/www/CarWebBot/env/bin/gunicorn --access-logfile - --workers 3 --bind unix:/var/www/CarWebBot/web/CarWebBot.sock core.wsgi:application
+ExecStart=/var/www/CarWebBot/.venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/var/www/CarWebBot/web/CarWebBot.sock core.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
@@ -202,7 +237,7 @@ After=network.target
 User=root
 Group=www-data
 WorkingDirectory=/var/www/CarWebBot/web
-ExecStart=/var/www/CarWebBot/env/bin/celery -A core worker --loglevel=info
+ExecStart=/var/www/CarWebBot/.venv/bin/celery -A core worker --loglevel=info
 
 [Install]
 WantedBy=multi-user.target
@@ -232,7 +267,7 @@ After=network.target
 User=root
 Group=www-data
 WorkingDirectory=/var/www/CarWebBot/web
-ExecStart=/var/www/CarWebBot/env/bin/celery -A core beat --loglevel=info
+ExecStart=/var/www/CarWebBot/.venv/bin/celery -A core beat --loglevel=info
 
 [Install]
 WantedBy=multi-user.target
