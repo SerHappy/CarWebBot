@@ -92,8 +92,8 @@ LOGURU_FORMAT=value
 - `LOGURU_PATH`: Путь до файла логов для Loguru, инструмента логирования Python. Пример: "/path/to/your/logfile.log".
 
 - `LOGURU_LEVEL`: Уровень логирования для Loguru. Пример: "DEBUG" или "INFO".
-
-- `LOGURU_FORMAT`: Формат логирования для Loguru. Пример: "<green>{time:DD.MM.YYYY HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+-
+- `LOGURU_FORMAT`: Формат логирования для Loguru. Пример: "\<green>{time:DD.MM.YYYY HH:mm:ss.SSS}\</green> | \<level>{level: <8}\</level> | \<cyan>{name}\</cyan>:\<cyan>{function}\</cyan>:\<cyan>{line}\</cyan> - \<level>{message}\</level>"
 
 Сохраните и закройте файл.
 
