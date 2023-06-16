@@ -173,7 +173,7 @@ sudo systemctl enable gunicorn
 sudo nano /etc/nginx/sites-available/CarWebBot
 ```
 
-Добавьте следующие строки в файл:
+Добавьте следующие строки в файл, заменив `your_domain` на ваш домен:
 
 ```bash
 server {
