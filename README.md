@@ -1,6 +1,37 @@
-# Инструкция по развертыванию проекта (Ubuntu server)
+# CarWebBot
 
-## Шаг 1: Подготовка
+## Описание проекта
+
+CarWebBot - это веб-сервер на Django, который обеспечивает функциональность для управления контентом Telegram канала. Администраторы могут создавать, редактировать и удалять объявления, которые затем публикуются в телеграмм канале.
+
+## Основные функции
+
+* Создание, редактирование и удаление объявлений для публикации в Telegram канале
+* Возможность добавлять неограниченное количество изображений и видео к сообщениям
+* Отложенные объявления
+
+## Технологии
+
+* Python 3.11
+* Django
+* MySQL
+* Redis
+* Gunicorn
+* Nginx
+* Celery
+* Telegram Bot API
+* AJAX
+* HTML
+* CSS
+* Bootstrap
+* JavaScript
+* Dropzone.js
+* Datepicker.js
+* Select2.js
+
+## Инструкция по развертыванию проекта (Ubuntu server)
+
+### Шаг 1: Подготовка
 
 Обновите вашу систему:
 
@@ -23,7 +54,7 @@ sudo apt install python3.11
 sudo apt install python3-pip libpython3.11-dev libmysqlclient-dev libssl-dev mysql-server default-libmysqlclient-dev nginx curl redis-server
 ```
 
-## Шаг 2: Установка Poetry
+### Шаг 2: Установка Poetry
 
 ```bash
 curl -sSL https://install.python-poetry.org | python3 -
@@ -37,21 +68,21 @@ curl -sSL https://install.python-poetry.org | python3 -
 poetry config virtualenvs.in-project true
 ```
 
-## Шаг 3: Клонирование вашего проекта с GitHub
+### Шаг 3: Клонирование вашего проекта с GitHub
 
 ```bash
 cd /var/www
 git clone https://github.com/SerHappy/CarWebBot.git
 ```
 
-## Шаг 4: Установка зависимостей проекта
+### Шаг 4: Установка зависимостей проекта
 
 ```bash
 cd CarWebBot
 poetry install
 ```
 
-## Шаг 5: Настройка переменных окружения
+### Шаг 5: Настройка переменных окружения
 
 Текущий проект использует файл `.env` для управления переменными окружения. Для того чтобы проект работал корректно, нужно создать этот файл и заполнить его правильными значениями.
 
@@ -77,27 +108,27 @@ LOGURU_FORMAT=value
 
 Описание каждого ключа:
 
-- `SECRET_KEY`: Это секретный ключ Django для вашего проекта. Он используется для предоставления криптографической подписи и должен быть сохранен в безопасности. Не делитесь им и не выкладывайте в открытый доступ. Пример: "your-django-secret-key".
+* `SECRET_KEY`: Это секретный ключ Django для вашего проекта. Он используется для предоставления криптографической подписи и должен быть сохранен в безопасности. Не делитесь им и не выкладывайте в открытый доступ. Пример: "your-django-secret-key".
 
-- `ALLOWED_HOSTS`: Это список хостов/доменов, на которых будет работать ваш проект Django. Пример: 127.0.0.1, your-server-ip, localhost.
+* `ALLOWED_HOSTS`: Это список хостов/доменов, на которых будет работать ваш проект Django. Пример: 127.0.0.1, your-server-ip, localhost.
 
-- `DEBUG`: Этот параметр указывает, должен ли Django использовать режим отладки. Если это значение `True`, Django будет отображать подробные сообщения об ошибках. Пример: True или False.
+* `DEBUG`: Этот параметр указывает, должен ли Django использовать режим отладки. Если это значение `True`, Django будет отображать подробные сообщения об ошибках. Пример: True или False.
 
-- `TELEGRAM_BOT_TOKEN`: Токен вашего бота Telegram. Пример: "your-telegram-bot-token".
+* `TELEGRAM_BOT_TOKEN`: Токен вашего бота Telegram. Пример: "your-telegram-bot-token".
 
-- `CHANNEL_ID`: Идентификатор канала Telegram, на который бот будет отправлять сообщения. Пример: "your-channel-id".
+* `CHANNEL_ID`: Идентификатор канала Telegram, на который бот будет отправлять сообщения. Пример: "your-channel-id".
 
-- `CHANNEL_NAME`: Имя канала Telegram, на который бот будет отправлять сообщения. Пример: "your-channel-name".
+* `CHANNEL_NAME`: Имя канала Telegram, на который бот будет отправлять сообщения. Пример: "your-channel-name".
 
-- `LOGURU_PATH`: Путь до файла логов для Loguru, инструмента логирования Python. Пример: "/path/to/your/logfile.log".
+* `LOGURU_PATH`: Путь до файла логов для Loguru, инструмента логирования Python. Пример: "/path/to/your/logfile.log".
 
-- `LOGURU_LEVEL`: Уровень логирования для Loguru. Пример: "DEBUG" или "INFO".
+* `LOGURU_LEVEL`: Уровень логирования для Loguru. Пример: "DEBUG" или "INFO".
 
-- `LOGURU_FORMAT`: Формат логирования для Loguru. Пример: "\<green>{time:DD.MM.YYYY HH:mm:ss.SSS}\</green> | \<level>{level: <8}\</level> | \<cyan>{name}\</cyan>:\<cyan>{function}\</cyan>:\<cyan>{line}\</cyan> - \<level>{message}\</level>"
+* `LOGURU_FORMAT`: Формат логирования для Loguru. Пример: "\<green>{time:DD.MM.YYYY HH:mm:ss.SSS}\</green> | \<level>{level: <8}\</level> | \<cyan>{name}\</cyan>:\<cyan>{function}\</cyan>:\<cyan>{line}\</cyan> - \<level>{message}\</level>"
 
 Сохраните и закройте файл.
 
-## Шаг 6: Настройка MySQL
+### Шаг 6: Настройка MySQL
 
 Запустите скрипт безопасной установки для MySQL:
 
@@ -136,7 +167,7 @@ cd /var/www/CarWebBot
 poetry run python3.11 web/manage.py migrate
 ```
 
-## Шаг 7: Настройка Redis
+### Шаг 7: Настройка Redis
 
 Отредактируйте конфигурацию Redis:
 
@@ -152,7 +183,7 @@ sudo nano /etc/redis/redis.conf
 sudo systemctl restart redis.service
 ```
 
-## Шаг 8: Настройка Gunicorn
+### Шаг 8: Настройка Gunicorn
 
 Создайте новый файл gunicorn.service:
 
@@ -186,7 +217,7 @@ sudo systemctl start gunicorn
 sudo systemctl enable gunicorn
 ```
 
-## Шаг 9: Настройка Nginx
+### Шаг 9: Настройка Nginx
 
 Создайте новый файл конфигурации Nginx:
 
@@ -239,7 +270,7 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 
-## Шаг 10: Настройка Celery и Celery Beat
+### Шаг 10: Настройка Celery и Celery Beat
 
 Создайте новый файл celery.service:
 
