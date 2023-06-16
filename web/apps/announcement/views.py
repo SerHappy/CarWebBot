@@ -2,7 +2,6 @@ from .models import Announcement
 from .models import Media
 from .models import Tag
 from .services import get_status
-from apps.bot.tasks import publish_announcements
 from apps.bot.views import delete_announcement_from_channel
 from apps.bot.views import edit_announcement_in_channel
 from datetime import datetime
