@@ -200,7 +200,7 @@ sudo nano /etc/nginx/sites-available/CarWebBot
 server {
     listen 80;
     server_name your_domain;
-
+    client_max_body_size 0;
 
 
  access_log /var/log/nginx/access.log;
