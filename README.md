@@ -72,7 +72,28 @@ CHANNEL_ID=value
 CHANNEL_NAME=value
 LOGURU_PATH=value
 LOGURU_LEVEL=value
+LOGURU_FORMAT=value
 ```
+
+Описание каждого ключа:
+
+- `SECRET_KEY`: Это секретный ключ Django для вашего проекта. Он используется для предоставления криптографической подписи и должен быть сохранен в безопасности. Не делитесь им и не выкладывайте в открытый доступ. Пример: "your-django-secret-key".
+
+- `ALLOWED_HOSTS`: Это список хостов/доменов, на которых будет работать ваш проект Django. Пример: 127.0.0.1, your-server-ip, localhost.
+
+- `DEBUG`: Этот параметр указывает, должен ли Django использовать режим отладки. Если это значение `True`, Django будет отображать подробные сообщения об ошибках. Пример: True или False.
+
+- `TELEGRAM_BOT_TOKEN`: Токен вашего бота Telegram. Пример: "your-telegram-bot-token".
+
+- `CHANNEL_ID`: Идентификатор канала Telegram, на который бот будет отправлять сообщения. Пример: "your-channel-id".
+
+- `CHANNEL_NAME`: Имя канала Telegram, на который бот будет отправлять сообщения. Пример: "your-channel-name".
+
+- `LOGURU_PATH`: Путь до файла логов для Loguru, инструмента логирования Python. Пример: "/path/to/your/logfile.log".
+
+- `LOGURU_LEVEL`: Уровень логирования для Loguru. Пример: "DEBUG" или "INFO".
+
+- `LOGURU_FORMAT`: Формат логирования для Loguru. Пример: "<green>{time:DD.MM.YYYY HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
 
 Сохраните и закройте файл.
 
