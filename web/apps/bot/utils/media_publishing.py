@@ -7,9 +7,9 @@ from apps.announcement.models import Media
 from decouple import config
 from django.db.models import QuerySet
 from loguru import logger
-from telegram import InputMediaPhoto
-from telegram import InputMediaVideo
-from telegram import Message
+from telebot.types import InputMediaPhoto
+from telebot.types import InputMediaVideo
+from telebot.types import Message
 
 
 def publish_announcement_media(announcement: Announcement) -> None:

@@ -5,8 +5,8 @@ from apps.announcement.models import Media
 from django.db.models import QuerySet
 from loguru import logger
 from telebot.types import Message
-from telegram import InputMediaPhoto
-from telegram import InputMediaVideo
+from telebot.types import InputMediaPhoto
+from telebot.types import InputMediaVideo
 
 
 def create_media_list(media: QuerySet[Media]) -> list[tuple[Media, InputMediaPhoto | InputMediaVideo]]:
