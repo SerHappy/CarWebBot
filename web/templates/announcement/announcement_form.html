@@ -57,6 +57,8 @@
   <script>
   let tagSelect = $("#tags").select2();
   $(document).ready(function () {
+    const myDropzoneInstance = new MyDropzone();
+    myDropzoneInstance.initialize();
     // Event handler for form submission
     $("#createTagForm").submit(function (event) {
       event.preventDefault();
