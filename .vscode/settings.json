@@ -19,6 +19,7 @@
         "Pydantic",
         "pytz",
         "queuecomplete",
+        "Removedfile",
         "takeoff",
         "uvicorn"
     ],

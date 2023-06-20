@@ -73,7 +73,11 @@ class Media(models.Model):
     announcement: "Announcement" = models.ForeignKey(
         Announcement, related_name="media", null=False, on_delete=models.CASCADE
     )
+    order = models.PositiveIntegerField(default=0, blank=False, null=False)
     created_at: str = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["order"]
 
     def __str__(self) -> str:
         return f"Media {self.file} for announcement {self.announcement.name}"

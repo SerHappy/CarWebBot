@@ -71,158 +71,223 @@
   <script src="/static/js/tag_creation.js"></script>
   <script src="/static/js/auto_resize.js"></script>
   <script>
-  let tagSelect = $("#tags").select2();
-  $(document).ready(function () {
-    $(document).on('click', '.republish-button', function () {
-    let announcement = JSON.parse('{{announcement|escapejs|safe}}');
-    console.log(announcement);
-    let announcementId = announcement[0].pk;
-    let cookie = document.cookie
-    let csrfToken = cookie.substring(cookie.indexOf('=') + 1)
+    // Объявите переменную в глобальном пространстве:
+  let myDropzoneInstance;
+  // Инициализация select2
+  let tagSelect = $("#tags").select2({
+    theme: "bootstrap4",
+    formatNoMatches: "Nothing found",
+  });
 
-    $("#republishModal").modal('show');
-    $("#republishButton").click(function () {
+  $(document).ready(function () {
+
+    // Обработчик клика на кнопку republish
+    $(document).on('click', '.republish-button', function () {
+      let announcement = getAnnouncementData();
+      let announcementId = announcement[0].pk;
+      let csrfToken = getCsrfToken();
+
+      $("#republishModal").modal('show');
+      $("#republishButton").click(function () {
+        republishAnnouncement(announcementId, csrfToken);
+      });
+    });
+
+    // Обработчик отправки формы создания тега
+    $("#createTagForm").submit(function (event) {
+      event.preventDefault();
+      createTag();
+    });
+
+    // Обработчик клика на кнопку создания тега
+    $("#createTagButton").click(function () {
+      createTag();
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    myDropzoneInstance = new MyDropzone();
+    myDropzoneInstance.initialize();
+
+    let announcement = getAnnouncementData();
+
+    if (announcement != null) {
+      populateFormFields(announcement);
+      populateExistingFiles(myDropzoneInstance, announcement);
+    }
+  });
+
+  function getAnnouncementData() {
+    console.log("Getting announcement data...");
+    return JSON.parse('{{announcement|escapejs|safe}}');
+  }
+
+  function getCsrfToken() {
+    console.log("Getting CSRF token...");
+    let cookie = document.cookie
+    return cookie.substring(cookie.indexOf('=') + 1)
+  }
+
+  function republishAnnouncement(announcementId, csrfToken) {
     console.log("Republish button clicked");
+
     let republishDatetime = $("#new_publication_date").val();
     let timezone = $("#timezone").val();
+
+    let formData = createFormData(republishDatetime, timezone);
+
+    $.ajax({
+      url: '/announcements/republish/' + announcementId + '/',
+      type: 'POST',
+      beforeSend: function (xhr) {
+        xhr.setRequestHeader("X-CSRFToken", csrfToken);
+      },
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function () {
+        window.location.href = "/";
+      },
+      error: function () {
+        alert('Произошла ошибка при переопубликовании объявления');
+      }
+    });
+
+    $("#republishModal").modal('hide');
+  }
+
+  function populateFormFields(announcement) {
+  let announcementFields = announcement[0].fields;
+  document.querySelector("input#name").value = announcementFields.name;
+  document.querySelector("textarea#text").value = announcementFields.text;
+  var textArea = document.querySelector("textarea#text");
+  window.autoResize(textArea);
+  document.querySelector("input#price").value = announcementFields.price;
+  document.querySelector("input#status").value = announcementFields.status;
+  document.querySelector("input#note").value = announcementFields.note;
+
+  let pubDateWithClientTimezone = new Date(announcementFields.publication_date);
+  console.log(pubDateWithClientTimezone);
+  let day = pubDateWithClientTimezone.getDate().toString().padStart(2, "0");
+  let month = (pubDateWithClientTimezone.getMonth() + 1).toString().padStart(2, "0");
+  let year = pubDateWithClientTimezone.getFullYear();
+  let hours = pubDateWithClientTimezone.getHours().toString().padStart(2, "0");
+  let minutes = pubDateWithClientTimezone.getMinutes().toString().padStart(2, "0");
+
+  document.querySelector(
+    "input#publication_date"
+  ).value = `${day}.${month}.${year} ${hours}:${minutes}`;
+  console.log("Publication date: " + document.querySelector("input#publication_date").value);
+}
+
+
+  function populateExistingFiles(myDropzoneInstance, announcement) {
+  let media = JSON.parse("{{media|escapejs|safe}}");
+  console.log(media);
+
+  if (media) {
+    initialFileCount = media.length;
+    let mediaPromises = media.map(function (mediaFile) {
+      mediaFileFields = mediaFile;
+
+      let mockFile = {
+        name: "/media/" + mediaFileFields.file,
+        size: mediaFileFields.size,
+        type: mediaFileFields.media_type,
+        isMock: true,
+        uploadId: mediaFile.file,  // assuming `pk` holds the id of the media file
+      };
+
+      let absoluteURL;
+      if (typeof mediaFileFields.file === 'string') {
+        absoluteURL = new URL("/media/" + mediaFileFields.file, window.location.origin);
+      }
+
+      if (!myDropzoneInstance.uploadIds.find((existingFile) => existingFile.name === mockFile.name)) {
+        document.querySelector("#existing-files").value += mediaFileFields.file + ",";
+        myDropzoneInstance.uploadIds.push(mockFile.uploadId);  // Add the uploadId to the array
+      }
+
+      return loadFileAndDisplay(mockFile, absoluteURL.href, myDropzoneInstance);
+    });
+
+    Promise.all(mediaPromises)
+  .then((loadedFiles) => {
+    loadedFiles.forEach((file) => {
+      if (file.src) {
+        myDropzoneInstance.displayExistingFile(file, file.src);
+        myDropzoneInstance.myDropzone.files.push(file);
+      } else {
+        console.error('Не удалось загрузить файл: ', file);
+      }
+    });
+  });
+  }
+}
+
+
+
+  function createFormData(republishDatetime, timezone) {
+    console.log("Creating form data...");
 
     let formData = new FormData();
     formData.append('datetime', republishDatetime);
     formData.append('timezone', timezone);
 
     // Добавить файлы из формы Dropzone
-    myDropzone.getAcceptedFiles().forEach(function (file) {
-        formData.append('media', file);
-    });
+    let uploadIdsString = myDropzoneInstance.getOrderedUploadIds();
+    formData.append('uploadIds', uploadIdsString);
 
     var existingFilesValue = document.querySelector("#existing-files").value;
     console.log("Existing files value: " + existingFilesValue);
 
     // Проверка наличия файлов в formData
     if (!formData.has('media') && existingFilesValue.trim() == "") {
-        console.log("No files for upload, displaying error");
-        alert("Загрузка файла обязательна!");
-        return;
+      console.log("No files for upload, displaying error");
+      alert("Загрузка файла обязательна!");
+      return;
     }
 
     // Добавить данные из формы 'announcement-form'
     let formElement = document.querySelector('#announcement-form');
     let formInputs = formElement.querySelectorAll('input, textarea, select');
     for(let i = 0; i < formInputs.length; i++){
-        formData.append(formInputs[i].name, formInputs[i].value);
+      formData.append(formInputs[i].name, formInputs[i].value);
     }
-    console.log("announcementId: " + announcementId);
 
-    $.ajax({
-        url: '/announcements/republish/' + announcementId + '/',
-        type: 'POST',
-        beforeSend: function (xhr) {
-            xhr.setRequestHeader("X-CSRFToken", csrfToken);
-        },
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function () {
-            window.location.href = "/";
-        },
-        error: function () {
-            alert('Произошла ошибка при переопубликовании объявления');
-        }
-    });
+    return formData;
+  }
 
-    $("#republishModal").modal('hide');
-});
-});
-
-    // Event handler for form submission
-    $("#createTagForm").submit(function (event) {
-      event.preventDefault();
-      console.log("Form submitted");
-      createTag();
-    });
-
-    // Event handler for "Create" button click
-    $("#createTagButton").click(function () {
-      console.log("Create button clicked");
-      createTag();
-    });
-    let tagSelect = $("#tags").select2({
-      theme: "bootstrap4",
-      formatNoMatches: "Nothing found",
-    });
-  });
-  let initialFileCount = 0;
-  let shouldSubmitForm = false;
-  let existingFiles = []; // Массив для хранения уже существующих файлов
-  let isExistingFileBeingAdded = false;
-  document.addEventListener("DOMContentLoaded", function () {
-    let announcement = JSON.parse('{{announcement|escapejs|safe}}');
-    if (announcement != null) {
-      let announcementFields = announcement[0].fields;
-      document.querySelector("input#name").value = announcementFields.name;
-      document.querySelector("textarea#text").value = announcementFields.text;
-      var textArea = document.querySelector("textarea#text");
-      window.autoResize(textArea);
-      document.querySelector("input#price").value = announcementFields.price;
-      document.querySelector("input#status").value = announcementFields.status;
-      let media = JSON.parse('{{media|escapejs|safe}}');
-      console.log(media);
-      if (media) {
-        initialFileCount = media.length;
-        console.log("Existing files:")
-        console.log(existingFiles);
-        media.forEach(function (mediaFile) {
-          mediaFileFields = mediaFile.fields;
-          let mockFile = {
-            name: "/media/" + mediaFileFields.file,
-            size: 12345,
-            type: mediaFileFields.media_type,
-            isMock: true,
-          };
-          console.log(mockFile);
-         let absoluteURL;
-      if (typeof mediaFileFields.file === 'string') {
-          console.log('mediaFileFields.file is a string: ', mediaFileFields.file);
-          console.log('window.location.origin: ', window.location.origin);
-          absoluteURL = new URL("/media/" + mediaFileFields.file, window.location.origin);
-          console.log('absoluteURL: ', absoluteURL);
-      } else {
-          console.log('mediaFileFields.file is not a string: ', mediaFileFields.file);
-      }
-
-      if (absoluteURL) {
-          console.log("absoluteURL.href: " + absoluteURL.href);
-      }
-          isExistingFileBeingAdded = true;
-          console.log("absoluteURL.href before displayExistingFile call: " + absoluteURL.href);
-          myDropzone.displayExistingFile(mockFile, absoluteURL.href);
-          isExistingFileBeingAdded = false;
-
-          if (
-            !existingFiles.find(
-              (existingFile) => existingFile.name === mockFile.name
-            )
-          ) {
-            document.querySelector("#existing-files").value += mediaFileFields.file + ",";
-            existingFiles.push(mockFile);
-          }
-        });
-      }
-      document.querySelector("input#note").value = announcementFields.note;
-
-      let pubDateWithClientTimezone = new Date(announcementFields.publication_date);
-      console.log(pubDateWithClientTimezone);
-      let day = pubDateWithClientTimezone.getDate().toString().padStart(2, "0");
-      let month = (pubDateWithClientTimezone.getMonth() + 1).toString().padStart(2, "0");
-      let year = pubDateWithClientTimezone.getFullYear();
-      let hours = pubDateWithClientTimezone.getHours().toString().padStart(2, "0");
-      let minutes = pubDateWithClientTimezone.getMinutes().toString().padStart(2, "0");
-
-      document.querySelector(
-        "input#publication_date"
-      ).value = `${day}.${month}.${year} ${hours}:${minutes}`;
-      console.log("Publication date: " + document.querySelector("input#publication_date").value);
+ function loadFileAndDisplay(file, url, myDropzoneInstance) {
+  return new Promise((resolve, reject) => {
+    if (file.type.startsWith('PHOTO')) {
+      // Загружаем и отображаем изображение
+      let image = new Image();
+      image.src = url;
+      image.onload = function() {
+        resolve({...file, src: this.src});
+      };
+      image.onerror = function() {
+        reject('Ошибка при загрузке изображения: ' + url);
+      };
+    } else if (file.type.startsWith('VIDEO')) {
+      // Загружаем и отображаем видео
+      let video = document.createElement('video');
+      video.src = url;
+      video.onloadeddata = function() {
+        resolve({...file, src: this.src});
+      };
+      video.onerror = function() {
+        reject('Ошибка при загрузке видео: ' + url);
+      };
+    } else {
+      // Неизвестный тип файла
+      reject('Неизвестный тип файла: ' + file.type);
     }
   });
+}
+
+
+
   </script>
 {% endblock content %}

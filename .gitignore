@@ -6,3 +6,4 @@ media/
 celerybeat-schedule
 *.log
 *.zip
+tmp/

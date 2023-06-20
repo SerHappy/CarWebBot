@@ -23,7 +23,12 @@
     transition: transform .11s;
     will-change: transform;
     border: none;
-    /* Удаляем окантовку вокруг превью */
+}
+
+.dropzone .dz-preview:hover img,
+.dropzone .dz-preview:hover video {
+    -webkit-filter: none;
+    filter: none;
 }
 
 .dropzone .dz-preview.dz-image-preview {
@@ -39,13 +44,12 @@
     opacity: 1;
 }
 
-.dropzone .dz-preview.dz-image-preview:hover .dz-image img {
+/* .dropzone .dz-preview.dz-image-preview:hover .dz-image img {
     opacity: 1;
     -webkit-filter: none;
     filter: none;
-}
+} */
 
-/* Удаляем окантовку вокруг кнопки удаления */
 .dropzone .dz-preview .dz-remove {
     border: none;
 }
@@ -87,6 +91,5 @@
 }
 
 .dz-progress {
-    /* progress bar covers file name */
     display: none !important;
 }

@@ -3,6 +3,7 @@ from .views import AnnouncementListView
 from .views import AnnouncementUpdate
 from .views import delete_announcement
 from .views import get_announcement_status
+from .views import MediaUploadView
 from .views import republish_announcement
 from .views import TagCreation
 from .views import takeoff_announcement
@@ -18,4 +19,6 @@ urlpatterns = [
     path("takeoff/<int:pk>", takeoff_announcement, name="announcement-takeoff"),
     path("republish/<int:pk>/", republish_announcement, name="announcement-republish"),
     path("delete/<int:pk>/", delete_announcement, name="announcement-delete"),
+    path("media/add/", MediaUploadView.as_view(), name="media-add"),
+    path("media/delete/<path:upload_id>/", MediaUploadView.as_view(), name="media-delete"),
 ]

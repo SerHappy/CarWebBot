@@ -1,6 +1,8 @@
+from django.conf import settings
 from .models import Announcement
 from .models import Media
 from .models import Tag
+from .serializers import serialize_media
 from .services import get_status
 from apps.bot.views import delete_announcement_from_channel
 from apps.bot.views import edit_announcement_in_channel
@@ -8,6 +10,7 @@ from datetime import datetime
 from datetime import timedelta
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.files.storage import FileSystemStorage
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
 from django.core.paginator import Paginator
@@ -21,8 +24,13 @@ from django.shortcuts import render
 from django.views.generic import ListView
 from django.views.generic import View
 from loguru import logger
+from urllib.parse import unquote
 
+import mimetypes
+import os
 import pytz
+import shutil
+import uuid
 
 
 @login_required(login_url="/user/login/")
@@ -40,6 +48,10 @@ def delete_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     for m in media:
         m.file.delete()
         m.delete()
+
+    media_folder = os.path.join(settings.MEDIA_ROOT, str(pk))
+    if os.path.isdir(media_folder):
+        shutil.rmtree(media_folder)
     announcement.delete()
     return HttpResponse(status=200)
 
@@ -103,22 +115,45 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
 
         announcement.publication_date = date_utc
         # Handle existing media files
-        existing_files = request.POST.get("existing_files").split(",") if request.POST.get("existing_files") else []
-        current_files = [media.file.name for media in announcement.media.all()]
+        # Handle existing media files
+        upload_ids_string = request.POST.getlist("uploadIds")[0]
+        upload_ids = upload_ids_string.split(",")
 
-        for file_name in current_files:
-            if file_name not in existing_files:
+        # Delete media files not present in the updated list
+        existing_files = [media.file.name for media in announcement.media.all()]
+        for file_name in existing_files:
+            if file_name not in upload_ids:
                 media = Media.objects.get(file=file_name, announcement=announcement)
                 media.file.delete()
                 media.delete()
 
-        # Handle new media files
-        for file in request.FILES.getlist("media"):
-            file.name = file.name.lower()
+        for index, upload_id in enumerate(upload_ids):
+            tmp_dir = tmp_storage.path(upload_id)
+            if os.path.exists(tmp_dir):
+                for filename in os.listdir(tmp_dir):
+                    file_path = f"{upload_id}/{filename}"
+                    file = tmp_storage.open(file_path)
+                    content_type, encoding = mimetypes.guess_type(file_path)
+                    media_type = Media.MediaType.PHOTO if "image" in content_type else Media.MediaType.VIDEO
+                    new_media = Media.objects.create(
+                        media_type=media_type,
+                        file=file,
+                        announcement=announcement,
+                        order=index,
+                    )
+                    file.close()
+                    upload_ids[index] = new_media.file.name  # update the upload_id with the new file name
+                shutil.rmtree(tmp_dir)
 
-            content_type = file.content_type.split("/")[0]
-            media_type = Media.MediaType.PHOTO if content_type == "image" else Media.MediaType.VIDEO
-            Media.objects.create(media_type=media_type, file=file, announcement=announcement)
+        # Update order for remaining media files and create new media files
+        for index, upload_id in enumerate(upload_ids):
+            try:
+                media = Media.objects.get(file=upload_id, announcement=announcement)
+                media.order = index
+                media.save()
+            except Media.DoesNotExist:
+                # Handle new media file creation, similar to in AnnouncementCreation.post
+                pass
 
     announcement.processing_status = Announcement.ProcessingStatus.PENDING
     announcement.is_published = False
@@ -133,6 +168,58 @@ def get_announcement_status(request: HttpRequest, pk: int) -> JsonResponse:
     status = get_status(announcement)
     publication_date = announcement.publication_date
     return JsonResponse({"status": status, "publication_date": publication_date})
+
+
+# Temporary storage location for uploaded files
+tmp_storage = FileSystemStorage(location=os.path.join(settings.BASE_DIR, 'tmp'))
+
+
+class MediaUploadView(View):
+    def post(self, request) -> JsonResponse:
+        files = list(request.FILES.values())
+        upload_ids = []
+
+        for file in files:
+            file.name = file.name.lower()
+
+            upload_id = str(uuid.uuid4())
+            filename = f"{file.name}"
+            tmp_storage.save(f"{upload_id}/{filename}", file)
+            upload_ids.append(upload_id)
+
+        return JsonResponse({"uploadId": upload_id})
+
+    def delete(self, request, upload_id) -> JsonResponse:
+        # Получите путь к папке
+        upload_id = unquote(upload_id)
+        if "/" in upload_id:
+            return JsonResponse(
+                {
+                    "status": 200,
+                    "text": "This file is already in announcement and will be delete after sending form",
+                },
+            )
+        folder_path = os.path.join(tmp_storage.location, upload_id)
+
+        # Удалите все файлы в папке
+        for filename in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print("Failed to delete %s. Reason: %s" % (file_path, e))
+
+        # Удалите папку
+        os.rmdir(folder_path)
+
+        return JsonResponse(
+            {
+                "status": 200,
+            }
+        )
 
 
 class AnnouncementListView(LoginRequiredMixin, ListView):
@@ -178,6 +265,9 @@ class AnnouncementCreation(LoginRequiredMixin, View):
         return render(request, "announcement/announcement_form.html", ctx)
 
     def post(self, request: HttpRequest) -> HttpResponse:
+        print(request.POST.get("uploadIds"))
+        print(request.FILES)
+        print(request.POST)
         name = request.POST.get("name")
         text = request.POST.get("text")
         tags = request.POST.getlist("tags")
@@ -209,12 +299,25 @@ class AnnouncementCreation(LoginRequiredMixin, View):
         )
         announcement.tags.set(tags)
 
-        for file in request.FILES.getlist("media"):
-            file.name = file.name.lower()
+        upload_ids_string = request.POST.getlist("uploadIds")[0]
+        upload_ids = upload_ids_string.split(",")
+        for index, upload_id in enumerate(upload_ids):
+            tmp_dir = tmp_storage.path(upload_id)
+            if os.path.exists(tmp_dir):
+                for filename in os.listdir(tmp_dir):
+                    file_path = f"{upload_id}/{filename}"
+                    file = tmp_storage.open(file_path)
+                    content_type, encoding = mimetypes.guess_type(file_path)
+                    media_type = Media.MediaType.PHOTO if "image" in content_type else Media.MediaType.VIDEO
+                    Media.objects.create(
+                        media_type=media_type,
+                        file=file,
+                        announcement=announcement,
+                        order=index,
+                    )
+                    file.close()
 
-            content_type = file.content_type.split("/")[0]
-            media_type = Media.MediaType.PHOTO if content_type == "image" else Media.MediaType.VIDEO
-            Media.objects.create(media_type=media_type, file=file, announcement=announcement)
+                shutil.rmtree(tmp_dir)
 
         return redirect("announcement-list")
 
@@ -227,7 +330,8 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
         announcement_json = serialize("json", [announcement])
         announcement_tags = announcement.tags.all()
         announcement_media = announcement.media.all()
-        media_json = serialize("json", announcement_media)
+        media_json = serialize_media(announcement_media)
+
         all_tags = Tag.objects.all()
         ctx = {
             "action": f"/announcements/edit/{announcement.pk}/",
@@ -259,24 +363,46 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
         announcement.tags.set(tags)
 
         # Handle existing media files
-        existing_files = request.POST.get("existing_files").split(",") if request.POST.get("existing_files") else []
-        current_files = [media.file.name for media in announcement.media.all()]
+        upload_ids_string = request.POST.getlist("uploadIds")[0]
+        upload_ids = upload_ids_string.split(",")
 
-        for file_name in current_files:
-            if file_name not in existing_files:
+        # Delete media files not present in the updated list
+        existing_files = [media.file.name for media in announcement.media.all()]
+        for file_name in existing_files:
+            if file_name not in upload_ids:
                 media = Media.objects.get(file=file_name, announcement=announcement)
                 media.file.delete()
                 media.delete()
 
-        # Handle new media files
-        for file in request.FILES.getlist("media"):
-            file.name = file.name.lower()
+        for index, upload_id in enumerate(upload_ids):
+            tmp_dir = tmp_storage.path(upload_id)
+            if os.path.exists(tmp_dir):
+                for filename in os.listdir(tmp_dir):
+                    file_path = f"{upload_id}/{filename}"
+                    file = tmp_storage.open(file_path)
+                    content_type, encoding = mimetypes.guess_type(file_path)
+                    media_type = Media.MediaType.PHOTO if "image" in content_type else Media.MediaType.VIDEO
+                    new_media = Media.objects.create(
+                        media_type=media_type,
+                        file=file,
+                        announcement=announcement,
+                        order=index,
+                    )
+                    file.close()
+                    upload_ids[index] = new_media.file.name  # update the upload_id with the new file name
+                shutil.rmtree(tmp_dir)
 
-            content_type = file.content_type.split("/")[0]
-            media_type = Media.MediaType.PHOTO if content_type == "image" else Media.MediaType.VIDEO
-            Media.objects.create(media_type=media_type, file=file, announcement=announcement)
-
-        edit_announcement_in_channel(announcement)
+        # Update order for remaining media files and create new media files
+        for index, upload_id in enumerate(upload_ids):
+            try:
+                media = Media.objects.get(file=upload_id, announcement=announcement)
+                media.order = index
+                media.save()
+            except Media.DoesNotExist:
+                # Handle new media file creation, similar to in AnnouncementCreation.post
+                pass
+        if announcement.is_published:
+            edit_announcement_in_channel(announcement)
 
         return redirect("announcement-list")
 
