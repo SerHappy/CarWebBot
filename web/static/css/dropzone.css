@@ -44,11 +44,6 @@
     opacity: 1;
 }
 
-/* .dropzone .dz-preview.dz-image-preview:hover .dz-image img {
-    opacity: 1;
-    -webkit-filter: none;
-    filter: none;
-} */
 
 .dropzone .dz-preview .dz-remove {
     border: none;
@@ -87,9 +82,13 @@
 }
 
 .dz-upload {
-    display: none !important;
+    display: block !important;
 }
 
 .dz-progress {
-    display: none !important;
+    display: block !important;
+}
+
+.dz-success-mark {
+    display: block !important;
 }
