@@ -21,6 +21,7 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+BASE_URL = config("BASE_URL")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -33,7 +34,8 @@ DEBUG = config("DEBUG", cast=bool)
 
 ALLOWED_HOSTS: list[str] = config("ALLOWED_HOSTS", cast=lambda v: [s.strip() for s in v.split(",")])
 
-INTERNAL_IPS = ["127.0.0.1"]
+if DEBUG:
+    INTERNAL_IPS = ["127.0.0.1"]
 
 AUTH_USER_MODEL = "users.User"
 
@@ -92,12 +94,12 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "cars",
-        "USER": "root",
-        "PASSWORD": "root",
-        "HOST": "localhost",
-        "PORT": "3306",
+        "ENGINE": config("DB_ENGINE"),
+        "NAME": config("DB_NAME"),
+        "USER": config("DB_USER"),
+        "PASSWORD": config("DB_PASSWORD"),
+        "HOST": config("DB_HOST"),
+        "PORT": config("DB_PORT"),
         "OPTIONS": {"charset": "utf8mb4"},
     }
 }
@@ -133,14 +135,13 @@ USE_I18N = True
 
 USE_TZ = True
 
-CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_BROKER_URL = config("CELERY_BROKER_URL")
 CELERY_TIMEZONE = "UTC"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "/static/"
-# STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static/")]
 
