@@ -221,7 +221,18 @@
         console.error('Не удалось загрузить файл: ', file);
       }
     });
+  })
+  .catch((error) => {
+    console.error(error);
+    let mockFile = {
+      name: "Ошибка",
+      size: 0,
+      type: "error",
+      isMock: true,
+    };
+    myDropzoneInstance.displayExistingFile(mockFile, 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.76Kw_Xh3DRaivy0fylLF4QHaF7%26pid%3DApi&f=1&ipt=5c275cadab968320e382b595716e42df5fba335c0fd3a6889fd73364fefb9357&ipo=images');
   });
+
   }
 }
 

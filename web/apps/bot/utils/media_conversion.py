@@ -1,6 +1,9 @@
 from apps.announcement.models import Media
+from django.conf import settings
+from loguru import logger
 from telebot.types import InputMediaPhoto
 from telebot.types import InputMediaVideo
+from urllib.parse import urljoin
 
 
 def create_media(media_file: Media) -> InputMediaPhoto | InputMediaVideo:
@@ -13,50 +16,52 @@ def create_media(media_file: Media) -> InputMediaPhoto | InputMediaVideo:
     Returns:
         InputMediaPhoto | InputMediaVideo: Медиа-объект для отправки в Telegram.
     """
-    file_content = _read_file(media_file)
+    logger.debug(f"Creating media from {media_file}")
+    file_url = _get_file_url(media_file)
     if media_file.media_type == Media.MediaType.PHOTO:
-        return _create_photo_media(file_content)
+        return _create_photo_media(file_url)
     elif media_file.media_type == Media.MediaType.VIDEO:
-        return _create_video_media(file_content)
+        return _create_video_media(file_url)
     else:
         raise ValueError(f"Unknown media type {media_file.media_type}")
 
 
-def _read_file(media_file: Media) -> bytes:
+def _get_file_url(media_file: Media) -> str:
     """
-    Открывает и читает содержимое файла.
+    Возвращает URL медиа-файла.
 
     Args:
-        media_file (Media): Медиа-файл для чтения.
+        media_file (Media): Медиа-файл.
 
     Returns:
-        bytes: Содержимое файла.
+        str: URL медиа-файла.
     """
-    with open(media_file.file.path, "rb") as file:  # type: ignore
-        return file.read()
+    return urljoin(settings.BASE_URL, media_file.file.url)
 
 
-def _create_photo_media(file_content: bytes) -> InputMediaPhoto:
+def _create_photo_media(file_url: str) -> InputMediaPhoto:
     """
     Создает объект фото-медиа для отправки в Telegram.
 
     Args:
-        file_content (bytes): Содержимое файла.
+        file_url (str): URL файла.
 
     Returns:
         InputMediaPhoto: Фото-медиа объект для отправки в Telegram.
     """
-    return InputMediaPhoto(file_content)
+    logger.debug(f"Creating photo media from {file_url}")
+    return InputMediaPhoto(file_url)
 
 
-def _create_video_media(file_content: bytes) -> InputMediaVideo:
+def _create_video_media(file_url: str) -> InputMediaVideo:
     """
     Создает объект видео-медиа для отправки в Telegram.
 
     Args:
-        file_content (bytes): Содержимое файла.
+        file_url (str): URL файла.
 
     Returns:
         InputMediaVideo: Видео-медиа объект для отправки в Telegram.
     """
-    return InputMediaVideo(file_content)
+    logger.debug(f"Creating photo media from {file_url}")
+    return InputMediaVideo(file_url)

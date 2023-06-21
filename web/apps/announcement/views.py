@@ -1,4 +1,3 @@
-from django.conf import settings
 from .models import Announcement
 from .models import Media
 from .models import Tag
@@ -8,6 +7,7 @@ from apps.bot.views import delete_announcement_from_channel
 from apps.bot.views import edit_announcement_in_channel
 from datetime import datetime
 from datetime import timedelta
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.storage import FileSystemStorage
@@ -171,7 +171,7 @@ def get_announcement_status(request: HttpRequest, pk: int) -> JsonResponse:
 
 
 # Temporary storage location for uploaded files
-tmp_storage = FileSystemStorage(location=os.path.join(settings.BASE_DIR, 'tmp'))
+tmp_storage = FileSystemStorage(location=os.path.join(settings.BASE_DIR, "tmp"))
 
 
 class MediaUploadView(View):
@@ -329,8 +329,24 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
         announcement = Announcement.objects.get(pk=pk)
         announcement_json = serialize("json", [announcement])
         announcement_tags = announcement.tags.all()
-        announcement_media = announcement.media.all()
-        media_json = serialize_media(announcement_media)
+        announcement_media = announcement.media.all().order_by('order')  # Упорядочить по порядку
+
+        valid_announcement_media = []
+        missing_files = []
+
+        for media in announcement_media:
+            if os.path.isfile(media.file.path):  # Проверка существования файла
+                valid_announcement_media.append(media)
+            else:
+                missing_files.append(media.file.name)  # Сохранить имя пропущенного файла
+                media.delete()  # Удалить запись из базы данных
+
+        # Переупорядочить оставшиеся файлы
+        for i, media in enumerate(valid_announcement_media):
+            media.order = i
+            media.save()
+
+        media_json = serialize_media(valid_announcement_media)
 
         all_tags = Tag.objects.all()
         ctx = {
@@ -340,9 +356,11 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
             "announcement_tags": announcement_tags,
             "tags": all_tags,
             "media": media_json,
+            "missing_files": missing_files,  # Передать список пропущенных файлов
         }
 
         return render(request, "announcement/announcement_update.html", ctx)
+
 
     def post(self, request: HttpRequest, pk: int) -> HttpResponse:
         name = request.POST.get("name")
