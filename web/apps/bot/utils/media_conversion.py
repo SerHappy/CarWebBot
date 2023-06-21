@@ -18,6 +18,7 @@ def create_media(media_file: Media) -> InputMediaPhoto | InputMediaVideo:
     """
     logger.debug(f"Creating media from {media_file}")
     file_url = _get_file_url(media_file)
+    logger.debug(f"File url: {file_url}")
     if media_file.media_type == Media.MediaType.PHOTO:
         return _create_photo_media(file_url)
     elif media_file.media_type == Media.MediaType.VIDEO:
