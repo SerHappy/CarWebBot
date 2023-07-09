@@ -23,10 +23,10 @@ def create_media(media_file: Media) -> InputMediaPhoto | InputMediaVideo:
     file_path = _get_file_path(media_file)
     logger.debug(f"File path: {file_path}")
     if media_file.media_type == Media.MediaType.PHOTO:
-        file_id = perform_action_with_retries(_upload_file(file_path, "photo"))
+        file_id = perform_action_with_retries(_upload_file, file_path, "photo")
         return InputMediaPhoto(file_id)
     elif media_file.media_type == Media.MediaType.VIDEO:
-        file_id = perform_action_with_retries(_upload_file(file_path, "video"))
+        file_id = perform_action_with_retries(_upload_file, file_path, "video")
         return InputMediaVideo(file_id)
     else:
         raise ValueError(f"Unknown media type {media_file.media_type}")
