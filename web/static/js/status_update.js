@@ -27,7 +27,7 @@ window.updateStatuses = function() {
 
         // Переводим дату в нужный формат
         let date = new Date(data.publication_date);
-        let day = date.getDate();
+        let day = (date.getDate() < 10 ? '0' : '') + date.getDate();
         let month = (date.getMonth() < 10 ? '0' : '') + (date.getMonth() + 1);
         let year = date.getFullYear();
         let hours = date.getHours();
