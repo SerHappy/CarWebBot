@@ -95,36 +95,81 @@ nano .env
 Добавьте в файл следующие значения (замените `value` на соответствующие значения для вашего проекта):
 
 ```bash
-SECRET_KEY=value
-ALLOWED_HOSTS=value
-DEBUG=value
-TELEGRAM_BOT_TOKEN=value
-CHANNEL_ID=value
-CHANNEL_NAME=value
-LOGURU_PATH=value
-LOGURU_LEVEL=value
-LOGURU_FORMAT=value
+SECRET_KEY = value
+ALLOWED_HOSTS = value
+DEBUG = value
+TELEGRAM_BOT_TOKEN = value
+CHANNEL_ID = value
+CHANNEL_NAME = value
+LOGURU_PATH = value
+LOGURU_LEVEL = value
+LOGURU_FORMAT = value
+BASE_URL = value
+DB_ENGINE = value
+DB_NAME = value
+DB_USER = value
+DB_PASSWORD = value
+DB_HOST = value
+DB_PORT = value
+CELERY_BROKER_URL = value
+MEDIA_CHANNEL_ID = value
 ```
 
 Описание каждого ключа:
 
-* `SECRET_KEY`: Это секретный ключ Django для вашего проекта. Он используется для предоставления криптографической подписи и должен быть сохранен в безопасности. Не делитесь им и не выкладывайте в открытый доступ. Пример: "your-django-secret-key".
+* `SECRET_KEY`: Это секретный ключ Django для вашего проекта. Он используется для предоставления криптографической подписи и должен быть сохранен в безопасности. Не делитесь им и не выкладывайте в открытый доступ.
+   > Пример: `"your-django-secret-key"`.
 
-* `ALLOWED_HOSTS`: Это список хостов/доменов, на которых будет работать ваш проект Django. Пример: 127.0.0.1, your-server-ip, localhost.
+* `ALLOWED_HOSTS`: Это список хостов/доменов, на которых будет работать ваш проект Django.
+   > Пример: `127.0.0.1, your-server-ip, localhost`.
 
-* `DEBUG`: Этот параметр указывает, должен ли Django использовать режим отладки. Если это значение `True`, Django будет отображать подробные сообщения об ошибках. Пример: True или False.
+* `DEBUG`: Этот параметр указывает, должен ли Django использовать режим отладки. Если это значение `True`, Django будет отображать подробные сообщения об ошибках.
+   > Пример: `True` или `False`.
 
-* `TELEGRAM_BOT_TOKEN`: Токен вашего бота Telegram. Пример: "your-telegram-bot-token".
+* `TELEGRAM_BOT_TOKEN`: Токен вашего бота Telegram.
+   > Пример: `"your-telegram-bot-token"`.
 
-* `CHANNEL_ID`: Идентификатор канала Telegram, на который бот будет отправлять сообщения. Пример: "your-channel-id".
+* `CHANNEL_ID`: Идентификатор канала Telegram, на который бот будет отправлять сообщения.
+   > Пример: `"your-channel-id"`.
 
-* `CHANNEL_NAME`: Имя канала Telegram, на который бот будет отправлять сообщения. Пример: "your-channel-name".
+* `CHANNEL_NAME`: Имя канала Telegram, на который бот будет отправлять сообщения.
+   > Пример: `"your-channel-name"`.
 
-* `LOGURU_PATH`: Путь до файла логов для Loguru, инструмента логирования Python. Пример: "/path/to/your/logfile.log".
+* `MEDIA_CHANNEL_ID`: Идентификатор канала Telegram, на который бот будет загружать медиафайлы.
+   > Пример: `"your-media-channel-id"`.
 
-* `LOGURU_LEVEL`: Уровень логирования для Loguru. Пример: "DEBUG" или "INFO".
+* `LOGURU_PATH`: Путь до файла логов для Loguru, инструмента логирования Python.
+   > Пример: `"/path/to/your/logfile.log"`.
 
-* `LOGURU_FORMAT`: Формат логирования для Loguru. Пример: "\<green>{time:DD.MM.YYYY HH:mm:ss.SSS}\</green> | \<level>{level: <8}\</level> | \<cyan>{name}\</cyan>:\<cyan>{function}\</cyan>:\<cyan>{line}\</cyan> - \<level>{message}\</level>"
+* `LOGURU_LEVEL`: Уровень логирования для Loguru.
+   > Пример: `"DEBUG"` или `"INFO"`.
+
+* `LOGURU_FORMAT`: Формат логирования для Loguru.
+   > Пример: `"<green>{time:DD.MM.YYYY HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"`.
+
+* `BASE_URL`: Базовый URL вашего сервера. Это основной адрес, который будет использоваться для доступа к вашему серверу.
+   > Пример: `"http://your-server-ip:8000"`.
+
+* `DB_ENGINE`: Движок базы данных Django, который вы будете использовать.
+   > Пример: `"django.db.backends.mysql"` для MySQL.
+
+* `DB_NAME`: Имя вашей базы данных.
+   > Пример: `"your-database-name"`.
+
+* `DB_USER`: Имя пользователя для доступа к вашей базе данных.
+   > Пример: `"your-database-user"`.
+
+* `DB_PASSWORD`: Пароль для доступа к вашей базе данных.
+   > Пример: `"your-database-password"`.
+
+* `DB_HOST`: Хост вашей базы данных. Если ваша база данных находится на том же сервере, что и ваш проект Django, вы можете использовать "localhost".
+   > Пример: `"localhost"` или `"your-database-server-ip"`.
+
+* `DB_PORT`: Порт вашей базы данных.
+   > Пример: `3306`.
+
+* `CELERY_BROKER_URL`: URL брокера для Celery. Celery - это асинхронная очередь задач, которую можно использовать для выполнения задач в фоновом режиме.
+   > Пример: `"redis://localhost:6379"`.
 
 Сохраните и закройте файл.
 
