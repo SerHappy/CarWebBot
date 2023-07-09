@@ -1,4 +1,5 @@
 from ..bot import bot
+from .telegram import perform_action_with_retries
 from apps.announcement.models import Media
 from decouple import config
 from django.conf import settings
@@ -6,7 +7,6 @@ from loguru import logger
 from telebot.types import InputMediaPhoto
 from telebot.types import InputMediaVideo
 from urllib.parse import urljoin
-from web.apps.bot.utils.telegram import perform_action_with_retries
 
 
 def create_media(media_file: Media) -> InputMediaPhoto | InputMediaVideo:
