@@ -1,4 +1,6 @@
+from ..bot import bot
 from apps.announcement.models import Media
+from decouple import config
 from django.conf import settings
 from loguru import logger
 from telebot.types import InputMediaPhoto
@@ -17,52 +19,54 @@ def create_media(media_file: Media) -> InputMediaPhoto | InputMediaVideo:
         InputMediaPhoto | InputMediaVideo: Медиа-объект для отправки в Telegram.
     """
     logger.debug(f"Creating media from {media_file}")
-    file_url = _get_file_url(media_file)
-    logger.debug(f"File url: {file_url}")
+    file_path = _get_file_path(media_file)
+    logger.debug(f"File path: {file_path}")
     if media_file.media_type == Media.MediaType.PHOTO:
-        return _create_photo_media(file_url)
+        file_id = _upload_file(file_path, "photo")
+        return InputMediaPhoto(file_id)
     elif media_file.media_type == Media.MediaType.VIDEO:
-        return _create_video_media(file_url)
+        file_id = _upload_file(file_path, "video")
+        return InputMediaVideo(file_id)
     else:
         raise ValueError(f"Unknown media type {media_file.media_type}")
 
 
-def _get_file_url(media_file: Media) -> str:
+def _upload_file(file_path: str, media_type: str) -> str:
     """
-    Возвращает URL медиа-файла.
+    Загружает файл в Telegram и возвращает его file_id.
+
+    Args:
+        file_path (str): Путь до файла на сервере.
+        media_type (str): Тип медиа-файла, "photo" или "video".
+
+    Returns:
+        str: file_id в Telegram.
+    """
+    logger.debug(f"Uploading file {file_path} to Telegram")
+    with open(file_path, "rb") as file:
+        logger.debug(f"File opened")
+        if media_type == "photo":
+            response = bot.send_photo(chat_id=config("MEDIA_CHANNEL_ID"), photo=file)
+            file_id = response.photo[-1].file_id
+        elif media_type == "video":
+            response = bot.send_video(chat_id=config("MEDIA_CHANNEL_ID"), video=file)
+            file_id = response.video.file_id
+        else:
+            raise ValueError(f"Unsupported media type: {media_type}")
+
+        bot.delete_message(chat_id=config("MEDIA_CHANNEL_ID"), message_id=response.message_id)
+
+    return file_id
+
+
+def _get_file_path(media_file: Media) -> str:
+    """
+    Возвращает путь до файла на сервере.
 
     Args:
         media_file (Media): Медиа-файл.
 
     Returns:
-        str: URL медиа-файла.
+        str: Путь до файла.
     """
-    return urljoin(settings.BASE_URL, media_file.file.url)
-
-
-def _create_photo_media(file_url: str) -> InputMediaPhoto:
-    """
-    Создает объект фото-медиа для отправки в Telegram.
-
-    Args:
-        file_url (str): URL файла.
-
-    Returns:
-        InputMediaPhoto: Фото-медиа объект для отправки в Telegram.
-    """
-    logger.debug(f"Creating photo media from {file_url}")
-    return InputMediaPhoto(file_url)
-
-
-def _create_video_media(file_url: str) -> InputMediaVideo:
-    """
-    Создает объект видео-медиа для отправки в Telegram.
-
-    Args:
-        file_url (str): URL файла.
-
-    Returns:
-        InputMediaVideo: Видео-медиа объект для отправки в Telegram.
-    """
-    logger.debug(f"Creating photo media from {file_url}")
-    return InputMediaVideo(file_url)
+    return media_file.file.path
