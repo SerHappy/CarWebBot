@@ -5,6 +5,8 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="WebAdmin site for telegram channel">
+    <meta name="keywords" content="">
     <link rel="shortcut icon"
           type="image/png"
           href="{% static 'images/favicon.png' %}">
@@ -42,7 +44,8 @@
     <!-- AdminLTE JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.1.0/js/adminlte.min.js"></script>
     <!-- dropzonejs -->
-    {% block extra_head %}{% endblock %}
+    {% block extra_head %}
+    {% endblock extra_head %}
   </head>
   <body class="hold-transition sidebar-mini">
     <div class="wrapper">
@@ -83,15 +86,21 @@
                 role="menu"
                 data-accordion="false">
               <li class="nav-item">
-                <a href="/" class="nav-link">
+                <a href={% url 'index' %} class="nav-link">
                   <i class="nav-icon fas fa-th"></i>
                   <p>Все объявления</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/announcements/add/" class="nav-link">
+                <a href={% url 'announcement-add' %} class="nav-link">
                   <i class="nav-icon fas fa-plus"></i>
-                  <p>Создать</p>
+                  <p>Создать объявление</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href={% url 'tag-add' %} class="nav-link">
+                  <i class="nav-icon fas fa-plus"></i>
+                  <p>Создать тег</p>
                 </a>
               </li>
             </ul>
@@ -107,7 +116,8 @@
         <section class="content">
           <div class="container-fluid">
             <!-- Add your content here -->
-            {% block content %}{% endblock %}
+            {% block content %}
+            {% endblock content %}
           </div>
         </section>
         <!-- End Main content -->
@@ -119,7 +129,7 @@
           <!-- Add your footer content here -->
         </div>
         <!-- Default to the left -->
-        <strong>&copy; 2023 CarWebBot</strong>
+        <strong>© 2023 CarWebBot</strong>
       </footer>
       <!-- End Footer -->
     </div>
