@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+  {% load static %}
+  <div class="container-fluid">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Создание тега</h3>
+            </div>
+            <form id="tag-form"
+                  name="tag-form"
+                  method="post"
+                  action="{% url 'tag-add' %}">
+              {% csrf_token %}
+              <div id="form-card-body" class="card-body">
+                {% include "tag/form_data/name.html" %}
+                {% include "tag/form_data/type.html" %}
+                {% include "tag/form_data/telegram_channel.html" %}
+              </div>
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Создать</button>
+              </div>
+            </form>
+          </div>
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Список созданных тегов</h3>
+            </div>
+            <div class="card-body">
+              {% for tag in tags %}
+                <ul id="tagList">
+                  <li>{{ tag.name }}</li>
+                </ul>
+              {% empty %}
+                <div class="text-center py-5">
+                  <i class="fa fa-frown-o fa-3x mb-3" aria-hidden="true"></i>
+                  <h4>Нет созданных тегов</h4>
+                  <p class="text-muted">Новые теги скоро появятся. Пожалуйста, проверьте позже.</p>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+$(document).ready(function() {
+  $('#tagName').on('change', function() {
+    var tagName = $(this).val();
+    $.ajax({
+      url: '/announcements/check-tag/',
+      data: {
+        'tag_name': tagName
+      },
+      dataType: 'json',
+      success: function(data) {
+        if (data.is_taken) {
+          $('#tagName').addClass('is-invalid');
+          $('#tagHelp').text("Тег с таким именем уже существует.").addClass('text-danger');
+        } else {
+          $('#tagName').removeClass('is-invalid');
+          $('#tagHelp').text("").removeClass('text-danger');
+        }
+      }
+    });
+  });
+});
+  </script>
+{% endblock content %}

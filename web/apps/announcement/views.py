@@ -33,6 +33,12 @@ import shutil
 import uuid
 
 
+def check_tag(request: HttpRequest) -> JsonResponse:
+    tag_name = request.GET.get("tag_name", None)
+    data = {"is_taken": Tag.objects.filter(name__iexact=tag_name).exists()}
+    return JsonResponse(data)
+
+
 @login_required(login_url="/user/login/")
 def takeoff_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     announcement = get_object_or_404(Announcement, pk=pk)
@@ -329,7 +335,7 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
         announcement = Announcement.objects.get(pk=pk)
         announcement_json = serialize("json", [announcement])
         announcement_tags = announcement.tags.all()
-        announcement_media = announcement.media.all().order_by('order')  # Упорядочить по порядку
+        announcement_media = announcement.media.all().order_by("order")  # Упорядочить по порядку
 
         valid_announcement_media = []
         missing_files = []
@@ -360,7 +366,6 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
         }
 
         return render(request, "announcement/announcement_update.html", ctx)
-
 
     def post(self, request: HttpRequest, pk: int) -> HttpResponse:
         name = request.POST.get("name")
@@ -427,6 +432,11 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
 
 class TagCreation(LoginRequiredMixin, View):
     login_url = "/user/login/"
+
+    def get(self, request) -> HttpResponse:
+        tags = Tag.objects.all()
+        ctx = {"tags": tags}
+        return render(request, "tag/creation.html", ctx)
 
     def post(self, request) -> JsonResponse:
         name = request.POST.get("tagName")

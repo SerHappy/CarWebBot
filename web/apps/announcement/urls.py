@@ -8,7 +8,7 @@ from .views import republish_announcement
 from .views import TagCreation
 from .views import takeoff_announcement
 from django.urls import path
-
+from .views import check_tag
 
 urlpatterns = [
     path("all/", AnnouncementListView.as_view(), name="announcement-list"),
@@ -21,4 +21,5 @@ urlpatterns = [
     path("delete/<int:pk>/", delete_announcement, name="announcement-delete"),
     path("media/add/", MediaUploadView.as_view(), name="media-add"),
     path("media/delete/<path:upload_id>/", MediaUploadView.as_view(), name="media-delete"),
+    path("check-tag/", check_tag, name="check-tag")
 ]
