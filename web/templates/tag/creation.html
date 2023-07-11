@@ -9,8 +9,8 @@
             <div class="card-header">
               <h3 class="card-title">Создание тега</h3>
             </div>
-            <form id="tag-form"
-                  name="tag-form"
+            <form id="createTagForm"
+                  name="createTagForm"
                   method="post"
                   action="{% url 'tag-add' %}">
               {% csrf_token %}

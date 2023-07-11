@@ -1,47 +1,57 @@
-<div
-  class="modal fade"
-  id="createTagModal"
-  tabindex="-1"
-  role="dialog"
-  aria-labelledby="createTagModalLabel"
-  aria-hidden="true"
->
+<div class="modal fade"
+     id="createTagModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="createTagModalLabel"
+     aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="createTagModalLabel">Создать тег</h5>
-        <button
-          type="button"
-          class="close"
-          data-dismiss="modal"
-          aria-label="Close"
-        >
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">×</span>
         </button>
       </div>
       <div class="modal-body">
-        <form id="createTagForm">
+        <form id="createTagForm"
+              name="createTagForm"
+              method="post"
+              action="{% url 'tag-add' %}">
           {% csrf_token %}
-          <div class="form-group">
-            <label for="tagName">Название тега</label>
-            <input
-              type="text"
-              class="form-control"
-              id="tagName"
-              name="tagName"
-              required
-            />
+          <div id="form-card-body" class="card-body">
+            {% include "tag/form_data/name.html" %}
+            {% include "tag/form_data/type.html" %}
+            {% include "tag/form_data/telegram_channel.html" %}
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-          Отмена
-        </button>
-        <button type="button" class="btn btn-primary" id="createTagButton">
-          Создать
-        </button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-primary" id="createTagButton">Создать</button>
       </div>
     </div>
   </div>
 </div>
+<script>
+  $(document).ready(function() {
+  $('#tagName').on('change', function() {
+    var tagName = $(this).val();
+    $.ajax({
+      url: '/announcements/check-tag/',
+      data: {
+        'tag_name': tagName
+      },
+      dataType: 'json',
+      success: function(data) {
+        if (data.is_taken) {
+          $('#tagName').addClass('is-invalid');
+          $('#tagHelp').text("Тег с таким именем уже существует.").addClass('text-danger');
+        } else {
+          $('#tagName').removeClass('is-invalid');
+          $('#tagHelp').text("").removeClass('text-danger');
+        }
+      }
+    });
+  });
+});
+</script>
