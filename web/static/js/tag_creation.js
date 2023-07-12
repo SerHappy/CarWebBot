@@ -4,7 +4,7 @@ function createTag() {
 
   $.ajax({
     type: "POST",
-    url: "/announcements/tags/add/",
+    url: "/tags/add/",
     data: formData,
     success: function (response) {
       console.log("Success response:", response);

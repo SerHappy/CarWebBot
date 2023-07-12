@@ -22,7 +22,7 @@ class TagCreation(LoginRequiredMixin, View):
     def get(self, request: HttpRequest) -> HttpResponse:
         tags = Tag.objects.all()
         ctx = {"tags": tags}
-        return render(request, "tag/creation.html", ctx)
+        return render(request, "tag/create/tag_create.html", ctx)
 
     def post(self, request: HttpRequest) -> JsonResponse:
         name = request.POST.get("tagName")
@@ -54,3 +54,12 @@ class TagCreation(LoginRequiredMixin, View):
         else:
             logger.error("Tag could not be created, because one already exists")
             return JsonResponse({"status": "error", "message": "Такой тег уже существует"})
+
+
+class TagListView(LoginRequiredMixin, View):
+    login_url = "/user/login/"
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        tags = Tag.objects.all()
+        ctx = {"tags": tags}
+        return render(request, "tag/tag_list.html", ctx)

@@ -38,30 +38,9 @@
           <p class="login-box-msg">Зарегистрируйтесь</p>
           <form action="" method="post">
             {% csrf_token %}
-            <div class="input-group mb-3">
-              {{ form.email }}
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-envelope"></span>
-                </div>
-              </div>
-            </div>
-            <div class="input-group mb-3">
-              {{ form.password }}
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-lock"></span>
-                </div>
-              </div>
-            </div>
-            <div class="input-group mb-3">
-              {{ form.password_confirmation }}
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-lock"></span>
-                </div>
-              </div>
-            </div>
+            {% include "register/form_data/email.html" %}
+            {% include "register/form_data/password.html" %}
+            {% include "register/form_data/password_confirmation.html" %}
             <div class="row">
               <!-- /.col -->
               <div class="col-4">

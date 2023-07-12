@@ -105,13 +105,6 @@
                         <br>
                       {% endfor %}
                     </td>
-                    {% comment %} <td>{{ announcement.status }}</td>
-                    <td>
-                      {% if announcement.note == None %}
-                      {% else %}
-                        {{ announcement.note }}
-                      {% endif %}
-                    </td> {% endcomment %}
                     <td>
                       {% for media in announcement.media.all %}
                         {% if media.media_type == 'PHOTO' %}
@@ -188,13 +181,13 @@
             </tbody>
           </table>
         </div>
-        {% include "pagination.html" %}
+        {% include "announcement/includes/pagination.html" %}
       </div>
     </div>
     <!-- /.container-fluid -->
   </section>
-  {% include "modal_viewer.html" %}
-  {% include "republish_modal.html" %}
+  {% include "announcement/includes/modal_viewer.html" %}
+  {% include "announcement/includes/republish_modal.html" %}
   <script src="{% static 'js/pagination_and_filters.js' %}"></script>
   <script src="{% static 'js/status_update.js' %}"></script>
   <script src="{% static "js/media_viewer.js" %}"></script>

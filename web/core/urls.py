@@ -27,7 +27,7 @@ urlpatterns = [
     path("", RedirectView.as_view(url="announcements/all/"), name="index"),
     path("announcements/", include("apps.announcement.urls")),
     path("tags/", include("apps.tag.urls")),
-    path("user/", include("apps.users.urls")),
+    path("users/", include("apps.users.urls")),
     path("admin/", admin.site.urls, name="admin"),
 ]
 

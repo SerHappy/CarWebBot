@@ -25,7 +25,7 @@ def register_view(request: HttpRequest) -> HttpResponseRedirect | HttpResponsePe
             return redirect("login")
     else:
         form = UserRegisterForm()
-    return render(request, "register.html", {"form": form})
+    return render(request, "register/register.html", {"form": form})
 
 
 def login_view(request) -> HttpResponseRedirect | HttpResponsePermanentRedirect | HttpResponse:
@@ -39,7 +39,7 @@ def login_view(request) -> HttpResponseRedirect | HttpResponsePermanentRedirect 
                 return redirect("announcement-list")
     else:
         form = UserLoginForm()
-    return render(request, "login.html", {"form": form})
+    return render(request, "login/login.html", {"form": form})
 
 
 def logout_view(request) -> HttpResponseRedirect | HttpResponsePermanentRedirect:

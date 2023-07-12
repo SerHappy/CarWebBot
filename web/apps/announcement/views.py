@@ -223,9 +223,9 @@ class MediaUploadView(View):
 
 
 class AnnouncementListView(LoginRequiredMixin, ListView):
-    login_url = "/user/login/"
+    login_url = "/users/login/"
     model = Announcement
-    template_name = "index.html"
+    template_name = "announcement/announcement_list.html"
     paginate_by = 5
 
     def get_context_data(self, **kwargs):
@@ -262,7 +262,7 @@ class AnnouncementCreation(LoginRequiredMixin, View):
     def get(self, request: HttpRequest) -> HttpResponse:
         tags = Tag.objects.all()
         ctx = {"action": f"/announcements/add/", "tags": tags, "announcement": "null"}
-        return render(request, "announcement/announcement_form.html", ctx)
+        return render(request, "announcement/create/announcement_create.html", ctx)
 
     def post(self, request: HttpRequest) -> HttpResponse:
         print(request.POST.get("uploadIds"))
@@ -359,7 +359,7 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
             "missing_files": missing_files,  # Передать список пропущенных файлов
         }
 
-        return render(request, "announcement/announcement_update.html", ctx)
+        return render(request, "announcement/edit/announcement_edit.html", ctx)
 
     def post(self, request: HttpRequest, pk: int) -> HttpResponse:
         name = request.POST.get("name")
