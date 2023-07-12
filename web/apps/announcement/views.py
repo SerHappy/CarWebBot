@@ -1,6 +1,6 @@
+from ..tag.models import Tag
 from .models import Announcement
 from .models import Media
-from .models import Tag
 from .serializers import serialize_media
 from .services import get_status
 from apps.bot.views import delete_announcement_from_channel
@@ -31,12 +31,6 @@ import os
 import pytz
 import shutil
 import uuid
-
-
-def check_tag(request: HttpRequest) -> JsonResponse:
-    tag_name = request.GET.get("tag_name", None)
-    data = {"is_taken": Tag.objects.filter(name__iexact=tag_name).exists()}
-    return JsonResponse(data)
 
 
 @login_required(login_url="/user/login/")
@@ -428,43 +422,3 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
             edit_announcement_in_channel(announcement)
 
         return redirect("announcement-list")
-
-
-class TagCreation(LoginRequiredMixin, View):
-    login_url = "/user/login/"
-
-    def get(self, request: HttpRequest) -> HttpResponse:
-        tags = Tag.objects.all()
-        ctx = {"tags": tags}
-        return render(request, "tag/creation.html", ctx)
-
-    def post(self, request: HttpRequest) -> JsonResponse:
-        name = request.POST.get("tagName")
-        type = request.POST.get("tagType")
-        channel_id = request.POST.get("telegramChannel")
-        max_length = Tag._meta.get_field("name").max_length
-
-        if len(name) < 1:
-            logger.error("Tag could not be created, because name is too short")
-            return JsonResponse({"status": "error", "message": "Название тега слишком короткое"})
-
-        if len(name) > max_length:
-            logger.error("Tag could not be created, because name is too long")
-            return JsonResponse({"status": "error", "message": "Название тега слишком длинное"})
-
-        tag, created = Tag.objects.get_or_create(name=name, type=type, channel_id=channel_id)
-        if created:
-            logger.info(f"Tag created: {tag}")
-            return JsonResponse(
-                {
-                    "status": "success",
-                    "message": "Тег успешно создан",
-                    "id": tag.id,
-                    "name": tag.name,
-                    "type": tag.type,
-                    "channel_id": tag.channel_id,
-                }
-            )
-        else:
-            logger.error("Tag could not be created, because one already exists")
-            return JsonResponse({"status": "error", "message": "Такой тег уже существует"})

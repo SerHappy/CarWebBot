@@ -5,21 +5,17 @@ from .views import delete_announcement
 from .views import get_announcement_status
 from .views import MediaUploadView
 from .views import republish_announcement
-from .views import TagCreation
 from .views import takeoff_announcement
 from django.urls import path
-from .views import check_tag
 
 urlpatterns = [
     path("all/", AnnouncementListView.as_view(), name="announcement-list"),
     path("add/", AnnouncementCreation.as_view(), name="announcement-add"),
     path("status/<int:pk>/", get_announcement_status, name="announcement-status"),
-    path("tags/add/", TagCreation.as_view(), name="tag-add"),
     path("edit/<int:pk>/", AnnouncementUpdate.as_view(), name="announcement-edit"),
     path("takeoff/<int:pk>", takeoff_announcement, name="announcement-takeoff"),
     path("republish/<int:pk>/", republish_announcement, name="announcement-republish"),
     path("delete/<int:pk>/", delete_announcement, name="announcement-delete"),
     path("media/add/", MediaUploadView.as_view(), name="media-add"),
     path("media/delete/<path:upload_id>/", MediaUploadView.as_view(), name="media-delete"),
-    path("check-tag/", check_tag, name="check-tag")
 ]
