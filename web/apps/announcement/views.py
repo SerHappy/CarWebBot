@@ -433,14 +433,15 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
 class TagCreation(LoginRequiredMixin, View):
     login_url = "/user/login/"
 
-    def get(self, request) -> HttpResponse:
+    def get(self, request: HttpRequest) -> HttpResponse:
         tags = Tag.objects.all()
         ctx = {"tags": tags}
         return render(request, "tag/creation.html", ctx)
 
-    def post(self, request) -> JsonResponse:
+    def post(self, request: HttpRequest) -> JsonResponse:
         name = request.POST.get("tagName")
-
+        type = request.POST.get("tagType")
+        channel_id = request.POST.get("telegramChannel")
         max_length = Tag._meta.get_field("name").max_length
 
         if len(name) < 1:
@@ -451,10 +452,19 @@ class TagCreation(LoginRequiredMixin, View):
             logger.error("Tag could not be created, because name is too long")
             return JsonResponse({"status": "error", "message": "Название тега слишком длинное"})
 
-        tag, created = Tag.objects.get_or_create(name=name)
+        tag, created = Tag.objects.get_or_create(name=name, type=type, channel_id=channel_id)
         if created:
             logger.info(f"Tag created: {tag}")
-            return JsonResponse({"status": "success", "message": "Тег успешно создан", "id": tag.id, "name": tag.name})
+            return JsonResponse(
+                {
+                    "status": "success",
+                    "message": "Тег успешно создан",
+                    "id": tag.id,
+                    "name": tag.name,
+                    "type": tag.type,
+                    "channel_id": tag.channel_id,
+                }
+            )
         else:
             logger.error("Tag could not be created, because one already exists")
             return JsonResponse({"status": "error", "message": "Такой тег уже существует"})

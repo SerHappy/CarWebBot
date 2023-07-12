@@ -18,7 +18,7 @@ class Tag(models.Model):
         null=False,
         default=TagType.visible,
     )
-    channel_id: str = models.CharField(max_length=255, null=True)
+    channel_id: str = models.CharField(max_length=255, null=True, blank=True)
     modified_at: str = models.DateTimeField(auto_now=True)
     created_at: str = models.DateTimeField(auto_now_add=True)
 

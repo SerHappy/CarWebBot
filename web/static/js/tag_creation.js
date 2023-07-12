@@ -19,8 +19,12 @@ function createTag() {
       console.log("Tag Name:", response.name);
 
       $("#tags").append(
-        "<option value='" + response.id + "'>" + response.name + "</option>"
-      );
+    $("<option>")
+      .attr("value", response.id)
+      .text(response.name)
+      .attr("data-type", response.type)
+      .attr("data-has-channel", response.channel_id ? "true" : "false")
+  );
 
       console.log($("#createTagModal"));
 
