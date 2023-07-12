@@ -226,7 +226,6 @@ class AnnouncementListView(LoginRequiredMixin, ListView):
     login_url = "/users/login/"
     model = Announcement
     template_name = "announcement/announcement_list.html"
-    paginate_by = 5
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -238,7 +237,7 @@ class AnnouncementListView(LoginRequiredMixin, ListView):
         if tag_filter:
             context["announcements"] = context["announcements"].filter(tags__name__icontains=tag_filter)
 
-        paginator = Paginator(context["announcements"], self.paginate_by)
+        paginator = Paginator(context["announcements"], 5)
         page = self.request.GET.get("page")
         try:
             context["announcements"] = paginator.page(page)
@@ -257,7 +256,7 @@ class AnnouncementListView(LoginRequiredMixin, ListView):
 
 
 class AnnouncementCreation(LoginRequiredMixin, View):
-    login_url = "/user/login/"
+    login_url = "/users/login/"
 
     def get(self, request: HttpRequest) -> HttpResponse:
         tags = Tag.objects.all()
@@ -323,7 +322,7 @@ class AnnouncementCreation(LoginRequiredMixin, View):
 
 
 class AnnouncementUpdate(LoginRequiredMixin, View):
-    login_url = "/user/login/"
+    login_url = "/users/login/"
 
     def get(self, request: HttpRequest, pk: int) -> HttpResponse:
         announcement = Announcement.objects.get(pk=pk)

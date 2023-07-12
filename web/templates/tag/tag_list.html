@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block content %}
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/links.css' %}">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-start">
+          <!-- Добавлен класс justify-content-start -->
+          <a type="button"
+             href="{% url 'tag-add' %}"
+             class="btn btn-primary ml-n1">
+            <i class="fas fa-plus"></i>
+            Добавить Тег
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- /.col -->
+  </div>
+  <!-- /.row -->
+  <!-- /.content-header -->
+  <style>
+.inactive-row {
+  background-color: #f2f2f2;
+}
+.media-links {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
+}
+.table-header {
+        width: 1000px;
+    }
+
+    .action-column {
+        width: 40px;
+    }
+    .thumbnail-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
+  </style>
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <div class="card mx-0">
+        <!-- /.card-header -->
+        <div class="card-body">
+          <!-- Фильтры -->
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="nameFilter">Фильтр по названию:</label>
+              <input type="text"
+                     class="form-control"
+                     id="nameFilter"
+                     placeholder="Введите название" />
+            </div>
+          </div>
+          <!-- Таблица -->
+          <table class="table table-bordered w-100" id="tagsTable">
+            <thead>
+              <tr>
+                <th>Название</th>
+                <th>Тип</th>
+                <th>ID канала</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if tags|length > 0 %}
+                {% for tag in tags %}
+                  <tr class="tag-row" data-id="{{ tag.id }}">
+                    <td>
+                      <a href="{% url 'tag-edit' tag.id %}" class="text">
+                        <i class="fas fa-pencil-alt"></i>
+                        {{ tag.name }}
+                      </a>
+                    </td>
+                    <td>
+                      {% if tag.type == "visible" %}
+                        Отображаемый
+                      {% else %}
+                        Скрытый
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if tag.channel_id %}
+                        {{ tag.channel_id }}
+                      {% else %}
+                        Нет
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="7" class="text-center py-5">
+                    <i class="fa fa-frown-o fa-3x mb-3" aria-hidden="true"></i>
+                    <h4>Нет тегов</h4>
+                    <p class="text-muted">Новые теги скоро появятся. Пожалуйста, проверьте позже.</p>
+                  </td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+        {% include "tag/includes/pagination.html" %}
+      </div>
+    </div>
+    <!-- /.container-fluid -->
+  </section>
+  <script src="{% static 'js/tag_pagination_and_filter.js' %}"></script>
+  <script>
+  $(document).ready(function () {
+    console.log("ready!");
+    handlePaginationEvents();
+  });
+  $(document).ajaxStop(function () {
+    console.log("ajaxStop!");
+    handlePaginationEvents();
+  });
+  </script>
+{% endblock content %}
