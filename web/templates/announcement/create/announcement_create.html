@@ -29,15 +29,15 @@
                   action="{{ action }}">
               {% csrf_token %}
               <div id="form-card-body" class="card-body">
-                {% include "announcement/form_data/name.html" %}
-                {% include "announcement/form_data/text.html" %}
-                {% include "announcement/form_data/price.html" %}
-                {% include "announcement/form_data/status.html" %}
-                {% include "announcement/form_data/tags.html" %}
-                {% include "announcement/form_data/note.html" %}
-                {% include "announcement/form_data/media.html" %}
-                {% include "announcement/form_data/publication_date.html" %}
-                {% include "announcement/form_data/timezone.html" %}
+                {% include "announcement/create/form_data/name.html" %}
+                {% include "announcement/create/form_data/text.html" %}
+                {% include "announcement/create/form_data/price.html" %}
+                {% include "announcement/create/form_data/status.html" %}
+                {% include "announcement/create/form_data/tags.html" %}
+                {% include "announcement/create/form_data/note.html" %}
+                {% include "announcement/create/form_data/media.html" %}
+                {% include "announcement/create/form_data/publication_date.html" %}
+                {% include "announcement/create/form_data/timezone.html" %}
               </div>
               <div class="card-footer">
                 <button type="submit" class="btn btn-primary">Опубликовать</button>
@@ -48,7 +48,7 @@
       </div>
     </div>
   </div>
-  {% include "announcement/create_tag_modal.html" %}
+  {% include "announcement/includes/create_tag_modal.html" %}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"
           integrity="sha512-U2WE1ktpMTuRBPoCFDzomoIorbOyUv0sP8B+INA3EzNAhehbzED1rOJg6bCqPf/Tuposxb5ja/MAUnC8THSbLQ=="
           crossorigin="anonymous"

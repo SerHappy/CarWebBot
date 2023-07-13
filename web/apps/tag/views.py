@@ -1,4 +1,5 @@
 from .models import Tag
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage
@@ -7,8 +8,11 @@ from django.core.paginator import PageNotAnInteger
 from django.core.paginator import Paginator
 from django.http import HttpRequest
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
+from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic import View
 from loguru import logger
@@ -16,14 +20,25 @@ from typing import Any
 from typing import Dict
 
 
-@login_required(login_url="/user/login/")
+@login_required(login_url="/users/login/")
 def check_tag(request: HttpRequest) -> JsonResponse:
     tag_name = request.GET.get("tag_name", None)
-    data = {"is_taken": Tag.objects.filter(name__iexact=tag_name).exists()}
+    tag_id = request.GET.get("tag_id", None)
+    if tag_id:
+        data = {"is_taken": Tag.objects.filter(name__iexact=tag_name).exclude(pk=tag_id).exists()}
+    else:
+        data = {"is_taken": Tag.objects.filter(name__iexact=tag_name).exists()}
     return JsonResponse(data)
 
 
-class TagCreation(LoginRequiredMixin, View):
+@login_required(login_url="/users/login/")
+def delete_tag(request: HttpRequest, pk: int) -> HttpResponse:
+    tag = get_object_or_404(Tag, pk=pk)
+    tag.delete()
+    return HttpResponse(status=200)
+
+
+class TagCreateView(LoginRequiredMixin, View):
     login_url = "/users/login/"
 
     def get(self, request: HttpRequest) -> HttpResponse:
@@ -31,36 +46,32 @@ class TagCreation(LoginRequiredMixin, View):
         ctx = {"tags": tags}
         return render(request, "tag/create/tag_create.html", ctx)
 
-    def post(self, request: HttpRequest) -> JsonResponse:
-        name = request.POST.get("tagName")
-        type = request.POST.get("tagType")
-        channel_id = request.POST.get("telegramChannel")
+    def post(self, request: HttpRequest) -> HttpResponseRedirect:
+        name = request.POST.get("tagName", None)
+        type = request.POST.get("tagType", None)
+        channel_id = request.POST.get("telegramChannel", None)
         max_length = Tag._meta.get_field("name").max_length
 
+        existing_tag = Tag.objects.filter(name=name).first()
+        if existing_tag:
+            messages.error(request, "Тег с таким именем уже существует")
+            return HttpResponseRedirect(reverse("tag-add"))
+
         if len(name) < 1:
-            logger.error("Tag could not be created, because name is too short")
-            return JsonResponse({"status": "error", "message": "Название тега слишком короткое"})
+            messages.error(request, "Название тега слишком короткое")
+            return HttpResponseRedirect(reverse("tag-add"))
 
         if len(name) > max_length:
-            logger.error("Tag could not be created, because name is too long")
-            return JsonResponse({"status": "error", "message": "Название тега слишком длинное"})
+            messages.error(request, "Название тега слишком длинное")
+            return HttpResponseRedirect(reverse("tag-add"))
 
-        tag, created = Tag.objects.get_or_create(name=name, type=type, channel_id=channel_id)
-        if created:
-            logger.info(f"Tag created: {tag}")
-            return JsonResponse(
-                {
-                    "status": "success",
-                    "message": "Тег успешно создан",
-                    "id": tag.id,
-                    "name": tag.name,
-                    "type": tag.type,
-                    "channel_id": tag.channel_id,
-                }
-            )
-        else:
-            logger.error("Tag could not be created, because one already exists")
-            return JsonResponse({"status": "error", "message": "Такой тег уже существует"})
+        try:
+            Tag.objects.create(name=name, type=type, channel_id=channel_id)
+            messages.success(request, "Тег успешно создан")
+            return HttpResponseRedirect(reverse("tag-list"))
+        except Tag.DoesNotExist:
+            messages.error(request, "Тег не существует")
+            return HttpResponseRedirect(reverse("tag-add"))
 
 
 class TagListView(LoginRequiredMixin, ListView):
@@ -75,7 +86,7 @@ class TagListView(LoginRequiredMixin, ListView):
         if name_filter:
             context["tags"] = context["tags"].filter(name__icontains=name_filter)
 
-        paginator = Paginator(context["tags"], 1)
+        paginator = Paginator(context["tags"], 5)
         page = self.request.GET.get("page")
         try:
             context["tags"] = paginator.page(page)
@@ -101,4 +112,35 @@ class TagEditView(LoginRequiredMixin, View):
     def get(self, request: HttpRequest, pk: int) -> HttpResponse:
         tag = Tag.objects.get(pk=pk)
         ctx = {"tag": tag}
-        return render(request, "tag/tag_edit.html", ctx)
+        return render(request, "tag/edit/tag_edit.html", ctx)
+
+    def post(self, request: HttpRequest, pk: int) -> HttpResponseRedirect:
+        name = request.POST.get("tagName")
+        type = request.POST.get("tagType")
+        channel_id = request.POST.get("telegramChannel")
+        max_length = Tag._meta.get_field("name").max_length
+
+        existing_tag = Tag.objects.filter(name=name).exclude(pk=pk).first()
+        if existing_tag:
+            messages.error(request, "Тег с таким именем уже существует")
+            return HttpResponseRedirect(reverse("tag-edit", args=[pk]))
+
+        if len(name) < 1:
+            messages.error(request, "Название тега слишком короткое")
+            return HttpResponseRedirect(reverse("tag-edit", args=[pk]))
+
+        if len(name) > max_length:
+            messages.error(request, "Название тега слишком длинное")
+            return HttpResponseRedirect(reverse("tag-edit", args=[pk]))
+
+        try:
+            tag = Tag.objects.get(pk=pk)
+            tag.name = name
+            tag.type = type
+            tag.channel_id = channel_id
+            tag.save()
+            messages.success(request, "Тег успешно обновлен")
+            return HttpResponseRedirect(reverse("tag-list"))
+        except Tag.DoesNotExist:
+            messages.error(request, "Тег не существует")
+            return HttpResponseRedirect(reverse("tag-edit", args=[pk]))

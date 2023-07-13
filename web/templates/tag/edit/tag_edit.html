@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+  {% load static %}
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <div class="container-fluid">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-12">
+          {% include "includes/django_messages.html" %}
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Редактирование тега</h3>
+            </div>
+            <form id="tag-form"
+                  name="tag-form"
+                  method="post"
+                  enctype="multipart/form-data"
+                  action="{{ action }}">
+              {% csrf_token %}
+              <div id="form-card-body" class="card-body">
+                {% include "tag/edit/form_data/name.html" %}
+                {% include "tag/edit/form_data/type.html" %}
+                {% include "tag/edit/form_data/telegram_channel.html" %}
+              </div>
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary mr-2" id="editButton">Отредактировать</button>
+                <button type="reset" class="btn btn-primary mr-2">Сбросить изменения</button>
+                <button type="button"
+                        class="btn btn-primary"
+                        id="deleteModalButton"
+                        data-delete-url="{% url 'tag-delete' pk=tag.id %}"
+                        data-redirect-url="{% url 'tag-list' %}">Удалить</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% include "tag/includes/delete_modal.html" %}
+  <script src="{% static "js/tag/edit/formHandlers.js" %}"></script>
+  <script src="{% static "js/tag/general/validationFunctions.js" %}"></script>
+{% endblock content %}

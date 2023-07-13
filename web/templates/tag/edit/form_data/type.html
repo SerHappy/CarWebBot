@@ -1,0 +1,7 @@
+<div class="form-group">
+  <label for="tagType">Тип тега</label>
+  <select class="form-control" id="tagType" name="tagType" autocomplete="off">
+    <option value="visible" {% if tag.type == 'visible' %}selected{% endif %}>Отображаемый</option>
+    <option value="hidden" {% if tag.type == 'hidden' %}selected{% endif %}>Скрытый</option>
+  </select>
+</div>

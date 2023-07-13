@@ -19,15 +19,15 @@
                   action="{{ action }}">
               {% csrf_token %}
               <div id="form-card-body" class="card-body">
-                {% include "announcement/form_data/name.html" %}
-                {% include "announcement/form_data/text.html" %}
-                {% include "announcement/form_data/price.html" %}
-                {% include "announcement/form_data/status.html" %}
-                {% include "announcement/form_data/tags.html" %}
-                {% include "announcement/form_data/note.html" %}
-                {% include "announcement/form_data/media.html" %}
-                {% include "announcement/form_data/added_date.html" %}
-                {% include "announcement/form_data/timezone.html" %}
+                {% include "announcement/edit/form_data/name.html" %}
+                {% include "announcement/edit/form_data/text.html" %}
+                {% include "announcement/edit/form_data/price.html" %}
+                {% include "announcement/edit/form_data/status.html" %}
+                {% include "announcement/edit/form_data/tags.html" %}
+                {% include "announcement/edit/form_data/note.html" %}
+                {% include "announcement/edit/form_data/media.html" %}
+                {% include "announcement/edit/form_data/added_date.html" %}
+                {% include "announcement/edit/form_data/timezone.html" %}
               </div>
               <div class="card-footer">
                 <button type="submit"
@@ -52,7 +52,7 @@
       </div>
     </div>
   </div>
-  {% include "announcement/create_tag_modal.html" %}
+  {% include "announcement/includes/create_tag_modal.html" %}
   {% include "announcement/includes/delete_modal.html" %}
   {% include "announcement/includes/republish_modal.html" %}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"

@@ -1,0 +1,17 @@
+<div class="form-group">
+  <label for="tagName">Название тега</label>
+  <input type="text"
+         class="form-control"
+         id="tagName"
+         name="tagName"
+         minlength="1"
+         maxlength="50"
+         value="{{ tag.name }}"
+         data-tag-id="{{ tag.id }}"
+         data-default-tag-name="{{ tag.name }}"
+         data-check-url="{% url 'check-tag' %}"
+         placeholder="Введите название тега"
+         autocomplete="off"
+         required />
+  <small id="tagHelp" class="form-text text-muted">При изменении, пожалуйста, введите уникальное имя тега.</small>
+</div>

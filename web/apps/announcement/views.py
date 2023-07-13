@@ -33,14 +33,14 @@ import shutil
 import uuid
 
 
-@login_required(login_url="/user/login/")
+@login_required(login_url="/users/login/")
 def takeoff_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     announcement = get_object_or_404(Announcement, pk=pk)
     delete_announcement_from_channel(announcement)
     return HttpResponse(status=200)
 
 
-@login_required(login_url="/user/login/")
+@login_required(login_url="/users/login/")
 def delete_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     announcement = get_object_or_404(Announcement, pk=pk)
     delete_announcement_from_channel(announcement)
@@ -56,7 +56,7 @@ def delete_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     return HttpResponse(status=200)
 
 
-@login_required(login_url="/user/login/")
+@login_required(login_url="/users/login/")
 def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     announcement = get_object_or_404(Announcement, pk=pk)
     if announcement.is_published:
@@ -162,7 +162,7 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     return HttpResponse(status=200)
 
 
-@login_required(login_url="/user/login/")
+@login_required(login_url="/users/login/")
 def get_announcement_status(request: HttpRequest, pk: int) -> JsonResponse:
     announcement = get_object_or_404(Announcement, pk=pk)
     status = get_status(announcement)

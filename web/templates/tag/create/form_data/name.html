@@ -4,7 +4,11 @@
          class="form-control"
          id="tagName"
          name="tagName"
+         minlength="1"
+         maxlength="50"
+         data-check-url="{% url 'check-tag' %}"
          placeholder="Введите название тега"
+         autocomplete="off"
          required />
   <small id="tagHelp" class="form-text text-muted">Пожалуйста, введите уникальное имя тега.</small>
 </div>

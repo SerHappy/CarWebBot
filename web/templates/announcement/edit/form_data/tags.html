@@ -1,0 +1,24 @@
+<div class="form-group">
+  <label for="tags">Теги</label>
+  <select class="select2"
+          id="tags"
+          name="tags"
+          multiple="multiple"
+          style="width: 100%"
+          data-placeholder="Выберите теги">
+    {% for tag in tags %}
+      <option value="{{ tag.id }}"
+              {% if tag in announcement_tags %}selected{% endif %}
+              data-type="{{ tag.type }}"
+              data-channel-id="{{ tag.channel_id }}">{{ tag.name }}</option>
+    {% endfor %}
+  </select>
+  <small class="form-text text-muted mb-3">
+    Если нужного тега нет, то его можно создать. |
+    👁️ - Видимый тег, 🕶️ - Невидимый тег, 📢 - Есть ТГ канал
+  </small>
+  <button type="button"
+          class="btn btn-primary"
+          data-toggle="modal"
+          data-target="#createTagModal">Создать тег</button>
+</div>
