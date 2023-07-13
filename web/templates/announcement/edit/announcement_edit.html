@@ -74,9 +74,26 @@
     // Объявите переменную в глобальном пространстве:
   let myDropzoneInstance;
   // Инициализация select2
+    function formatTag (tag) {
+    var $tag = $("<span>").text(tag.text).addClass("tag-text");
+    var $emoji = $("<span>").addClass("tag-emoji");
+    if ($(tag.element).data('type') === 'hidden') {
+      $emoji.text(" 🕶️");
+    } else {
+      $emoji.text(" 👁️");
+    }
+    var tagChannelData = $(tag.element).data('channel-id');
+    if (tagChannelData && tagChannelData !== "None") {
+      $emoji.append(" 📢");
+    }
+    $tag.append($emoji);
+    return $tag;
+  };
+
   let tagSelect = $("#tags").select2({
     theme: "bootstrap4",
-    formatNoMatches: "Nothing found",
+    templateResult: formatTag,
+    templateSelection: formatTag
   });
 
   $(document).ready(function () {
