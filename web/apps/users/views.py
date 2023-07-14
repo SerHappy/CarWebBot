@@ -32,7 +32,6 @@ def login_view(request) -> HttpResponseRedirect | HttpResponsePermanentRedirect 
     if request.method == "POST":
         form = UserLoginForm(request.POST)
         if form.is_valid():
-            print(form.cleaned_data)
             user = authenticate(request, username=form.cleaned_data["email"], password=form.cleaned_data["password"])
             if user is not None:
                 login(request, user)

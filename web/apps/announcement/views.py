@@ -210,7 +210,7 @@ class MediaUploadView(View):
                 elif os.path.isdir(file_path):
                     shutil.rmtree(file_path)
             except Exception as e:
-                print("Failed to delete %s. Reason: %s" % (file_path, e))
+                logger.error(f"Failed to delete {file_path}. Reason: {e}")
 
         # Удалите папку
         os.rmdir(folder_path)
@@ -264,9 +264,6 @@ class AnnouncementCreation(LoginRequiredMixin, View):
         return render(request, "announcement/create/announcement_create.html", ctx)
 
     def post(self, request: HttpRequest) -> HttpResponse:
-        print(request.POST.get("uploadIds"))
-        print(request.FILES)
-        print(request.POST)
         name = request.POST.get("name")
         text = request.POST.get("text")
         tags = request.POST.getlist("tags")
