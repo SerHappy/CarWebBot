@@ -103,7 +103,15 @@
                     <td>{{ announcement.price }}</td>
                     <td>
                       {% for tag in announcement.tags.all %}
-                        {{ tag.name }}
+                        <a href="{% url 'tag-edit' tag.id %}">
+                          <span class="tag-text">{{ tag.name }}</span>
+                          {% if tag.type == 'hidden' %}
+                            <span class="tag-emoji">🕶️</span>
+                          {% else %}
+                            <span class="tag-emoji">👁️</span>
+                          {% endif %}
+                          {% if tag.channel_id and tag.channel_id != "None" %}<span class="tag-emoji">📢</span>{% endif %}
+                        </a>
                         <br>
                       {% endfor %}
                     </td>
