@@ -1,10 +1,10 @@
 $(document).ready(function () {
     $(document).on('click', '#deleteModalButton', function () {
         $("#deleteModal").modal('show');
+        let deleteUrl = $(this).data('delete-url');
+        let redirectUrl = $(this).data('redirect-url');
 
         $("#deleteButton").click(function () {
-            let deleteUrl = $(this).data('delete-url');
-            let redirectUrl = $(this).data('redirect-url');
             let cookie = document.cookie;
             let csrfToken = cookie.substring(cookie.indexOf('=') + 1);
             $.ajax({

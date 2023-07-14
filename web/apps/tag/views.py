@@ -1,4 +1,5 @@
 from .models import Tag
+from apps.bot.views import edit_announcement_in_channel
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -34,7 +35,11 @@ def check_tag(request: HttpRequest) -> JsonResponse:
 @login_required(login_url="/users/login/")
 def delete_tag(request: HttpRequest, pk: int) -> HttpResponse:
     tag = get_object_or_404(Tag, pk=pk)
+    tag_announcements = list(tag.announcements.all())
     tag.delete()
+    for announcement in tag_announcements:
+        announcement.refresh_from_db()
+        edit_announcement_in_channel(announcement)
     return HttpResponse(status=200)
 
 
@@ -140,7 +145,11 @@ class TagEditView(LoginRequiredMixin, View):
             tag.channel_id = channel_id
             tag.save()
             messages.success(request, "Тег успешно обновлен")
-            return HttpResponseRedirect(reverse("tag-list"))
         except Tag.DoesNotExist:
             messages.error(request, "Тег не существует")
             return HttpResponseRedirect(reverse("tag-edit", args=[pk]))
+
+        announcements = tag.announcements.all()
+        for announcement in announcements:
+            edit_announcement_in_channel(announcement)
+        return HttpResponseRedirect(reverse("tag-list"))
