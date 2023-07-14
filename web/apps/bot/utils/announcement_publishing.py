@@ -65,7 +65,7 @@ def _prepare_announcement_tags(announcement: Announcement) -> LiteralString:
         LiteralString | Literal["Тегов нет"]: Возвращает строку с перечисленными тегами или строку "Тегов нет",
         если теги отсутствуют.
     """
-    tags = announcement.tags.all()
+    tags = announcement.tags.filter(type="visible")
     if tags:
         return f"{', '.join([tag.name for tag in tags])}\n"
     return ""
