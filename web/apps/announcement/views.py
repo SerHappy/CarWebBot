@@ -373,6 +373,10 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
         announcement.note = note
         announcement.save()
 
+        old_tags = {
+            tag: tag.channel_id for tag in announcement.tags.all()
+        }  # Сохраните старые теги и их channel_id перед обновлением
+
         announcement.tags.set(tags)
 
         # Handle existing media files
@@ -415,6 +419,6 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
                 # Handle new media file creation, similar to in AnnouncementCreation.post
                 pass
         if announcement.is_published:
-            edit_announcement_in_channel(announcement)
+            edit_announcement_in_channel(announcement, old_tags)
 
         return redirect("announcement-list")

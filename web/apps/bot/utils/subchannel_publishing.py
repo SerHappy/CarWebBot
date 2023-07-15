@@ -1,14 +1,14 @@
 from ..bot import bot
 from .telegram import perform_action_with_retries
 from apps.announcement.models import Announcement
-from apps.bot.models import PublishedMessage
-from decouple import config
+from apps.bot.models import SubchannelMessage
+from apps.tag.models import Tag
 from typing import LiteralString
 
 
-def create_announcement_message(announcement: Announcement) -> str:
+def create_subchannel_message(announcement: Announcement) -> str:
     """
-    Создает текстовое сообщение для данного объявления.
+    Создает текстовое сообщение для данного объявления для подканала.
 
     Args:
         announcement (Announcement): Объявление, для которого необходимо создать текстовое сообщение.
@@ -17,44 +17,45 @@ def create_announcement_message(announcement: Announcement) -> str:
         str: Текстовое сообщение, готовое к отправке.
     """
     return (
-        f"{_prepare_announcement_tags(announcement)}{announcement.name}\n{_prepare_announcement_text(announcement)}🤖"
+        f"{_prepare_subchannel_tags(announcement)}{announcement.name}\n{_prepare_subchannel_text(announcement)}🤖"
+        f"\n{announcement.published_message_link}"
     )
 
 
-def send_text_message_with_retries(message: str) -> str | None:
+def send_text_message_with_retries_to_subchannel(message: str, tag: Tag) -> str | None:
     """
-    Отправляет текстовое сообщение в Telegram с несколькими попытками.
+    Отправляет текстовое сообщение в Telegram подканал с несколькими попытками.
 
     Args:
         message (str): Текст сообщения для отправки.
+        tag (Tag): Тег, подканал которого следует использовать для отправки.
 
     Returns:
         Optional[str]: Возвращает объект сообщения, если сообщение успешно отправлено.
                        Возвращает None, если отправка сообщения не удалась.
     """
-    return perform_action_with_retries(bot.send_message, config("CHANNEL_ID"), message)
+    return perform_action_with_retries(bot.send_message, tag.channel_id, message)
 
 
-def update_announcement_and_save_message(announcement: Announcement, text_message: str) -> None:
+def update_announcement_and_save_subchannel_message(announcement: Announcement, text_message: str, tag: Tag) -> None:
     """
-    Обновляет данные объявления и сохраняет информацию о сообщении в базе данных.
+    Обновляет данные объявления и сохраняет информацию о сообщении в базе данных для подканала.
 
     Args:
         announcement (Announcement): Объявление для обновления.
         text_message (str): Объект сообщения, информация о котором будет сохранена в базе данных.
+        tag (Tag): Тег, подканал которого следует использовать для сохранения информации.
     """
-    announcement.published_message_link = f"https://t.me/{config('CHANNEL_NAME')}/{text_message.message_id}"
-    announcement.is_published = True
-    announcement.save()
-    PublishedMessage.objects.create(
+    SubchannelMessage.objects.create(
         announcement=announcement,
-        channel_id=config("CHANNEL_ID"),
+        channel_id=tag.channel_id,
         message_id=text_message.message_id,
-        type=PublishedMessage.MessageType.TEXT,
+        type=SubchannelMessage.MessageType.TEXT,
+        tag=tag,
     )
 
 
-def _prepare_announcement_tags(announcement: Announcement) -> LiteralString:
+def _prepare_subchannel_tags(announcement: Announcement) -> LiteralString:
     """
     Подготавливает строку тегов для данного объявления.
 
@@ -71,7 +72,7 @@ def _prepare_announcement_tags(announcement: Announcement) -> LiteralString:
     return ""
 
 
-def _prepare_announcement_text(announcement: Announcement) -> LiteralString:
+def _prepare_subchannel_text(announcement: Announcement) -> LiteralString:
     """
     Подготавливает текст объявления.
 

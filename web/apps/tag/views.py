@@ -1,4 +1,5 @@
 from .models import Tag
+from apps.bot.views import delete_announcement_from_subchannel
 from apps.bot.views import edit_announcement_in_channel
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -36,10 +37,16 @@ def check_tag(request: HttpRequest) -> JsonResponse:
 def delete_tag(request: HttpRequest, pk: int) -> HttpResponse:
     tag = get_object_or_404(Tag, pk=pk)
     tag_announcements = list(tag.announcements.all())
+    old_channel_id = tag.channel_id  # Запоминаем старый channel_id
+
+    for announcement in tag_announcements:
+        delete_announcement_from_subchannel(announcement, tag)
+
     tag.delete()
+
     for announcement in tag_announcements:
         announcement.refresh_from_db()
-        edit_announcement_in_channel(announcement)
+        edit_announcement_in_channel(announcement, {tag: old_channel_id})
     return HttpResponse(status=200)
 
 
@@ -140,6 +147,7 @@ class TagEditView(LoginRequiredMixin, View):
 
         try:
             tag = Tag.objects.get(pk=pk)
+            old_channel_id = tag.channel_id  # Запоминаем старый channel_id
             tag.name = name
             tag.type = type
             tag.channel_id = channel_id
@@ -149,7 +157,6 @@ class TagEditView(LoginRequiredMixin, View):
             messages.error(request, "Тег не существует")
             return HttpResponseRedirect(reverse("tag-edit", args=[pk]))
 
-        announcements = tag.announcements.all()
-        for announcement in announcements:
-            edit_announcement_in_channel(announcement)
+        for announcement in tag.announcements.all():
+            edit_announcement_in_channel(announcement, {tag: old_channel_id})
         return HttpResponseRedirect(reverse("tag-list"))

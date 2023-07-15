@@ -1,6 +1,6 @@
 from ..bot import bot
 from .announcement_publishing import create_announcement_message
-from .media_processing import create_media
+from .media.media_processing import create_media
 from .telegram import perform_action_with_retries
 from apps.announcement.models import Announcement
 from apps.announcement.models import Media
