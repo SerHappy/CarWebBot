@@ -2,9 +2,6 @@ $(document).ready(function(){
   $('button[type="reset"]').click(function() {
     setTimeout(function(){ $('#tagName').trigger('change'); }, 10);
 });
-   $(".alert").delay(5000).slideUp(200, function() {
-      $(this).alert('close');
-   });
   $('#tagName').on('change', function() {
   var tagName = $(this).val().trim();
   var tagId = $(this).data('tag-id');
