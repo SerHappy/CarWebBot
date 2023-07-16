@@ -39,6 +39,8 @@ def delete_tag(request: HttpRequest, pk: int) -> HttpResponse:
     tag_announcements = list(tag.announcements.all())
     old_channel_id = tag.channel_id  # Запоминаем старый channel_id
 
+    tag_name = tag.name  # Сохраняем имя тега
+
     for announcement in tag_announcements:
         delete_announcement_from_subchannel(announcement, tag)
 
@@ -46,7 +48,7 @@ def delete_tag(request: HttpRequest, pk: int) -> HttpResponse:
 
     for announcement in tag_announcements:
         announcement.refresh_from_db()
-        edit_announcement_in_channel(announcement, {tag: old_channel_id})
+        edit_announcement_in_channel(announcement, {tag_name: old_channel_id})
     return HttpResponse(status=200)
 
 
@@ -147,16 +149,24 @@ class TagEditView(LoginRequiredMixin, View):
 
         try:
             tag = Tag.objects.get(pk=pk)
-            old_channel_id = tag.channel_id  # Запоминаем старый channel_id
+            old_channel_id = tag.channel_id
             tag.name = name
             tag.type = type
             tag.channel_id = channel_id
             tag.save()
             messages.success(request, "Тег успешно обновлен")
+
         except Tag.DoesNotExist:
             messages.error(request, "Тег не существует")
             return HttpResponseRedirect(reverse("tag-edit", args=[pk]))
 
-        for announcement in tag.announcements.all():
-            edit_announcement_in_channel(announcement, {tag: old_channel_id})
+        announcements = tag.announcements.all()
+
+        for announcement in announcements:
+            current_tags = announcement.tags.all()
+
+            old_tags = {t: old_channel_id if t == tag else t.channel_id for t in current_tags}
+
+            edit_announcement_in_channel(announcement, old_tags)
+
         return HttpResponseRedirect(reverse("tag-list"))
