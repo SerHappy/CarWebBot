@@ -60,6 +60,8 @@ def edit_announcement_in_channel(announcement: Announcement, old_tags: dict[Tag,
     current_tags = {tag: tag.channel_id for tag in announcement.tags.all()}
 
     for tag, old_channel_id in old_tags.items():
+        if isinstance(tag, str):
+            continue
         if tag in current_tags:
             current_channel_id = current_tags.get(tag)
             if old_channel_id and old_channel_id != current_channel_id:
