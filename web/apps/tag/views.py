@@ -20,6 +20,7 @@ from django.views.generic import View
 from loguru import logger
 from typing import Any
 from typing import Dict
+from typing import Union
 
 
 @login_required(login_url="/users/login/")
@@ -60,7 +61,7 @@ class TagCreateView(LoginRequiredMixin, View):
         ctx = {"tags": tags}
         return render(request, "tag/create/tag_create.html", ctx)
 
-    def post(self, request: HttpRequest) -> HttpResponseRedirect:
+    def post(self, request: HttpRequest) -> Union[HttpResponseRedirect, JsonResponse]:
         name = request.POST.get("tagName", None)
         type = request.POST.get("tagType", None)
         channel_id = request.POST.get("telegramChannel", None)
@@ -68,24 +69,39 @@ class TagCreateView(LoginRequiredMixin, View):
 
         existing_tag = Tag.objects.filter(name=name).first()
         if existing_tag:
-            messages.error(request, "Тег с таким именем уже существует")
-            return HttpResponseRedirect(reverse("tag-add"))
+            if request.is_ajax():
+                return JsonResponse({"error": "Тег с таким именем уже существует"}, status=400)
+            else:
+                messages.error(request, "Тег с таким именем уже существует")
+                return HttpResponseRedirect(reverse("tag-add"))
 
         if len(name) < 1:
-            messages.error(request, "Название тега слишком короткое")
-            return HttpResponseRedirect(reverse("tag-add"))
+            if request.is_ajax():
+                return JsonResponse({"error": "Название тега слишком короткое"}, status=400)
+            else:
+                messages.error(request, "Название тега слишком короткое")
+                return HttpResponseRedirect(reverse("tag-add"))
 
         if len(name) > max_length:
-            messages.error(request, "Название тега слишком длинное")
-            return HttpResponseRedirect(reverse("tag-add"))
+            if request.is_ajax():
+                return JsonResponse({"error": "Название тега слишком длинное"}, status=400)
+            else:
+                messages.error(request, "Название тега слишком длинное")
+                return HttpResponseRedirect(reverse("tag-add"))
 
         try:
-            Tag.objects.create(name=name, type=type, channel_id=channel_id)
-            messages.success(request, "Тег успешно создан")
-            return HttpResponseRedirect(reverse("tag-list"))
+            tag = Tag.objects.create(name=name, type=type, channel_id=channel_id)
+            if request.is_ajax():
+                return JsonResponse({"success": "Тег успешно создан", "tag_id": tag.id, "tag_name": tag.name})
+            else:
+                messages.success(request, "Тег успешно создан")
+                return HttpResponseRedirect(reverse("tag-list"))
         except Tag.DoesNotExist:
-            messages.error(request, "Тег не существует")
-            return HttpResponseRedirect(reverse("tag-add"))
+            if request.is_ajax():
+                return JsonResponse({"error": "Тег не существует"}, status=400)
+            else:
+                messages.error(request, "Тег не существует")
+                return HttpResponseRedirect(reverse("tag-add"))
 
 
 class TagListView(LoginRequiredMixin, ListView):

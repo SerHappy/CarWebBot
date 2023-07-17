@@ -46,6 +46,13 @@
     <!-- dropzonejs -->
     {% block extra_head %}
     {% endblock extra_head %}
+    <style>
+      @media (min-width: 992px) {
+  .sidebar-mini.sidebar-collapse .main-sidebar .nav-link .right, .sidebar-mini.sidebar-collapse .main-sidebar .nav-link.pull-right .right {
+    display: none;
+  }
+}
+    </style>
   </head>
   <body class="hold-transition sidebar-mini">
     <div class="wrapper">
@@ -74,59 +81,61 @@
       <!-- End Header -->
       <!-- Sidebar -->
       <aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <!-- Brand Logo -->
-    <a href="#" class="brand-link">
-      <span class="brand-text font-weight-light">CarWebBot</span>
-    </a>
-    <div class="sidebar">
-      <!-- Sidebar Menu -->
-      <nav class="mt-2">
-        <ul class="nav nav-pills nav-sidebar flex-column"
-            data-widget="treeview"
-            role="menu"
-            data-accordion="false">
-
-          <li class="nav-item">
-            <a href={% url 'announcement-list' %} class="nav-link {% if request.resolver_match.url_name == 'announcement-list' %}active{% endif %}">
-              <i class="nav-icon fas fa-car"></i>
-              <p>Все объявления</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href={% url 'tag-list' %} class="nav-link {% if request.resolver_match.url_name == 'tag-list' %}active{% endif %}">
-              <i class="nav-icon fas fa-tags"></i>
-              <p>Все теги</p>
-            </a>
-          </li>
-          <li class="nav-item has-treeview {% if request.resolver_match.url_name == 'announcement-add' or request.resolver_match.url_name == 'tag-add' %}menu-open{% endif %}">
-            <a href="#" class="nav-link {% if request.resolver_match.url_name == 'announcement-add' or request.resolver_match.url_name == 'tag-add' %}active{% endif %}">
-              <i class="nav-icon fas fa-plus"></i>
-              <p>Создать</p>
-              <i class="right fas fa-angle-left"></i>
-            </a>
-            <ul class="nav nav-treeview">
+        <!-- Brand Logo -->
+        <a href="#" class="brand-link">
+          <span class="brand-text font-weight-light">CarWebBot</span>
+        </a>
+        <div class="sidebar">
+          <!-- Sidebar Menu -->
+          <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column"
+                data-widget="treeview"
+                role="menu"
+                data-accordion="false">
               <li class="nav-item">
-                <a href={% url 'announcement-add' %} class="nav-link {% if request.resolver_match.url_name == 'announcement-add' %}active{% endif %}">
-                  <i class="nav-icon fas fa-plus-circle"></i>
-                  <p>Создать объявление</p>
+                <a href="{% url 'announcement-list' %}"
+                   class="nav-link {% if request.resolver_match.url_name == 'announcement-list' %}active{% endif %}">
+                  <i class="nav-icon fas fa-car"></i>
+                  <p>Все объявления</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href={% url 'tag-add' %} class="nav-link {% if request.resolver_match.url_name == 'tag-add' %}active{% endif %}">
-                  <i class="nav-icon fas fa-tag"></i>
-                  <p>Создать тег</p>
+                <a href="{% url 'tag-list' %}"
+                   class="nav-link {% if request.resolver_match.url_name == 'tag-list' %}active{% endif %}">
+                  <i class="nav-icon fas fa-tags"></i>
+                  <p>Все теги</p>
                 </a>
+              </li>
+              <li class="nav-item has-treeview {% if request.resolver_match.url_name == 'announcement-add' or request.resolver_match.url_name == 'tag-add' %}menu-open{% endif %}">
+                <a href="#"
+                   class="nav-link {% if request.resolver_match.url_name == 'announcement-add' or request.resolver_match.url_name == 'tag-add' %}active{% endif %}">
+                  <i class="nav-icon fas fa-plus"></i>
+                  <p>Создать</p>
+                  <i class="right fas fa-angle-left"></i>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="{% url 'announcement-add' %}"
+                       class="nav-link {% if request.resolver_match.url_name == 'announcement-add' %}active{% endif %}">
+                      <i class="nav-icon fas fa-plus-circle"></i>
+                      <p>Создать объявление</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="{% url 'tag-add' %}"
+                       class="nav-link {% if request.resolver_match.url_name == 'tag-add' %}active{% endif %}">
+                      <i class="nav-icon fas fa-tag"></i>
+                      <p>Создать тег</p>
+                    </a>
+                  </li>
+                </ul>
               </li>
             </ul>
-          </li>
-
-        </ul>
-      </nav>
-      <!-- End Sidebar Menu -->
-    </div>
-    <!-- Sidebar -->
-  </aside>
-
+          </nav>
+          <!-- End Sidebar Menu -->
+        </div>
+        <!-- Sidebar -->
+      </aside>
       <!-- End Sidebar -->
       <!-- Content Wrapper -->
       <div class="content-wrapper">

@@ -138,7 +138,9 @@
                                 data-target="#mediaModal"
                                 data-src="{{ media.file.url }}"
                                 data-media-index="{{ loop.index0 }}"
-                                data-announcement-id="{{ announcement.id }}">
+                                data-announcement-id="{{ announcement.id }}"
+                                style="position: relative;
+                                       display: inline-block">
                             <video class="img-thumbnail"
                                    style="width: 100%;
                                           height: 100%;
@@ -146,6 +148,13 @@
                               <source class="img-thumbnail" src="{{ media.file.url }}" type="video/mp4" />
                               Your browser does not support the video tag.
                             </video>
+                            <i class="fas fa-video fa-lg"
+                               style="position: absolute;
+                                      bottom: 5px;
+                                      right: 5px;
+                                      color: #fff;
+                                      border-radius: 50%;
+                                      padding: 5px"></i>
                           </span>
                         {% endif %}
                       {% endfor %}

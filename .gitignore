@@ -2,7 +2,7 @@
 .env
 resourses/
 __pycache__/
-media/
+web/media/
 celerybeat-schedule
 *.log
 *.zip

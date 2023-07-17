@@ -10,29 +10,26 @@ function createTag() {
       console.log("Success response:", response);
 
       // Update the list of tags
-      if (response.status == "error") {
-        alert(response.message);
-        return;
-      }
-
-      console.log("Tag ID:", response.id);
-      console.log("Tag Name:", response.name);
+      console.log("Tag ID:", response.tag_id);
+      console.log("Tag Name:", response.tag_name);
 
       $("#tags").append(
     $("<option>")
-      .attr("value", response.id)
-      .text(response.name)
-      .attr("data-type", response.type)
-      .attr("data-has-channel", response.channel_id ? "true" : "false")
+      .attr("value", response.tag_id)
+      .text(response.tag_name)
   );
-
-      console.log($("#createTagModal"));
 
       // Close the modal window
       $("#createTagModal").modal("hide");
     },
     error: function (xhr, status, error) {
-      console.log("Error:", xhr.responseText);
-    },
+    console.log("Error:", xhr.responseText);
+    if (xhr.responseJSON) {
+        alert(xhr.responseJSON.error);
+    } else {
+        alert('An unknown error occurred.');
+    }
+},
+
   });
 }
