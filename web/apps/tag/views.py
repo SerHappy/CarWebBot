@@ -69,21 +69,21 @@ class TagCreateView(LoginRequiredMixin, View):
 
         existing_tag = Tag.objects.filter(name=name).first()
         if existing_tag:
-            if request.is_ajax():
+            if request.headers.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
                 return JsonResponse({"error": "Тег с таким именем уже существует"}, status=400)
             else:
                 messages.error(request, "Тег с таким именем уже существует")
                 return HttpResponseRedirect(reverse("tag-add"))
 
         if len(name) < 1:
-            if request.is_ajax():
+            if request.headers.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
                 return JsonResponse({"error": "Название тега слишком короткое"}, status=400)
             else:
                 messages.error(request, "Название тега слишком короткое")
                 return HttpResponseRedirect(reverse("tag-add"))
 
         if len(name) > max_length:
-            if request.is_ajax():
+            if request.headers.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
                 return JsonResponse({"error": "Название тега слишком длинное"}, status=400)
             else:
                 messages.error(request, "Название тега слишком длинное")
@@ -91,13 +91,13 @@ class TagCreateView(LoginRequiredMixin, View):
 
         try:
             tag = Tag.objects.create(name=name, type=type, channel_id=channel_id)
-            if request.is_ajax():
+            if request.headers.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
                 return JsonResponse({"success": "Тег успешно создан", "tag_id": tag.id, "tag_name": tag.name})
             else:
                 messages.success(request, "Тег успешно создан")
                 return HttpResponseRedirect(reverse("tag-list"))
         except Tag.DoesNotExist:
-            if request.is_ajax():
+            if request.headers.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
                 return JsonResponse({"error": "Тег не существует"}, status=400)
             else:
                 messages.error(request, "Тег не существует")
