@@ -2,8 +2,6 @@
 {% block content %}
   {% load static %}
   <link rel="stylesheet" href="{% static "css/dropzone.css" %}" />
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <div class="container-fluid">
     <div class="card-body">
       <div class="row">
@@ -72,35 +70,14 @@
     $tag.append($emoji);
     return $tag;
   };
-
   let tagSelect = $("#tags").select2({
     theme: "bootstrap4",
     templateResult: formatTag,
     templateSelection: formatTag
   });
   $(document).ready(function () {
-
     const myDropzoneInstance = new MyDropzone();
     myDropzoneInstance.initialize();
-    // Event handler for form submission
-    $("#createTagForm").submit(function (event) {
-      event.preventDefault();
-      console.log("Form submitted");
-      createTag();
-    });
-
-    // Event handler for "Create" button click
-    $("#createTagButton").click(function () {
-      console.log("Create button clicked");
-      createTag();
-    });
-    //let tagSelect = $("#tags").select2({
-    //  theme: "bootstrap4",
-    //  formatNoMatches: "Nothing found",
-    //});
   });
-  let shouldSubmitForm = false;
-  let existingFiles = []; // Массив для хранения уже существующих файлов
-  let isExistingFileBeingAdded = false;
   </script>
 {% endblock content %}
