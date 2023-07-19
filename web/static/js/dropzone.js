@@ -36,9 +36,9 @@ class MyDropzone {
       <div class="dz-error-message"><span data-dz-errormessage></span></div>
       </div>`,
       headers: {
-      'X-CSRFToken': csrfToken,
+        'X-CSRFToken': csrfToken,
       },
-      accept: function(file, done) {
+      accept: function (file, done) {
         if (file.type.startsWith('image/')) {
           if (file.size > 10 * 1024 * 1024) {
             console.log("File type: " + file.type);
@@ -70,7 +70,7 @@ class MyDropzone {
             let video = document.createElement('video');
             console.log("Video created");
             video.preload = 'metadata';
-            video.onloadedmetadata = function() {
+            video.onloadedmetadata = function () {
               window.URL.revokeObjectURL(video.src);
               let width = video.videoWidth;
               console.log("Video width: " + width);
@@ -90,38 +90,38 @@ class MyDropzone {
         }
       },
       success: (file, response) => {
-      console.log('File:', file);
-      console.log('Response:', response);
+        console.log('File:', file);
+        console.log('Response:', response);
         file.uploadId = response.uploadId;
-      console.log("File uploadId: " + file.uploadId);
-    },
+        console.log("File uploadId: " + file.uploadId);
+      },
     };
   }
 
   initDropzone() {
-  console.log("Dropzone init triggered");
+    console.log("Dropzone init triggered");
     $("#dropzoneForm").sortable({
-    items: '.dz-preview',
-    cursor: 'move',
-    opacity: 0.3,
-    containment: "#dropzoneForm",
-    distance: 20,
-    tolerance: 'pointer',
-    forcePlaceholderSize: true,
-    update: (e, ui) => {
-      console.log("Sortable update triggered");
-      this.updateFileOrderInDropzone(this.myDropzone);
-    }
-  });
+      items: '.dz-preview',
+      cursor: 'move',
+      opacity: 0.3,
+      containment: "#dropzoneForm",
+      distance: 20,
+      tolerance: 'pointer',
+      forcePlaceholderSize: true,
+      update: (e, ui) => {
+        console.log("Sortable update triggered");
+        this.updateFileOrderInDropzone(this.myDropzone);
+      }
+    });
   }
 
   displayExistingFile(file, url) {
     console.log("Display existing file triggered");
     console.log("File: " + file.name + " url: " + url);
-        this.myDropzone.displayExistingFile(file, url);
-    }
+    this.myDropzone.displayExistingFile(file, url);
+  }
 
- processAcceptedFiles(formData) {
+  processAcceptedFiles(formData) {
     this.myDropzone.getAcceptedFiles().forEach(function (file) {
       console.log("Accepted file: " + file.name);
       formData.append('uploadIds', file);
@@ -134,111 +134,114 @@ class MyDropzone {
       .addEventListener("submit", (e) => this.submitForm(e));
   }
 
-  submitForm() {
-  console.log("Submit form triggered");
-  const form = document.getElementById('announcement-form');
-  const input = document.createElement('input');
-  this.uploadIds = this.getOrderedUploadIds();
-  input.type = 'hidden';
-  input.name = 'uploadIds';
-  input.value = this.uploadIds;
-  console.log("input.value");
-  console.log(input.value);
+  submitForm(e) {
+    console.log("Submit form triggered");
+    if (this.myDropzone.files.length == 0) {
+      e.preventDefault();
+      alert("Пожалуйста, загрузите хотя бы один файл");
+    }
+    else {
+      console.log("Submit form triggered");
+      const form = document.getElementById('announcement-form');
+      const input = document.createElement('input');
+      this.uploadIds = this.getOrderedUploadIds();
+      input.type = 'hidden';
+      input.name = 'uploadIds';
+      input.value = this.uploadIds;
+      console.log("input.value");
+      console.log(input.value);
 
-  form.appendChild(input);
+      form.appendChild(input);
 
-  // Submit the form
-  form.submit();
-}
+      // Submit the form
+      form.submit();
+    }
+
+  }
 
   queueComplete() {
-  console.log("Queue complete triggered");
-  if (this.shouldSubmitForm) {
-    console.log("Submitting form");
-    document.querySelector("#announcement-form").submit();
-  }
+    console.log("Queue complete triggered");
+    if (this.shouldSubmitForm) {
+      console.log("Submitting form");
+      document.querySelector("#announcement-form").submit();
+    }
   }
 
   addedFile(file) {
     console.log("Addedfile event triggered for file: " + file.name);
     file.index = this.myDropzone.files.indexOf(file);
-    file.order = this.myDropzone.files.length - 1; // assuming the first file added has an order of 0
+    file.order = this.myDropzone.files.length - 1;
     console.log("File " + file.name + " index: " + file.index + " order: " + file.order);
     console.log("Current uploadIds array:");
-    // uploadIds = getOrderedUploadIds(this.myDropzone);
     console.log(this.uploadIds);
     console.log("Current file.type: " + file.type);
     if (file.type == "VIDEO" || file.type.startsWith("video")) {
-    if (file.type == "VIDEO") {
-    // Обработка уже загруженных видео
-    console.log("File is a video");
-    // Создаем URL для файла видео
-    var videoUrl = file.name; // Предполагая, что file.name уже является URL
+      if (file.type == "VIDEO") {
+        console.log("File is a video");
+        var videoUrl = file.name;
+        var video = document.createElement("video");
+        var canvas = document.createElement("canvas");
+        var context = canvas.getContext("2d");
 
-    // Создаем элементы video и canvas
-    var video = document.createElement("video");
-    var canvas = document.createElement("canvas");
-    var context = canvas.getContext("2d");
+        // Загружаем видео
+        video.src = videoUrl;
+        video.addEventListener("loadeddata", function () {
+          // Get the size of the preview container
+          var previewWidth = file.previewElement.querySelector(".dz-image").offsetWidth;
+          var previewHeight = file.previewElement.querySelector(".dz-image").offsetHeight;
 
-    // Загружаем видео
-    video.src = videoUrl;
-    video.addEventListener("loadeddata", function () {
-        // Get the size of the preview container
-        var previewWidth = file.previewElement.querySelector(".dz-image").offsetWidth;
-        var previewHeight = file.previewElement.querySelector(".dz-image").offsetHeight;
+          // Set the size of the canvas to match the size of the preview container
+          canvas.width = previewWidth;
+          canvas.height = previewHeight;
 
-        // Set the size of the canvas to match the size of the preview container
-        canvas.width = previewWidth;
-        canvas.height = previewHeight;
+          // Draw the video frame on the canvas
+          context.drawImage(video, 0, 0, previewWidth, previewHeight);
 
-        // Draw the video frame on the canvas
-        context.drawImage(video, 0, 0, previewWidth, previewHeight);
+          // Create a URL for the image from the canvas
+          var imageUrl = canvas.toDataURL();
 
-        // Create a URL for the image from the canvas
-        var imageUrl = canvas.toDataURL();
+          // Replace the video preview with an image
+          file.previewElement.querySelector(".dz-image").innerHTML = '<img src="' + imageUrl + '" />';
+        });
+      } else if (file.type.startsWith("video")) {
+        // Обработка новых видео
+        console.log("File is a video");
+        // Создаем URL для файла видео
+        var videoUrl = URL.createObjectURL(file);
 
-        // Replace the video preview with an image
-        file.previewElement.querySelector(".dz-image").innerHTML = '<img src="' + imageUrl + '" />';
-    });
-    } else if (file.type.startsWith("video")) {
-    // Обработка новых видео
-    console.log("File is a video");
-    // Создаем URL для файла видео
-    var videoUrl = URL.createObjectURL(file);
+        // Создаем элементы video и canvas
+        var video = document.createElement("video");
+        var canvas = document.createElement("canvas");
+        var context = canvas.getContext("2d");
 
-    // Создаем элементы video и canvas
-    var video = document.createElement("video");
-    var canvas = document.createElement("canvas");
-    var context = canvas.getContext("2d");
+        // Загружаем видео
+        video.src = videoUrl;
+        video.addEventListener("loadeddata", function () {
+          // Get the size of the preview container
+          var previewWidth = file.previewElement.querySelector(".dz-image").offsetWidth;
+          var previewHeight = file.previewElement.querySelector(".dz-image").offsetHeight;
 
-    // Загружаем видео
-    video.src = videoUrl;
-    video.addEventListener("loadeddata", function () {
-        // Get the size of the preview container
-        var previewWidth = file.previewElement.querySelector(".dz-image").offsetWidth;
-        var previewHeight = file.previewElement.querySelector(".dz-image").offsetHeight;
+          // Set the size of the canvas to match the size of the preview container
+          canvas.width = previewWidth;
+          canvas.height = previewHeight;
 
-        // Set the size of the canvas to match the size of the preview container
-        canvas.width = previewWidth;
-        canvas.height = previewHeight;
+          // Draw the video frame on the canvas
+          context.drawImage(video, 0, 0, previewWidth, previewHeight);
 
-        // Draw the video frame on the canvas
-        context.drawImage(video, 0, 0, previewWidth, previewHeight);
+          // Create a URL for the image from the canvas
+          var imageUrl = canvas.toDataURL();
 
-        // Create a URL for the image from the canvas
-        var imageUrl = canvas.toDataURL();
-
-        // Replace the video preview with an image
-        file.previewElement.querySelector(".dz-image").innerHTML = '<img src="' + imageUrl + '" />';
-    });
+          // Replace the video preview with an image
+          file.previewElement.querySelector(".dz-image").innerHTML = '<img src="' + imageUrl + '" />';
+        });
+      }
     }
-}
 
-  if (this.myDropzone.files.length > 0) {
-    console.log("Files exist, hiding dz-message");
-    document.querySelector(".dz-message").style.display = "none";
-  }
-  this.checkFileCountAndUpdateButton();
+    if (this.myDropzone.files.length > 0) {
+      console.log("Files exist, hiding dz-message");
+      document.querySelector(".dz-message").style.display = "none";
+    }
+    this.checkFileCountAndUpdateButton();
   }
 
   removedFile(file) {
@@ -277,38 +280,38 @@ class MyDropzone {
       };
     }
     if (file.uploadId !== undefined) {
-    let fileIndexInDropzone = this.myDropzone.files.findIndex((dropzoneFile) => dropzoneFile.uploadId === file.uploadId);
-    console.log("File index in Dropzone files array: ", fileIndexInDropzone);
-    if (fileIndexInDropzone != -1) {
+      let fileIndexInDropzone = this.myDropzone.files.findIndex((dropzoneFile) => dropzoneFile.uploadId === file.uploadId);
+      console.log("File index in Dropzone files array: ", fileIndexInDropzone);
+      if (fileIndexInDropzone != -1) {
         this.myDropzone.files.splice(fileIndexInDropzone, 1);
         console.log("File removed from Dropzone files array");
-    }
+      }
 
-    // Update uploadIds
-    this.uploadIds = this.myDropzone.files.map(file => file.uploadId);
-}
+      // Update uploadIds
+      this.uploadIds = this.myDropzone.files.map(file => file.uploadId);
+    }
 
     console.log("Updated Dropzone files array: ", this.myDropzone.files);
     console.log("Updated UploadIds: ", this.uploadIds);
     console.log("Updating Dropzone files array: ", this.myDropzone.files);
     for (let i = 0; i < this.myDropzone.files.length; i++) {
-        this.myDropzone.files[i].order = i;
-        this.myDropzone.files[i].index = i;
+      this.myDropzone.files[i].order = i;
+      this.myDropzone.files[i].index = i;
     }
     console.log("Updated Dropzone files array: ", this.myDropzone.files);
     console.log("UploadIds");
     console.log(this.uploadIds);
     // Обновление интерфейса
     if (this.myDropzone.files.length > 0) {
-        document.querySelector(".dz-message").style.display = "none";
-        console.log("Files exist, hiding dz-message");
+      document.querySelector(".dz-message").style.display = "none";
+      console.log("Files exist, hiding dz-message");
     } else {
-        document.querySelector(".dz-message").style.display = "block";
-        console.log("No files exist, displaying dz-message");
+      document.querySelector(".dz-message").style.display = "block";
+      console.log("No files exist, displaying dz-message");
     }
 
     this.checkFileCountAndUpdateButton();
-}
+  }
 
   handleError(file, message) {
     if (message.startsWith("Файл изображения слишком большой")) {
@@ -324,7 +327,7 @@ class MyDropzone {
     }
     file.status = "error";
     this.myDropzone.removeFile(file);
-}
+  }
 
 
   checkFileCountAndUpdateButton() {
@@ -333,24 +336,24 @@ class MyDropzone {
     console.log(editButton);
     // Если кнопка "Редактировать" существует
     if (editButton) {
-    console.log("Checking file count");
-    let currentFileCount = this.myDropzone.files.length; // Считаем текущее количество файлов
-    console.log("Current file count: " + currentFileCount);
-    console.log("myDropzone files: ");
-    console.log(this.myDropzone.files);
-    // Если текущее количество файлов отличается от изначального, делаем кнопку неактивной
-    console.log("Initial file count: " + initialFileCount);
-    if (currentFileCount > initialFileCount) {
-      console.log("File count more chat initialFileCount, disabling editButton");
-      editButton.setAttribute('disabled', 'disabled');
-      editButton.setAttribute('title', 'Количество файлов увеличилось, редактирование невозможно. Было: ' + initialFileCount + ', стало ' + currentFileCount + '');
-    }  else {
-      // Иначе делаем кнопку активной
-      console.log("File count is the same as initial, enabling editButton");
-      editButton.removeAttribute('disabled');
-      editButton.setAttribute('title', 'Редактирование разрешено');
+      console.log("Checking file count");
+      let currentFileCount = this.myDropzone.files.length; // Считаем текущее количество файлов
+      console.log("Current file count: " + currentFileCount);
+      console.log("myDropzone files: ");
+      console.log(this.myDropzone.files);
+      // Если текущее количество файлов отличается от изначального, делаем кнопку неактивной
+      console.log("Initial file count: " + initialFileCount);
+      if (currentFileCount > initialFileCount) {
+        console.log("File count more chat initialFileCount, disabling editButton");
+        editButton.setAttribute('disabled', 'disabled');
+        editButton.setAttribute('title', 'Количество файлов увеличилось, редактирование невозможно. Было: ' + initialFileCount + ', стало ' + currentFileCount + '');
+      } else {
+        // Иначе делаем кнопку активной
+        console.log("File count is the same as initial, enabling editButton");
+        editButton.removeAttribute('disabled');
+        editButton.setAttribute('title', 'Редактирование разрешено');
+      }
     }
-  }
   }
 
   updateFileOrderInDropzone() {
@@ -394,12 +397,12 @@ class MyDropzone {
     this.myDropzone.on("addedfile", (file) => this.addedFile(file));
     this.myDropzone.on("removedfile", (file) => this.removedFile(file));
     this.myDropzone.on("error", (file, message) => this.handleError(file, message));
-    this.myDropzone.on("sending", function(file, xhr, formData) {
-    // Get the order of current file
+    this.myDropzone.on("sending", function (file, xhr, formData) {
+      // Get the order of current file
       let fileOrder = file.order;
       console.log("Sending file order: " + fileOrder);
-    // Append the order to the form data
-    formData.append("order", fileOrder);
+      // Append the order to the form data
+      formData.append("order", fileOrder);
     });
     this.addEventListener();
     console.log("Initial files in myDropzone.files:");
