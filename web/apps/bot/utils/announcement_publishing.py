@@ -67,7 +67,7 @@ def _prepare_announcement_tags(announcement: Announcement) -> LiteralString:
     """
     tags = announcement.tags.filter(type="visible")
     if tags:
-        return f"{', '.join([tag.name for tag in tags])}\n"
+        return f"{' '.join([tag.name for tag in tags])}\n"
     return ""
 
 
