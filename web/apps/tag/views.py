@@ -176,7 +176,7 @@ class TagEditView(LoginRequiredMixin, View):
             messages.error(request, "Тег не существует")
             return HttpResponseRedirect(reverse("tag-edit", args=[pk]))
 
-        announcements = tag.announcements.all()
+        announcements = tag.announcements.filter(is_published=True)
 
         for announcement in announcements:
             current_tags = announcement.tags.all()
