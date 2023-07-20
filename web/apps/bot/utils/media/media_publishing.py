@@ -69,11 +69,18 @@ def _send_first_media_to_subchannel(announcement: Announcement, media: Media, ta
         media (Media): Медиа для отправки.
         tag (Tag): Тег, подканал которого следует использовать для публикации.
     """
-    media_message = perform_action_with_retries(
-        bot.send_photo,
-        chat_id=tag.channel_id,
-        photo=perform_action_with_retries(_upload_file, media.file.path, "photo"),
-    )
+    if media.media_type == Media.MediaType.PHOTO:
+        media_message = perform_action_with_retries(
+            bot.send_photo,
+            chat_id=tag.channel_id,
+            photo=perform_action_with_retries(_upload_file, media.file.path, "photo"),
+        )
+    elif media.media_type == Media.MediaType.VIDEO:
+        media_message = perform_action_with_retries(
+            bot.send_video,
+            chat_id=tag.channel_id,
+            video=perform_action_with_retries(_upload_file, media.file.path, "video"),
+        )
     if media_message is not None:
         SubchannelMessage.objects.create(
             announcement=announcement,
