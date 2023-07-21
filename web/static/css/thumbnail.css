@@ -1,0 +1,19 @@
+.media-links {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
+}
+
+
+
+.thumbnail-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+
+.thumbnail-video {
+    object-fit: cover;
+}

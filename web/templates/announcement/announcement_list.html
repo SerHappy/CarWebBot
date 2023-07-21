@@ -3,6 +3,8 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/links.css' %}">
   <link rel="stylesheet" href="{% static 'css/modal.css' %}">
+  <link rel="stylesheet" href="{% static 'css/table.css' %}">
+  <link rel="stylesheet" href="{% static 'css/thumbnail.css' %}">
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <div class="row">
@@ -22,32 +24,6 @@
   </div>
   <!-- /.row -->
   <!-- /.content-header -->
-  <style>
-.inactive-row {
-  background-color: #f2f2f2;
-}
-.media-links {
-    display: inline-block;
-    width: 100px;
-    height: 100px;
-    overflow: hidden;
-}
-.table-header {
-        width: 1000px;
-    }
-
-    .action-column {
-        width: 40px;
-    }
-    .thumbnail-image {
-        width: 100px;
-        height: 100px;
-        object-fit: cover;
-    }
-    .table th {
-        text-align: center;
-    }
-  </style>
   <!-- Main content -->
   <section class="content">
     <div class="container-fluid">
@@ -74,22 +50,22 @@
             </div>
           </div>
           <!-- Таблица -->
-          <table class="table table-bordered w-100" id="announcementsTable">
+          <table class="table table-hover table-bordered" id="announcementsTable">
             <thead>
               <tr>
                 <th>Название</th>
                 <th>Текст</th>
                 <th>Цена</th>
                 <th>Теги</th>
-                <th class="table-header">Медиа</th>
-                <th class="action-column">Действие</th>
+                <th>Медиа</th>
+                <th>Действие</th>
                 <th>Статус публикации</th>
               </tr>
             </thead>
             <tbody>
               {% if announcements|length > 0 %}
                 {% for announcement in announcements %}
-                  <tr class="announcement-row {% if not announcement.is_active %}inactive-row{% endif %}"
+                  <tr class="announcement-row {% if not announcement.is_active %}table-secondary{% endif %}"
                       data-id="{{ announcement.id }}"
                       data-announcement-id="{{ announcement.id }}"
                       data-published-message-link="{{ announcement.published_message_link }}">
@@ -99,14 +75,20 @@
                         {{ announcement.name }}
                       </a>
                     </td>
-                    <td data-toggle="tooltip"
+                    <td class="no-wrap"
+                        data-toggle="tooltip"
                         data-placement="top"
-                        data-announcement-id="{{ announcement.id }}"
                         title="{{ announcement.text }}">{{ announcement.text|truncatechars:50 }}</td>
-                    <td>{{ announcement.price }}</td>
+                    <td class="no-wrap"
+                        data-toggle="tooltip"
+                        data-placement="top"
+                        title="{{ announcement.price }}">{{ announcement.price }}</td>
                     <td>
                       {% for tag in announcement.tags.all %}
-                        <a href="{% url 'tag-edit' tag.id %}">
+                        <a href="{% url 'tag-edit' tag.id %}"
+                           class="badge badge-primary"
+                           data-toggle="tooltip"
+                           title="{{ tag.name }}">
                           <span class="tag-text">{{ tag.name }}</span>
                           {% if tag.type == 'hidden' %}
                             <span class="tag-emoji">🕶️</span>
@@ -115,55 +97,33 @@
                           {% endif %}
                           {% if tag.channel_id and tag.channel_id != "None" %}<span class="tag-emoji">📢</span>{% endif %}
                         </a>
-                        <br>
                       {% endfor %}
                     </td>
                     <td>
                       {% for media in announcement.media.all %}
-                        {% if media.media_type == 'PHOTO' %}
-                          <span class="media-links"
-                                data-toggle="modal"
-                                data-target="#mediaModal"
-                                data-src="{{ media.file.url }}"
-                                data-media-index="{{ loop.index0 }}"
-                                data-announcement-id="{{ announcement.id }}">
+                        <span class="media-links"
+                              data-toggle="modal"
+                              data-target="#mediaModal"
+                              data-src="{{ media.file.url }}"
+                              data-media-index="{{ loop.index0 }}"
+                              data-announcement-id="{{ announcement.id }}">
+                          {% if media.media_type == 'PHOTO' %}
                             <img src="{{ media.file.url }}"
                                  class="img-thumbnail thumbnail-image"
                                  alt="image"
                                  loading="lazy"
-                                 width="100"
-                                 height="100" />
-                          </span>
-                        {% elif media.media_type == 'VIDEO' %}
-                          <span href="#"
-                                class="media-links"
-                                data-toggle="modal"
-                                data-target="#mediaModal"
-                                data-src="{{ media.file.url }}"
-                                data-media-index="{{ loop.index0 }}"
-                                data-announcement-id="{{ announcement.id }}"
-                                style="position: relative;
-                                       display: inline-block">
-                            <video class="img-thumbnail"
-                                   style="width: 100%;
-                                          height: 100%;
-                                          object-fit: cover">
-                              <source class="img-thumbnail" src="{{ media.file.url }}" type="video/mp4" />
-                              Your browser does not support the video tag.
+                                 width="50"
+                                 height="50" />
+                          {% elif media.media_type == 'VIDEO' %}
+                            <video class="img-thumbnail thumbnail-video">
+                              <source src="{{ media.file.url }}" type="video/mp4" />
                             </video>
-                            <i class="fas fa-video fa-lg"
-                               style="position: absolute;
-                                      bottom: 5px;
-                                      right: 5px;
-                                      color: #fff;
-                                      border-radius: 50%;
-                                      padding: 5px"></i>
-                          </span>
-                        {% endif %}
+                            <i class="fas fa-video fa-lg video-icon"></i>
+                          {% endif %}
+                        </span>
                       {% endfor %}
                     </td>
                     <td>
-                      <!-- Buttons -->
                       <button type="button"
                               class="btn btn-primary btn-sm republish-button"
                               id="republishModalButton"
@@ -181,7 +141,6 @@
                         <i class="fa fa-ban"></i>
                       </button>
                     </td>
-                    <!-- остальные поля -->
                     <td id="status_{{ announcement.id }}">
                       <span id="status_text_{{ announcement.id }}">{{ announcement.status }}</span>
                       <button type="button"

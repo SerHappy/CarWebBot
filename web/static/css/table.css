@@ -1,0 +1,22 @@
+.table th {
+    text-align: center;
+}
+
+.table-header {
+    width: 1000px;
+}
+
+.action-column {
+    width: 40px;
+}
+
+.no-wrap {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+.inactive-row {
+    background-color: #f2f2f2;
+}
