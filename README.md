@@ -1,6 +1,6 @@
 # CarWebBot
 
-![Screenshot 2023-07-20 at 17-52-53 CarWebBot](https://github.com/SerHappy/CarWebBot/assets/57107119/60713d6e-798e-4f13-926d-5fc2214726fc)
+![Screenshot 2023-07-22 at 20-42-56 CarWebBot](https://github.com/SerHappy/CarWebBot/assets/57107119/2861cdb3-d19d-42b6-85a1-0d46289de4bf)
 
 ## Описание проекта
 
