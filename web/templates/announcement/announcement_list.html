@@ -55,7 +55,6 @@
               <tr>
                 <th>Название</th>
                 <th>Текст</th>
-                <th>Цена</th>
                 <th>Теги</th>
                 <th>Медиа</th>
                 <th>Действие</th>
@@ -79,10 +78,6 @@
                         data-toggle="tooltip"
                         data-placement="top"
                         title="{{ announcement.text }}">{{ announcement.text|truncatechars:50 }}</td>
-                    <td class="no-wrap"
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        title="{{ announcement.price }}">{{ announcement.price }}</td>
                     <td>
                       {% for tag in announcement.tags.all %}
                         <a href="{% url 'tag-edit' tag.id %}"
@@ -150,7 +145,7 @@
                 {% endfor %}
               {% else %}
                 <tr>
-                  <td colspan="7" class="text-center py-5">
+                  <td colspan="6" class="text-center py-5">
                     <i class="fa fa-frown-o fa-3x mb-3" aria-hidden="true"></i>
                     <h4>Нет доступных объявлений</h4>
                     <p class="text-muted">Новые объявления скоро появятся. Пожалуйста, проверьте позже.</p>
