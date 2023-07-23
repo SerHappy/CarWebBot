@@ -68,59 +68,22 @@
           crossorigin="anonymous"
           referrerpolicy="no-referrer"></script>
   <script src="/static/js/dropzone.js"></script>
-  <script src="/static/js/tag_creation.js"></script>
   <script src="/static/js/auto_resize.js"></script>
   <script>
-    // Объявите переменную в глобальном пространстве:
   let myDropzoneInstance;
-  // Инициализация select2
-    function formatTag (tag) {
-    var $tag = $("<span>").text(tag.text).addClass("tag-text");
-    var $emoji = $("<span>").addClass("tag-emoji");
-    if ($(tag.element).data('type') === 'hidden') {
-      $emoji.text(" 🕶️");
-    } else {
-      $emoji.text(" 👁️");
-    }
-    var tagChannelData = $(tag.element).data('channel-id');
-    if (tagChannelData && tagChannelData !== "None") {
-      $emoji.append(" 📢");
-    }
-    $tag.append($emoji);
-    return $tag;
-  };
-
-  let tagSelect = $("#tags").select2({
-    theme: "bootstrap4",
-    templateResult: formatTag,
-    templateSelection: formatTag
-  });
 
   $(document).ready(function () {
 
-    // Обработчик клика на кнопку republish
     $(document).on('click', '.republish-button', function () {
       let announcement = getAnnouncementData();
       let announcementId = announcement[0].pk;
       let csrfToken = getCsrfToken();
 
       $("#republishModal").modal('show');
-      $("#republishButton").click(function () {
+      $("#republishButton").off('click').one(function () {
         republishAnnouncement(announcementId, csrfToken);
       });
     });
-
-    // Обработчик отправки формы создания тега
-    $("#createTagForm").submit(function (event) {
-      event.preventDefault();
-      createTag();
-    });
-
-    // Обработчик клика на кнопку создания тега
-    $("#createTagButton").click(function () {
-      createTag();
-    });
-  });
 
   document.addEventListener("DOMContentLoaded", function () {
     myDropzoneInstance = new MyDropzone();
@@ -212,7 +175,7 @@
         size: mediaFileFields.size,
         type: mediaFileFields.media_type,
         isMock: true,
-        uploadId: mediaFile.file,  // assuming `pk` holds the id of the media file
+        uploadId: mediaFile.file,
       };
 
       let absoluteURL;
@@ -222,7 +185,7 @@
 
       if (!myDropzoneInstance.uploadIds.find((existingFile) => existingFile.name === mockFile.name)) {
         document.querySelector("#existing-files").value += mediaFileFields.file + ",";
-        myDropzoneInstance.uploadIds.push(mockFile.uploadId);  // Add the uploadId to the array
+        myDropzoneInstance.uploadIds.push(mockFile.uploadId);
       }
 
       return loadFileAndDisplay(mockFile, absoluteURL.href, myDropzoneInstance);
@@ -252,8 +215,6 @@
 
   }
 }
-
-
 
   function createFormData(republishDatetime, timezone) {
     console.log("Creating form data...");
@@ -314,8 +275,6 @@
     }
   });
 }
-
-
-
+  });
   </script>
 {% endblock content %}

@@ -123,31 +123,28 @@
                         </span>
                       {% endfor %}
                     </td>
-                    <td>
+                    <td style="vertical-align: top;">
                       <button type="button"
-                              class="btn btn-primary btn-sm republish-button"
-                              id="republishModalButton"
-                              data-toggle="modal"
-                              data-target="#republicationModal"
+                              class="btn btn-primary btn-sm btn-block"
+                              style="margin-bottom: 5px"
                               title="Переопубликовать">
-                        <i class="fa fa-refresh"></i>
+                        <i class="fa fa-refresh"></i> Переопубликовать
                       </button>
                       <button type="button"
-                              class="btn btn-warning btn-sm takeoff-button"
-                              id="takeoffButton"
-                              data-toggle="tooltip"
-                              data-placement="top"
+                              class="btn btn-warning btn-sm btn-block"
                               title="Снять с публикации">
-                        <i class="fa fa-ban"></i>
+                        <i class="fa fa-ban"></i> Снять с публикации
                       </button>
                     </td>
-                    <td id="status_{{ announcement.id }}">
-                      <span id="status_text_{{ announcement.id }}">{{ announcement.status }}</span>
-                      <button type="button"
-                              class="btn btn-sm btn-secondary copy-button"
-                              title="Скопировать ссылку на сообщение">
-                        <i class="fa fa-copy"></i>
-                      </button>
+                    <td id="status_{{ announcement.id }}" style="vertical-align: top;">
+                      <div id="status_text_{{ announcement.id }}" style="margin-bottom: 5px;">{{ announcement.status }}</div>
+                      {% if announcement.is_published %}
+                        <button type="button"
+                                class="btn btn-secondary btn-sm btn-block copy-button"
+                                title="Скопировать ссылку на сообщение">
+                          <i class="fa fa-copy"></i> Скопировать
+                        </button>
+                      {% endif %}
                     </td>
                   </tr>
                 {% endfor %}
@@ -173,7 +170,7 @@
   <script src="{% static 'js/pagination_and_filters.js' %}"></script>
   <script src="{% static 'js/status_update.js' %}"></script>
   <script src="{% static "js/media_viewer.js" %}"></script>
-  <script src="{% static 'js/actions.js' %}"></script>
+  <script src="{% static 'js/announcement_actions.js' %}"></script>
   <script>
   $(document).ready(function () {
     console.log("ready!");

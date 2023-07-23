@@ -50,31 +50,10 @@
           crossorigin="anonymous"
           referrerpolicy="no-referrer"></script>
   <script src="/static/js/dropzone.js"></script>
-  <script src="/static/js/tag_creation.js"></script>
   <script src="/static/js/datetime_datepicker.js"></script>
   <script src="/static/js/timezone.js"></script>
   <script src="/static/js/auto_resize.js"></script>
   <script>
-    function formatTag (tag) {
-    var $tag = $("<span>").text(tag.text).addClass("tag-text");
-    var $emoji = $("<span>").addClass("tag-emoji");
-    if ($(tag.element).data('type') === 'hidden') {
-      $emoji.text(" 🕶️");
-    } else {
-      $emoji.text(" 👁️");
-    }
-    var tagChannelData = $(tag.element).data('channel-id');
-    if (tagChannelData && tagChannelData !== "None") {
-      $emoji.append(" 📢");
-    }
-    $tag.append($emoji);
-    return $tag;
-  };
-  let tagSelect = $("#tags").select2({
-    theme: "bootstrap4",
-    templateResult: formatTag,
-    templateSelection: formatTag
-  });
   $(document).ready(function () {
     const myDropzoneInstance = new MyDropzone();
     myDropzoneInstance.initialize();

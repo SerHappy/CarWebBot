@@ -1,0 +1,35 @@
+.tag-item {
+    display: flex;
+    align-items: center;
+    padding: 2px 5px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    border-radius: 25px;
+    cursor: pointer;
+    background-color: #d6e9ff;
+    color: #000000;
+}
+
+.tag-item.selected {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+.tag-name {
+    padding: 5px;
+}
+
+.tag-button {
+    margin-left: 1px;
+    padding: 2px 5px;
+    width: 20px;
+    height: 20px;
+}
+
+.tag-button.selected {
+    background-color: transparent;
+    color: #ffffff;
+}
+
+.tag-item .tag-name {
+    border: none !important;
+}

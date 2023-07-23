@@ -63,7 +63,6 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
         delete_announcement_from_channel(announcement)
 
     keys = request.POST.keys()
-    # If only datetime and timezone are passed, handle only them
     if set(keys) == {"datetime", "timezone"}:
         new_date = request.POST.get("datetime")
         timezone = request.POST.get("timezone")
@@ -71,9 +70,7 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
         date_format = "%d.%m.%Y %H:%M"
         date_without_tz = datetime.strptime(new_date, date_format)
         date_with_tz = pytz_timezone.localize(date_without_tz)
-        # Check if the publication time is less than the current time
         if date_with_tz < datetime.now(pytz_timezone):
-            # Set the publication time to the next minute from the current time
             now = datetime.now(pytz_timezone)
             date_with_tz = now.replace(second=0, microsecond=0) + timedelta(minutes=1)
 
@@ -105,21 +102,16 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
         date_without_tz = datetime.strptime(new_date, date_format)
         date_with_tz = pytz_timezone.localize(date_without_tz)
 
-        # Check if the publication time is less than the current time
         if date_with_tz < datetime.now(pytz_timezone):
-            # Set the publication time to the next minute from the current time
             now = datetime.now(pytz_timezone)
             date_with_tz = now.replace(second=0, microsecond=0) + timedelta(minutes=1)
 
         date_utc = date_with_tz.astimezone(pytz.UTC)
 
         announcement.publication_date = date_utc
-        # Handle existing media files
-        # Handle existing media files
         upload_ids_string = request.POST.getlist("uploadIds")[0]
         upload_ids = upload_ids_string.split(",")
 
-        # Delete media files not present in the updated list
         existing_files = [media.file.name for media in announcement.media.all()]
         for file_name in existing_files:
             if file_name not in upload_ids:
@@ -142,17 +134,15 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
                         order=index,
                     )
                     file.close()
-                    upload_ids[index] = new_media.file.name  # update the upload_id with the new file name
+                    upload_ids[index] = new_media.file.name
                 shutil.rmtree(tmp_dir)
 
-        # Update order for remaining media files and create new media files
         for index, upload_id in enumerate(upload_ids):
             try:
                 media = Media.objects.get(file=upload_id, announcement=announcement)
                 media.order = index
                 media.save()
             except Media.DoesNotExist:
-                # Handle new media file creation, similar to in AnnouncementCreation.post
                 pass
 
     announcement.processing_status = Announcement.ProcessingStatus.PENDING
@@ -170,7 +160,6 @@ def get_announcement_status(request: HttpRequest, pk: int) -> JsonResponse:
     return JsonResponse({"status": status, "publication_date": publication_date})
 
 
-# Temporary storage location for uploaded files
 tmp_storage = FileSystemStorage(location=os.path.join(settings.BASE_DIR, "tmp"))
 
 
@@ -190,7 +179,6 @@ class MediaUploadView(View):
         return JsonResponse({"uploadId": upload_id})
 
     def delete(self, request, upload_id) -> JsonResponse:
-        # Получите путь к папке
         upload_id = unquote(upload_id)
         if "/" in upload_id:
             return JsonResponse(
@@ -201,7 +189,6 @@ class MediaUploadView(View):
             )
         folder_path = os.path.join(tmp_storage.location, upload_id)
 
-        # Удалите все файлы в папке
         for filename in os.listdir(folder_path):
             file_path = os.path.join(folder_path, filename)
             try:
@@ -212,7 +199,6 @@ class MediaUploadView(View):
             except Exception as e:
                 logger.error(f"Failed to delete {file_path}. Reason: {e}")
 
-        # Удалите папку
         os.rmdir(folder_path)
 
         return JsonResponse(
@@ -266,7 +252,8 @@ class AnnouncementCreation(LoginRequiredMixin, View):
     def post(self, request: HttpRequest) -> HttpResponse:
         name = request.POST.get("name")
         text = request.POST.get("text")
-        tags = request.POST.getlist("tags")
+        tag_str = request.POST.get("tags")
+        tag_ids = sorted(tag_str.split(",") if tag_str else [])
         price = request.POST.get("price")
         status = request.POST.get("status")
         note = request.POST.get("note", None)
@@ -277,9 +264,7 @@ class AnnouncementCreation(LoginRequiredMixin, View):
         date_without_tz = datetime.strptime(publication_date_row, date_format)
         date_with_tz = pytz_timezone.localize(date_without_tz)
 
-        # Check if the publication time is less than the current time
         if date_with_tz < datetime.now(pytz_timezone):
-            # Set the publication time to the next minute from the current time
             now = datetime.now(pytz_timezone)
             date_with_tz = now.replace(second=0, microsecond=0) + timedelta(minutes=1)
 
@@ -293,7 +278,7 @@ class AnnouncementCreation(LoginRequiredMixin, View):
             note=note,
             publication_date=date_utc,
         )
-        announcement.tags.set(tags)
+        announcement.tags.set(tag_ids)
 
         upload_ids_string = request.POST.getlist("uploadIds")[0]
         upload_ids = upload_ids_string.split(",")
@@ -325,19 +310,18 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
         announcement = Announcement.objects.get(pk=pk)
         announcement_json = serialize("json", [announcement])
         announcement_tags = announcement.tags.all()
-        announcement_media = announcement.media.all().order_by("order")  # Упорядочить по порядку
+        announcement_media = announcement.media.all().order_by("order")
 
         valid_announcement_media = []
         missing_files = []
 
         for media in announcement_media:
-            if os.path.isfile(media.file.path):  # Проверка существования файла
+            if os.path.isfile(media.file.path):
                 valid_announcement_media.append(media)
             else:
-                missing_files.append(media.file.name)  # Сохранить имя пропущенного файла
-                media.delete()  # Удалить запись из базы данных
+                missing_files.append(media.file.name)
+                media.delete()
 
-        # Переупорядочить оставшиеся файлы
         for i, media in enumerate(valid_announcement_media):
             media.order = i
             media.save()
@@ -352,7 +336,7 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
             "announcement_tags": announcement_tags,
             "tags": all_tags,
             "media": media_json,
-            "missing_files": missing_files,  # Передать список пропущенных файлов
+            "missing_files": missing_files,
         }
 
         return render(request, "announcement/edit/announcement_edit.html", ctx)
@@ -360,7 +344,8 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
     def post(self, request: HttpRequest, pk: int) -> HttpResponse:
         name = request.POST.get("name")
         text = request.POST.get("text")
-        tags = request.POST.getlist("tags")
+        tag_str = request.POST.get("tags")
+        tag_ids = sorted(tag_str.split(",") if tag_str else [])
         price = request.POST.get("price")
         status = request.POST.get("status")
         note = request.POST.get("note", None)
@@ -373,17 +358,13 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
         announcement.note = note
         announcement.save()
 
-        old_tags = {
-            tag: tag.channel_id for tag in announcement.tags.all()
-        }  # Сохраните старые теги и их channel_id перед обновлением
+        old_tags = {tag: tag.channel_id for tag in announcement.tags.all()}
 
-        announcement.tags.set(tags)
+        announcement.tags.set(tag_ids)
 
-        # Handle existing media files
         upload_ids_string = request.POST.getlist("uploadIds")[0]
         upload_ids = upload_ids_string.split(",")
 
-        # Delete media files not present in the updated list
         existing_files = [media.file.name for media in announcement.media.all()]
         for file_name in existing_files:
             if file_name not in upload_ids:
@@ -406,17 +387,15 @@ class AnnouncementUpdate(LoginRequiredMixin, View):
                         order=index,
                     )
                     file.close()
-                    upload_ids[index] = new_media.file.name  # update the upload_id with the new file name
+                    upload_ids[index] = new_media.file.name
                 shutil.rmtree(tmp_dir)
 
-        # Update order for remaining media files and create new media files
         for index, upload_id in enumerate(upload_ids):
             try:
                 media = Media.objects.get(file=upload_id, announcement=announcement)
                 media.order = index
                 media.save()
             except Media.DoesNotExist:
-                # Handle new media file creation, similar to in AnnouncementCreation.post
                 pass
         if announcement.is_published:
             edit_announcement_in_channel(announcement, old_tags)
