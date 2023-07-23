@@ -92,3 +92,14 @@
 .dz-success-mark {
     display: block !important;
 }
+
+.dz-video-preview .video-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 50px;
+    color: rgb(255, 255, 255);
+    display: block;
+    z-index: 10;
+}

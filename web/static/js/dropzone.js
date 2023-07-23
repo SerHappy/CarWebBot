@@ -62,6 +62,10 @@ class MyDropzone {
             img.src = URL.createObjectURL(file);
           }
         } else if (file.type.startsWith('video/')) {
+          file.previewElement.classList.add('dz-video-preview');
+          let videoIcon = document.createElement('i');
+          videoIcon.classList.add('fas', 'fa-video', 'video-icon');
+          file.previewElement.appendChild(videoIcon);
           if (file.size > 50 * 1024 * 1024) {
             console.log("File type: " + file.type);
             console.log("Media file size: " + file.size);
