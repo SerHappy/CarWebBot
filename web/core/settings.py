@@ -18,29 +18,31 @@ from pathlib import Path
 import os
 
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# --------------------------------
+# BASE PATHS AND URLS
+# --------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
+LOGIN_URL = "/users/login/"
+TMP_STORAGE_PATH = os.path.join(BASE_DIR, "tmp")
 
-BASE_URL = config("BASE_URL")
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
+# --------------------------------
+# SECURITY SETTINGS
+# --------------------------------
 SECRET_KEY = config("SECRET_KEY")
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", cast=bool)
-
 ALLOWED_HOSTS: list[str] = config("ALLOWED_HOSTS", cast=lambda v: [s.strip() for s in v.split(",")])
-
 if DEBUG:
     INTERNAL_IPS = ["127.0.0.1"]
 
+# --------------------------------
+# AUTHENTICATION SETTINGS
+# --------------------------------
 AUTH_USER_MODEL = "users.User"
+AUTHENTICATION_BACKENDS = ["apps.users.backends.EmailBackend"]
 
-# Application definition
-
+# --------------------------------
+# APPLICATION AND MIDDLEWARE SETTINGS
+# --------------------------------
 INSTALLED_APPS = [
     "debug_toolbar",
     "django.contrib.admin",
@@ -54,7 +56,6 @@ INSTALLED_APPS = [
     "apps.users",
     "apps.bot",
 ]
-
 MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -67,10 +68,15 @@ MIDDLEWARE = [
 ]
 
 
-AUTHENTICATION_BACKENDS = ["apps.users.backends.EmailBackend"]
-
+# --------------------------------
+# URL AND WSGI SETTINGS
+# --------------------------------
 ROOT_URLCONF = "core.urls"
+WSGI_APPLICATION = "core.wsgi.application"
 
+# --------------------------------
+# TEMPLATE SETTINGS
+# --------------------------------
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -89,10 +95,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
+# --------------------------------
+# DATABASE SETTINGS
+# --------------------------------
 DATABASES = {
     "default": {
         "ENGINE": config("DB_ENGINE"),
@@ -105,10 +110,9 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-
+# --------------------------------
+# PASSWORD VALIDATION SETTINGS
+# --------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -124,35 +128,34 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
-
+# --------------------------------
+# INTERNATIONALIZATION SETTINGS
+# --------------------------------
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
 
+# --------------------------------
+# CELERY SETTINGS
+# --------------------------------
 CELERY_BROKER_URL = config("CELERY_BROKER_URL")
 CELERY_TIMEZONE = "UTC"
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
+# --------------------------------
+# STATIC FILES SETTINGS
+# --------------------------------
 STATIC_URL = "/static/"
-
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static/")]
-
 MEDIA_URL = "media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
+# --------------------------------
+# DEFAULT FIELD TYPE SETTINGS
+# --------------------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# --------------------------------
+# LOGGER SETTINGS
+# --------------------------------
 load_loguru(globals(), configure_func=setup_logger)

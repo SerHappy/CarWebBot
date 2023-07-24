@@ -1,6 +1,7 @@
 from .models import Tag
 from apps.bot.views import delete_announcement_from_subchannel
 from apps.bot.views import edit_announcement_in_channel
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -23,7 +24,7 @@ from typing import Dict
 from typing import Union
 
 
-@login_required(login_url="/users/login/")
+@login_required(login_url=settings.LOGIN_URL)
 def check_tag(request: HttpRequest) -> JsonResponse:
     tag_name = request.GET.get("tag_name", None)
     tag_id = request.GET.get("tag_id", None)
@@ -34,7 +35,7 @@ def check_tag(request: HttpRequest) -> JsonResponse:
     return JsonResponse(data)
 
 
-@login_required(login_url="/users/login/")
+@login_required(login_url=settings.LOGIN_URL)
 def delete_tag(request: HttpRequest, pk: int) -> HttpResponse:
     tag = get_object_or_404(Tag, pk=pk)
     tag_announcements = list(tag.announcements.all())
@@ -54,7 +55,7 @@ def delete_tag(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 class TagCreateView(LoginRequiredMixin, View):
-    login_url = "/users/login/"
+    login_url = settings.LOGIN_URL
 
     def get(self, request: HttpRequest) -> HttpResponse:
         tags = Tag.objects.all()
@@ -105,7 +106,7 @@ class TagCreateView(LoginRequiredMixin, View):
 
 
 class TagListView(LoginRequiredMixin, ListView):
-    login_url = "/users/login/"
+    login_url = settings.LOGIN_URL
     model = Tag
     template_name = "tag/tag_list.html"
 
@@ -137,7 +138,7 @@ class TagListView(LoginRequiredMixin, ListView):
 
 
 class TagEditView(LoginRequiredMixin, View):
-    login_url = "/users/login/"
+    login_url = settings.LOGIN_URL
 
     def get(self, request: HttpRequest, pk: int) -> HttpResponse:
         tag = Tag.objects.get(pk=pk)

@@ -106,7 +106,6 @@ CHANNEL_NAME = value
 LOGURU_PATH = value
 LOGURU_LEVEL = value
 LOGURU_FORMAT = value
-BASE_URL = value
 DB_ENGINE = value
 DB_NAME = value
 DB_USER = value
@@ -148,9 +147,6 @@ MEDIA_CHANNEL_ID = value
 
 * `LOGURU_FORMAT`: Формат логирования для Loguru.
    > Пример: `"<green>{time:DD.MM.YYYY HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"`.
-
-* `BASE_URL`: Базовый URL вашего сервера. Это основной адрес, который будет использоваться для доступа к вашему серверу.
-   > Пример: `"http://your-server-ip:8000"`.
 
 * `DB_ENGINE`: Движок базы данных Django, который вы будете использовать.
    > Пример: `"django.db.backends.mysql"` для MySQL.

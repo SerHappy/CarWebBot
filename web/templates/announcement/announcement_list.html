@@ -120,10 +120,9 @@
                         </span>
                       {% endfor %}
                     </td>
-                    <td style="vertical-align: top;">
+                    <td class="vertical-align-top">
                       <button type="button"
-                              class="btn btn-primary btn-sm btn-block republish-button"
-                              style="margin-bottom: 5px"
+                              class="btn btn-primary btn-sm btn-block republish-button margin-bottom-5px"
                               title="Переопубликовать">
                         <i class="fa fa-refresh"></i> Переопубликовать
                       </button>
@@ -133,15 +132,8 @@
                         <i class="fa fa-ban"></i> Снять с публикации
                       </button>
                     </td>
-                    <td id="status_{{ announcement.id }}" style="vertical-align: top;">
-                      <div id="status_text_{{ announcement.id }}" style="margin-bottom: 5px;">{{ announcement.status }}</div>
-                      {% if announcement.is_published %}
-                        <button type="button"
-                                class="btn btn-secondary btn-sm btn-block copy-button"
-                                title="Скопировать ссылку на сообщение">
-                          <i class="fa fa-copy"></i> Скопировать
-                        </button>
-                      {% endif %}
+                    <td id="status_{{ announcement.id }}" class="vertical-align-top">
+                      <div id="status_text_{{ announcement.id }}" class="margin-bottom-5px">{{ announcement.status }}</div>
                     </td>
                   </tr>
                 {% endfor %}
