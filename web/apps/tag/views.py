@@ -38,9 +38,9 @@ def check_tag(request: HttpRequest) -> JsonResponse:
 def delete_tag(request: HttpRequest, pk: int) -> HttpResponse:
     tag = get_object_or_404(Tag, pk=pk)
     tag_announcements = list(tag.announcements.all())
-    old_channel_id = tag.channel_id  # Запоминаем старый channel_id
+    old_channel_id = tag.channel_id
 
-    tag_name = tag.name  # Сохраняем имя тега
+    tag_name = tag.name
 
     for announcement in tag_announcements:
         delete_announcement_from_subchannel(announcement, tag)

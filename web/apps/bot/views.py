@@ -65,21 +65,17 @@ def edit_announcement_in_channel(announcement: Announcement, old_tags: dict[Tag,
         if tag in current_tags:
             current_channel_id = current_tags.get(tag)
             if old_channel_id and old_channel_id != current_channel_id:
-                # Если channel_id тега изменился, удалить объявление из старого канала
                 delete_announcement_from_subchannel(announcement, tag.id)
         else:
-            # Если тег был удален из объявления, удалить объявление из соответствующего подканала
             delete_announcement_from_subchannel(announcement, tag.id)
 
-    # Обновить объявление в новых каналах тегов или в тех, где изменился channel_id
     for tag, channel_id in current_tags.items():
         old_channel_id = old_tags.get(tag)
-        # Проверка на то, было ли произведено изменение channel_id или тега
         if old_channel_id != channel_id and channel_id or (tag not in old_tags and channel_id):
             message = create_subchannel_message(announcement)
             publish_subchannel_media(announcement, tag)
             text_message = send_text_message_with_retries_to_subchannel(message, tag)
-            if text_message:  # Проверьте, было ли сообщение успешно отправлено
+            if text_message:
                 update_announcement_and_save_subchannel_message(announcement, text_message, tag)
 
     logger.info(f"Announcement {announcement.name} edited")
@@ -94,7 +90,6 @@ def delete_announcement_from_channel(announcement: Announcement) -> None:
     """
     logger.info(f"Deleting announcement: {announcement.name}")
 
-    # Удаляем сообщения из основного канала
     published_messages: QuerySet[PublishedMessage] = announcement.published_messages.all()
     logger.debug(f"Deleting {published_messages.count()} messages")
     for message in published_messages:
@@ -102,7 +97,6 @@ def delete_announcement_from_channel(announcement: Announcement) -> None:
         message.delete()
         logger.debug(f"Message {message.message_id} deleted from channel and database")
 
-    # Удаляем сообщения из подканалов
     subchannel_messages: QuerySet[SubchannelMessage] = announcement.subchannel_messages.all()
     logger.debug(f"Deleting {subchannel_messages.count()} subchannel messages")
     for message in subchannel_messages:

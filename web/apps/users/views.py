@@ -16,11 +16,9 @@ def register_view(request: HttpRequest) -> HttpResponseRedirect | HttpResponsePe
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
         if form.is_valid():
-            # Remove password_confirmation from the form data
             cleaned_data = form.cleaned_data
             cleaned_data.pop("password_confirmation")
 
-            # Create the new user
             User.objects.create_user(**cleaned_data)
             return redirect("login")
     else:

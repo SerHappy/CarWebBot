@@ -17,8 +17,5 @@ def setup_logger(logger, settings_dict=None) -> None:
         compression="zip",
         level=config("LOGURU_LEVEL", default="DEBUG"),
         format=config("LOGURU_FORMAT", default=LOGURU_FORMAT),
-        # colorize=config("LOGURU_COLORIZE", default=True, cast=bool),
         serialize=config("LOGURU_SERIALIZE", default=False, cast=bool),
-        # diagnose=config("LOGURU_DIAGNOSE", default=True, cast=bool),
-        # backtrace=config("LOGURU_BACKTRACE", default=True, cast=bool),
     )
