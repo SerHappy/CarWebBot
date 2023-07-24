@@ -79,9 +79,8 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     else:
         name = request.POST.get("name")
         text = request.POST.get("text")
-        tags = request.POST.getlist("tags")
-        if tags == [""]:
-            tags = []
+        tag_str = request.POST.get("tags")
+        tag_ids = sorted(tag_str.split(",") if tag_str else [])
         price = request.POST.get("price")
         status = request.POST.get("status")
         note = request.POST.get("note", None)
@@ -94,7 +93,7 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
         announcement.note = note
         announcement.save()
 
-        announcement.tags.set(tags)
+        announcement.tags.set(tag_ids)
         new_date = request.POST.get("datetime")
         timezone = request.POST.get("timezone")
         pytz_timezone = pytz.timezone(timezone)

@@ -5,15 +5,28 @@
     overflow: hidden;
 }
 
-
-
 .thumbnail-image {
-    width: 100px;
-    height: 100px;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
 
 .thumbnail-video {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+}
+
+.video-icon {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    color: #fff;
+    /* Измените это на любой цвет, который вы хотите для иконки */
 }

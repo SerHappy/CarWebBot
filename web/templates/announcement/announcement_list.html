@@ -110,23 +110,25 @@
                                  width="50"
                                  height="50" />
                           {% elif media.media_type == 'VIDEO' %}
-                            <video class="img-thumbnail thumbnail-video">
-                              <source src="{{ media.file.url }}" type="video/mp4" />
-                            </video>
-                            <i class="fas fa-video fa-lg video-icon"></i>
+                            <div class="video-wrapper">
+                              <video class="img-thumbnail thumbnail-video">
+                                <source src="{{ media.file.url }}" type="video/mp4" />
+                              </video>
+                              <i class="fas fa-video fa-lg video-icon"></i>
+                            </div>
                           {% endif %}
                         </span>
                       {% endfor %}
                     </td>
                     <td style="vertical-align: top;">
                       <button type="button"
-                              class="btn btn-primary btn-sm btn-block"
+                              class="btn btn-primary btn-sm btn-block republish-button"
                               style="margin-bottom: 5px"
                               title="Переопубликовать">
                         <i class="fa fa-refresh"></i> Переопубликовать
                       </button>
                       <button type="button"
-                              class="btn btn-warning btn-sm btn-block"
+                              class="btn btn-warning btn-sm btn-block takeoff-button"
                               title="Снять с публикации">
                         <i class="fa fa-ban"></i> Снять с публикации
                       </button>

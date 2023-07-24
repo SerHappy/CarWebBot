@@ -182,6 +182,10 @@ class MyDropzone {
     if (file.type == "VIDEO" || file.type.startsWith("video")) {
       if (file.type == "VIDEO") {
         console.log("File is a video");
+        file.previewElement.classList.add('dz-video-preview');
+        let videoIcon = document.createElement('i');
+        videoIcon.classList.add('fas', 'fa-video', 'video-icon');
+        file.previewElement.appendChild(videoIcon);
         var videoUrl = file.name;
         var video = document.createElement("video");
         var canvas = document.createElement("canvas");
@@ -347,71 +351,81 @@ class MyDropzone {
       console.log(this.myDropzone.files);
       // Если текущее количество файлов отличается от изначального, делаем кнопку неактивной
       console.log("Initial file count: " + initialFileCount);
+      let announcementData = editButton.getAttribute('data-announcement');
+      let announcement = JSON.parse(announcementData);
+      console.log("announcement: ", announcement);
+      console.log(announcement[0].fields.is_published);
       if (currentFileCount > initialFileCount) {
-        console.log("File count more chat initialFileCount, disabling editButton");
+        console.log("File count more than initialFileCount, disabling editButton");
         editButton.setAttribute('disabled', 'disabled');
         editButton.setAttribute('title', 'Количество файлов увеличилось, редактирование невозможно. Было: ' + initialFileCount + ', стало ' + currentFileCount + '');
-      } else {
-        // Иначе делаем кнопку активной
-        console.log("File count is the same as initial, enabling editButton");
-        editButton.removeAttribute('disabled');
-        editButton.setAttribute('title', 'Редактирование разрешено');
+      }
+      else {
+        if (announcement[0].fields.is_published == false) {
+          console.log("Announcement is not published, disabling editButton");
+          editButton.setAttribute('disabled', 'disabled');
+          editButton.setAttribute('title', 'Объявление не опубликовано, редактирование невозможно');
+        } else {
+          console.log("File count is the same as initial, enabling editButton");
+          editButton.removeAttribute('disabled');
+          editButton.setAttribute('title', 'Редактирование разрешено');
+        }
       }
     }
   }
 
-  updateFileOrderInDropzone() {
-    console.log("Updating file order in dropzone");
+    updateFileOrderInDropzone() {
+      console.log("Updating file order in dropzone");
 
-    // Define a new array to hold the updated upload ids
-    let updatedUploadIds = new Array(this.myDropzone.files.length);
+      // Define a new array to hold the updated upload ids
+      let updatedUploadIds = new Array(this.myDropzone.files.length);
 
-    this.uploadIds = this.getOrderedUploadIds();
-    console.log(this.uploadIds);
+      this.uploadIds = this.getOrderedUploadIds();
+      console.log(this.uploadIds);
 
-    // Use an arrow function to preserve `this`
-    this.myDropzone.files.forEach((file) => {
-      file.order = $(file.previewElement).index() - 1;
-      console.log("File " + file.name + " index: " + this.myDropzone.files.indexOf(file) + " order: " + file.order);
+      // Use an arrow function to preserve `this`
+      this.myDropzone.files.forEach((file) => {
+        file.order = $(file.previewElement).index() - 1;
+        console.log("File " + file.name + " index: " + this.myDropzone.files.indexOf(file) + " order: " + file.order);
 
-      // Update the uploadIds array according to the new order
-      updatedUploadIds[file.order] = this.uploadIds[this.myDropzone.files.indexOf(file)];
+        // Update the uploadIds array according to the new order
+        updatedUploadIds[file.order] = this.uploadIds[this.myDropzone.files.indexOf(file)];
+        console.log("Updated uploadIds array:");
+        console.log(updatedUploadIds);
+      });
+
+      // Replace the old uploadIds array with the updated one
+      this.uploadIds = updatedUploadIds;
       console.log("Updated uploadIds array:");
-      console.log(updatedUploadIds);
-    });
+      console.log(this.uploadIds);
+      console.log("Updated files in myDropzone.files:");
+      console.log(this.getOrderedUploadIds());
+    }
 
-    // Replace the old uploadIds array with the updated one
-    this.uploadIds = updatedUploadIds;
-    console.log("Updated uploadIds array:");
-    console.log(this.uploadIds);
-    console.log("Updated files in myDropzone.files:");
-    console.log(this.getOrderedUploadIds());
+    getOrderedUploadIds() {
+      return this.myDropzone.files.sort((a, b) => a.order - b.order).map(file => file.uploadId);
+    }
+
+    initialize() {
+      console.log("Initializing Dropzone");
+      Dropzone.autoDiscover = false;
+      this.myDropzone = new Dropzone("#dropzoneForm", this.dropzoneOptions);
+
+      this.myDropzone.on("queuecomplete", () => this.queueComplete());
+      this.myDropzone.on("addedfile", (file) => this.addedFile(file));
+      this.myDropzone.on("removedfile", (file) => this.removedFile(file));
+      this.myDropzone.on("error", (file, message) => this.handleError(file, message));
+      this.myDropzone.on("sending", function (file, xhr, formData) {
+        // Get the order of current file
+        let fileOrder = file.order;
+        console.log("Sending file order: " + fileOrder);
+        // Append the order to the form data
+        formData.append("order", fileOrder);
+      });
+      this.addEventListener();
+      console.log("Initial files in myDropzone.files:");
+      console.log(this.myDropzone.files);
+      console.log("Initializing tooltips");
+      $('[data-toggle="tooltip"]').tooltip();
+    }
   }
-
-  getOrderedUploadIds() {
-    return this.myDropzone.files.sort((a, b) => a.order - b.order).map(file => file.uploadId);
-  }
-
-  initialize() {
-    console.log("Initializing Dropzone");
-    Dropzone.autoDiscover = false;
-    this.myDropzone = new Dropzone("#dropzoneForm", this.dropzoneOptions);
-
-    this.myDropzone.on("queuecomplete", () => this.queueComplete());
-    this.myDropzone.on("addedfile", (file) => this.addedFile(file));
-    this.myDropzone.on("removedfile", (file) => this.removedFile(file));
-    this.myDropzone.on("error", (file, message) => this.handleError(file, message));
-    this.myDropzone.on("sending", function (file, xhr, formData) {
-      // Get the order of current file
-      let fileOrder = file.order;
-      console.log("Sending file order: " + fileOrder);
-      // Append the order to the form data
-      formData.append("order", fileOrder);
-    });
-    this.addEventListener();
-    console.log("Initial files in myDropzone.files:");
-    console.log(this.myDropzone.files);
-    console.log("Initializing tooltips");
-    $('[data-toggle="tooltip"]').tooltip();
-  }
-}

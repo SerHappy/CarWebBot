@@ -35,6 +35,7 @@
                         id="editButton"
                         data-toggle="tooltip"
                         data-placement="top"
+                        data-announcement="{{ announcement }}"
                         title="">Отредактировать</button>
                 <button type="button"
                         class="btn btn-primary republish-button mr-2"
@@ -73,68 +74,80 @@
   let myDropzoneInstance;
 
   $(document).ready(function () {
+    console.log("Document ready event...");
 
     $(document).on('click', '.republish-button', function () {
+      console.log("Click on republish-button...");
       let announcement = getAnnouncementData();
+      console.log("Announcement: ", announcement);
       let announcementId = announcement[0].pk;
       let csrfToken = getCsrfToken();
+      console.log("CSRF Token: ", csrfToken);
 
       $("#republishModal").modal('show');
-      $("#republishButton").off('click').one(function () {
+      $("#republishButton").off('click').click(function () {
         republishAnnouncement(announcementId, csrfToken);
       });
     });
 
-  document.addEventListener("DOMContentLoaded", function () {
+
+    console.log("DOMContentLoaded event...");
     myDropzoneInstance = new MyDropzone();
     myDropzoneInstance.initialize();
 
     let announcement = getAnnouncementData();
+    console.log("Announcement: ", announcement);
 
     if (announcement != null) {
       populateFormFields(announcement);
       populateExistingFiles(myDropzoneInstance, announcement);
     }
-  });
 
   function getAnnouncementData() {
-    console.log("Getting announcement data...");
-    return JSON.parse('{{announcement|escapejs|safe}}');
-  }
+      console.log("Getting announcement data...");
+      let announcement = JSON.parse('{{announcement|escapejs|safe}}');
+      console.log("Announcement data: ", announcement);
+      return announcement;
+    }
 
   function getCsrfToken() {
-    console.log("Getting CSRF token...");
-    let cookie = document.cookie
-    return cookie.substring(cookie.indexOf('=') + 1)
-  }
+      console.log("Getting CSRF token...");
+      let cookie = document.cookie;
+      let csrfToken = cookie.substring(cookie.indexOf('=') + 1);
+      console.log("CSRF Token: ", csrfToken);
+      return csrfToken;
+    }
+
 
   function republishAnnouncement(announcementId, csrfToken) {
-    console.log("Republish button clicked");
+      console.log("Republish button clicked");
+      console.log("Announcement ID: ", announcementId);
+      console.log("CSRF Token: ", csrfToken);
 
-    let republishDatetime = $("#new_publication_date").val();
-    let timezone = $("#timezone").val();
+      let republishDatetime = $("#new_publication_date").val();
+      let timezone = $("#timezone").val();
 
-    let formData = createFormData(republishDatetime, timezone);
+      let formData = createFormData(republishDatetime, timezone);
 
-    $.ajax({
-      url: '/announcements/republish/' + announcementId + '/',
-      type: 'POST',
-      beforeSend: function (xhr) {
-        xhr.setRequestHeader("X-CSRFToken", csrfToken);
-      },
-      data: formData,
-      processData: false,
-      contentType: false,
-      success: function () {
-        window.location.href = "/";
-      },
-      error: function () {
-        alert('Произошла ошибка при переопубликовании объявления');
-      }
-    });
+      $.ajax({
+        url: '/announcements/republish/' + announcementId + '/',
+        type: 'POST',
+        beforeSend: function (xhr) {
+          xhr.setRequestHeader("X-CSRFToken", csrfToken);
+        },
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function () {
+          window.location.href = "/";
+        },
+        error: function () {
+          alert('Произошла ошибка при переопубликовании объявления');
+        }
+      });
 
-    $("#republishModal").modal('hide');
-  }
+      $("#republishModal").modal('hide');
+    }
 
   function populateFormFields(announcement) {
   let announcementFields = announcement[0].fields;
