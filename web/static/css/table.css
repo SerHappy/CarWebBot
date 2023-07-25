@@ -60,3 +60,9 @@
     color: #dc3545;
 }
 
+.badge,
+.badge-primary,
+.tag-text,
+.tag-emoji {
+    font-size: 14px;
+}
