@@ -78,16 +78,16 @@
                     <td>
                       {% for tag in announcement.tags.all %}
                         <a href="{% url 'tag-edit' tag.id %}"
-                           class="tag-link"
+                           class="tag-link no-wrap"
                            data-toggle="tooltip"
                            title="{{ tag.name }}">
-                          {{ tag.name }}&nbsp;
+                          {{ tag.name }}
                           {% if tag.type == 'hidden' %}
                             <span class="tag-icon">🕶️</span>
                           {% else %}
                             <span class="tag-icon">👁️</span>
                           {% endif %}
-                          {% if tag.channel_id and tag.channel_id != "None" %}&nbsp;<span class="tag-icon">📢</span>{% endif %}
+                          {% if tag.channel_id and tag.channel_id != "None" %}<span class="tag-icon">📢</span>{% endif %}
                         </a>
                       {% endfor %}
                     </td>
@@ -125,7 +125,8 @@
                       </button>
                       <button type="button"
                               class="btn btn-warning btn-sm btn-block takeoff-button"
-                              title="Снять с публикации">
+                              title="Снять с публикации"
+                              hidden>
                         <i class="fa fa-ban"></i> Снять с публикации
                       </button>
                     </td>
