@@ -60,9 +60,19 @@
     color: #dc3545;
 }
 
-.badge,
-.badge-primary,
-.tag-text,
-.tag-emoji {
-    font-size: 14px;
+.tag-link {
+    display: block;
+    color: black;
+    text-decoration: none;
+    background: none;
+    cursor: pointer;
+}
+
+.tag-link:hover {
+    text-decoration: underline;
+    color: #007bff;
+}
+
+.tag-icon {
+    display: inline;
 }

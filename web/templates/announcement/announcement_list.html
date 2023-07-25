@@ -78,16 +78,16 @@
                     <td>
                       {% for tag in announcement.tags.all %}
                         <a href="{% url 'tag-edit' tag.id %}"
-                           class="badge badge-primary"
+                           class="tag-link"
                            data-toggle="tooltip"
                            title="{{ tag.name }}">
-                          <span class="tag-text">{{ tag.name }}</span>
+                          {{ tag.name }}
                           {% if tag.type == 'hidden' %}
-                            <span class="tag-emoji">🕶️</span>
+                            <span class="tag-icon">🕶️</span>
                           {% else %}
-                            <span class="tag-emoji">👁️</span>
+                            <span class="tag-icon">👁️</span>
                           {% endif %}
-                          {% if tag.channel_id and tag.channel_id != "None" %}<span class="tag-emoji">📢</span>{% endif %}
+                          {% if tag.channel_id and tag.channel_id != "None" %}<span class="tag-icon">📢</span>{% endif %}
                         </a>
                       {% endfor %}
                     </td>
