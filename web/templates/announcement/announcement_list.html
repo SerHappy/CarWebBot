@@ -81,13 +81,13 @@
                            class="tag-link"
                            data-toggle="tooltip"
                            title="{{ tag.name }}">
-                          {{ tag.name }}
+                          {{ tag.name }}&nbsp;
                           {% if tag.type == 'hidden' %}
                             <span class="tag-icon">🕶️</span>
                           {% else %}
                             <span class="tag-icon">👁️</span>
                           {% endif %}
-                          {% if tag.channel_id and tag.channel_id != "None" %}<span class="tag-icon">📢</span>{% endif %}
+                          {% if tag.channel_id and tag.channel_id != "None" %}&nbsp;<span class="tag-icon">📢</span>{% endif %}
                         </a>
                       {% endfor %}
                     </td>
