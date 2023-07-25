@@ -2,6 +2,7 @@ from apps.bot.views import delete_announcement_from_subchannel
 from apps.bot.views import edit_announcement_in_channel
 from apps.tag.models import Tag
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest
 from django.http import HttpResponse
@@ -24,4 +25,5 @@ def delete_tag(request: HttpRequest, pk: int) -> HttpResponse:
     for announcement in tag_announcements:
         announcement.refresh_from_db()
         edit_announcement_in_channel(announcement, {tag_name: old_channel_id})
+    messages.success(request, "Тег успешно удален")
     return HttpResponse(status=200)

@@ -20,10 +20,7 @@
         </div>
       </div>
     </div>
-    <!-- /.col -->
   </div>
-  <!-- /.row -->
-  <!-- /.content-header -->
   <!-- Main content -->
   <section class="content">
     <div class="container-fluid">
@@ -126,22 +123,30 @@
                               title="Переопубликовать">
                         <i class="fa fa-refresh"></i> Переопубликовать
                       </button>
-                      {% if announcement.is_published %}
                       <button type="button"
                               class="btn btn-warning btn-sm btn-block takeoff-button"
                               title="Снять с публикации">
                         <i class="fa fa-ban"></i> Снять с публикации
                       </button>
-                      {% endif %}
                     </td>
-                    <td id="status_{{ announcement.id }}" class="vertical-align-top">
-                      <div id="status_text_{{ announcement.id }}" class="margin-bottom-5px">{{ announcement.status }}</div>
+                    <td id="status_{{ announcement.id }}"
+                        class="text-center vertical-align-middle">
+                      <div>
+                        <i class="fa fa-circle status-icon"
+                           id="status_icon_{{ announcement.id }}"></i>
+                        <span id="status_text_{{ announcement.id }}" class="status-text">{{ announcement.status }}</span>
+                        <button type="button"
+                                class="btn btn-outline-dark btn-sm copy-button"
+                                title="Скопировать">
+                          <i class="fa fa-copy"></i>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 {% endfor %}
               {% else %}
                 <tr>
-                  <td colspan="6" class="text-center py-5">
+                  <td colspan="100%" class="text-center py-5">
                     <i class="fa fa-frown-o fa-3x mb-3" aria-hidden="true"></i>
                     <h4>Нет доступных объявлений</h4>
                     <p class="text-muted">Новые объявления скоро появятся. Пожалуйста, проверьте позже.</p>
@@ -171,25 +176,16 @@
     $(".copy-button").click(function() {
       var announcementRow = $(this).closest(".announcement-row");
   var publishedMessageLink = announcementRow.data("published-message-link");
-
-  // Создаем временный textarea для копирования текста
   var tempElement = document.createElement("textarea");
   tempElement.value = publishedMessageLink;
-
-  // Добавляем элемент в DOM
   document.body.appendChild(tempElement);
-
-  // Выделяем текст в элементе
   tempElement.select();
-
- // Копируем текст в буфер обмена
   try {
     document.execCommand("copy");
   } catch (err) {
    alert("Не удалось скопировать ссылку: " + err);
   }
 
- // Удаляем временный элемент
   document.body.removeChild(tempElement);
 });
   });

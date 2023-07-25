@@ -17,6 +17,7 @@ from apps.announcement.models import Announcement
 from apps.announcement.models import Media
 from apps.bot.models import SubchannelMessage
 from apps.tag.models import Tag
+from django.db.models import Q
 from django.db.models import QuerySet
 from loguru import logger
 
@@ -36,8 +37,13 @@ def publish_announcement_to_channel(announcement: Announcement) -> None:
         logger.info(f"Announcement {announcement.name} published")
         update_announcement_and_save_message(announcement, text_message)
 
-        for tag in announcement.tags.filter(channel_id__isnull=False):
+        for tag in announcement.tags.filter(Q(channel_id__isnull=False) & ~Q(channel_id__exact="")):
             message = create_subchannel_message(announcement)
+            logger.critical(f"Tag: {tag}")
+            logger.critical(f"Tag channel_id: {tag.channel_id}")
+            logger.critical(f"Tag channel_id type: {type(tag.channel_id)}")
+            logger.critical(f"Tag channel_id is empty: {tag.channel_id == ''}")
+            logger.critical(f"Tag channel_id len: {len(tag.channel_id)}")
             publish_subchannel_media(announcement, tag)
             text_message = send_text_message_with_retries_to_subchannel(message, tag)
             update_announcement_and_save_subchannel_message(announcement, text_message, tag)

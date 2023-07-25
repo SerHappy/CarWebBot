@@ -1,3 +1,4 @@
+from apps.bot.views import edit_announcement_in_channel
 from apps.tag.models import Tag
 from django.contrib import messages
 from django.http import HttpRequest
@@ -14,7 +15,16 @@ def handle_form_data(request, tag: Tag = None) -> HttpResponseRedirect | HttpRes
         messages.error(request, validation.get("error"))
         return redirect(reverse("tag-edit", args=[tag.id]) if tag else reverse("tag-add"))
     if tag:
+        old_channel_id = tag.channel_id
         _update_tag(tag, name, tag_type, channel_id)
+        announcements = tag.announcements.filter(is_published=True)
+
+        for announcement in announcements:
+            current_tags = announcement.tags.all()
+
+            old_tags = {t: old_channel_id if t == tag else t.channel_id for t in current_tags}
+
+            edit_announcement_in_channel(announcement, old_tags)
         messages.success(request, "Тег успешно обновлен")
     else:
         _create_tag(name, tag_type, channel_id)
@@ -23,9 +33,9 @@ def handle_form_data(request, tag: Tag = None) -> HttpResponseRedirect | HttpRes
 
 
 def _get_form_data(request: HttpRequest) -> tuple[str | None, str | None, str | None]:
-    name = request.POST.get("tagName")
-    tag_type = request.POST.get("tagType")
-    channel_id = request.POST.get("telegramChannel")
+    name = request.POST.get("tagName").strip()
+    tag_type = request.POST.get("tagType").strip()
+    channel_id = request.POST.get("telegramChannel").strip()
     return name, tag_type, channel_id
 
 

@@ -1,7 +1,8 @@
 $(document).ready(function () {
   $(document).on('click', '.takeoff-button', function () {
     console.log("takeoffButton clicked!")
-    let announcementId = $(this).closest('.announcement-row').data('announcement-id');
+    let announcementRow = $(this).closest('.announcement-row');
+    let announcementId = announcementRow.data('announcement-id');
     console.log("announcementId: " + announcementId)
     let cookie = document.cookie
     let csrfToken = cookie.substring(cookie.indexOf('=') + 1)
@@ -12,6 +13,8 @@ $(document).ready(function () {
         xhr.setRequestHeader("X-CSRFToken", csrfToken);
       },
       success: function () {
+        announcementRow.addClass('table-secondary');
+        announcementRow.find(".takeoff-button").hide();
         updateStatuses();
       },
       error: function () {
@@ -29,7 +32,7 @@ $(document).ready(function () {
     $("#republishModal").modal('show');
 
     // Когда кнопка в модальном окне нажата...
-   $("#republishButton").off('click').click(function () {
+    $("#republishButton").off('click').click(function () {
       let republishDatetime = $("#new_publication_date").val();
       let timezone = $("#timezone").val();
       $.ajax({
@@ -44,8 +47,8 @@ $(document).ready(function () {
           timezone: timezone
         },
         success: function () {
-        updateStatuses();
-      },
+          updateStatuses();
+        },
         error: function () {
           alert('Произошла ошибка при переопубликовании объявления');
         }

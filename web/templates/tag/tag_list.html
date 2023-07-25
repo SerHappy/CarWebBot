@@ -2,13 +2,13 @@
 {% block content %}
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/links.css' %}">
+  <link rel="stylesheet" href="{% static 'css/table.css' %}">
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <div class="row">
     <div class="col-md-12">
       <div class="card-body">
         <div class="d-flex align-items-center justify-content-start">
-          <!-- Добавлен класс justify-content-start -->
           <a type="button"
              href="{% url 'tag-add' %}"
              class="btn btn-primary ml-n1">
@@ -21,33 +21,6 @@
     <!-- /.col -->
   </div>
   <!-- /.row -->
-  <!-- /.content-header -->
-  <style>
-.inactive-row {
-  background-color: #f2f2f2;
-}
-.media-links {
-    display: inline-block;
-    width: 100px;
-    height: 100px;
-    overflow: hidden;
-}
-.table-header {
-        width: 1000px;
-    }
-
-    .action-column {
-        width: 40px;
-    }
-    .thumbnail-image {
-        width: 100px;
-        height: 100px;
-        object-fit: cover;
-    }
-    .table th {
-        text-align: center;
-    }
-  </style>
   <!-- Main content -->
   <section class="content">
     <div class="container-fluid">
@@ -67,7 +40,7 @@
             </div>
           </div>
           <!-- Таблица -->
-          <table class="table table-bordered w-100" id="tagsTable">
+          <table class="table table-hover table-bordered w-100" id="tagsTable">
             <thead>
               <tr>
                 <th>Название</th>
@@ -105,7 +78,7 @@
                 {% endfor %}
               {% else %}
                 <tr>
-                  <td colspan="7" class="text-center py-5">
+                  <td colspan="100%" class="text-center py-5">
                     <i class="fa fa-frown-o fa-3x mb-3" aria-hidden="true"></i>
                     <h4>Нет тегов</h4>
                     <p class="text-muted">Новые теги скоро появятся. Пожалуйста, проверьте позже.</p>

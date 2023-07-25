@@ -45,11 +45,17 @@ def _upload_file(file_path: str, media_type: str) -> str:
     with open(file_path, "rb") as file:
         logger.debug(f"File opened")
         if media_type == "photo":
+            logger.debug(f"Sending photo")
             response = bot.send_photo(chat_id=config("MEDIA_CHANNEL_ID"), photo=file)
+            logger.debug(f"Photo sent")
             file_id = response.photo[-1].file_id
+            logger.debug(f"File id: {file_id}")
         elif media_type == "video":
+            logger.debug(f"Sending video")
             response = bot.send_video(chat_id=config("MEDIA_CHANNEL_ID"), video=file)
+            logger.debug(f"Video sent")
             file_id = response.video.file_id
+            logger.debug(f"File id: {file_id}")
         else:
             raise ValueError(f"Unsupported media type: {media_type}")
 

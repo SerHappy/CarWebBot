@@ -28,3 +28,35 @@
 .margin-bottom-5px {
     margin-bottom: 5px;
 }
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+    /* Можно изменить цвет и прозрачность в соответствии с вашими предпочтениями */
+}
+
+.status-text {
+    font-weight: bold;
+    margin: 0 5px;
+}
+
+.status-icon {
+    vertical-align: middle;
+}
+
+.copy-button {
+    display: none;
+    border: none;
+}
+
+.status-published {
+    color: #28a745;
+}
+
+.status-awaiting {
+    color: #ffc107;
+}
+
+.status-removed {
+    color: #dc3545;
+}
+

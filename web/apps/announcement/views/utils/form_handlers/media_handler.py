@@ -12,15 +12,17 @@ import shutil
 tmp_storage = FileSystemStorage(location=settings.TMP_STORAGE_PATH)
 
 
-def _get_upload_ids_from_request(request: HttpRequest) -> list[str]:
-    return request.POST.getlist("uploadIds")[0].split(",")
-
-
 def handle_media_files(request: HttpRequest, announcement: Announcement) -> None:
     upload_ids = _get_upload_ids_from_request(request)
+    if announcement.is_published:
+        _delete_media_files(upload_ids, announcement)
     _add_new_media_files(upload_ids, announcement)
-    _update_existing_media_files_order(upload_ids, announcement)
-    _delete_media_files(upload_ids, announcement)
+    if announcement.is_published:
+        _update_existing_media_files_order(upload_ids, announcement)
+
+
+def _get_upload_ids_from_request(request: HttpRequest) -> list[str]:
+    return request.POST.getlist("uploadIds")[0].split(",")
 
 
 def _add_new_media_files(upload_ids: list[str], announcement: Announcement) -> None:
