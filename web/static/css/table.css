@@ -48,6 +48,11 @@
     border: none;
 }
 
+.takeoff-button {
+    display: none;
+    border: none;
+}
+
 .status-published {
     color: #28a745;
 }
