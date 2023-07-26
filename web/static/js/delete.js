@@ -1,7 +1,7 @@
 $(document).ready(function () {
     $(document).on('click', '#deleteModalButton', function () {
         // Получить JSON объявления из data-атрибута
-         let announcementId = $(this).data('announcement-id');
+        let announcementId = $(this).data('announcement-id');
         console.log(announcementId);
 
         $("#deleteModal").modal('show');
