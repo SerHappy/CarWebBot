@@ -14,7 +14,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 150px;
 }
 
 .inactive-row {
@@ -80,4 +79,9 @@
 
 .tag-icon {
     display: inline;
+}
+
+.text {
+    max-width: 250px;
+    word-wrap: break-word;
 }

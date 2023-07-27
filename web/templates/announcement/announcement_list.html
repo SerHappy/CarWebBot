@@ -65,13 +65,13 @@
                       data-id="{{ announcement.id }}"
                       data-announcement-id="{{ announcement.id }}"
                       data-published-message-link="{{ announcement.published_message_link }}">
-                    <td class="no-wrap">
+                    <td>
                       <a href="{% url 'announcement-edit' announcement.id %}" class="text">
                         <i class="fas fa-pencil-alt"></i>
                         {{ announcement.name }}
                       </a>
                     </td>
-                    <td class="no-wrap"
+                    <td
                         data-toggle="tooltip"
                         data-placement="top"
                         title="{{ announcement.text }}">{{ announcement.text|truncatechars:50 }}</td>
@@ -81,7 +81,7 @@
                            class="tag-link no-wrap"
                            data-toggle="tooltip"
                            title="{{ tag.name }}">
-                          {{ tag.name }}
+                          {{ tag.name|truncatechars:20 }}
                           {% if tag.type == 'hidden' %}
                             <span class="tag-icon">🕶️</span>
                           {% else %}
@@ -92,32 +92,30 @@
                       {% endfor %}
                     </td>
                     <td>
-                      <div class="media-row">
-                        {% for media in announcement.media.all %}
-                          <span class="media-links"
-                                data-toggle="modal"
-                                data-target="#mediaModal"
-                                data-src="{{ media.file.url }}"
-                                data-media-index="{{ loop.index0 }}"
-                                data-announcement-id="{{ announcement.id }}">
-                            {% if media.media_type == 'PHOTO' %}
-                              <img src="{{ media.file.url }}"
-                                   class="img-thumbnail thumbnail-image"
-                                   alt="image"
-                                   loading="lazy"
-                                   width="100"
-                                   height="100" />
-                            {% elif media.media_type == 'VIDEO' %}
-                              <div class="video-wrapper">
-                                <video class="img-thumbnail thumbnail-video">
-                                  <source src="{{ media.file.url }}" type="video/mp4" />
-                                </video>
-                                <i class="fas fa-video fa-lg video-icon"></i>
-                              </div>
-                            {% endif %}
-                          </span>
-                        {% endfor %}
-                      </div>
+                      {% for media in announcement.media.all %}
+                        <span class="media-links"
+                              data-toggle="modal"
+                              data-target="#mediaModal"
+                              data-src="{{ media.file.url }}"
+                              data-media-index="{{ loop.index0 }}"
+                              data-announcement-id="{{ announcement.id }}">
+                          {% if media.media_type == 'PHOTO' %}
+                            <img src="{{ media.file.url }}"
+                                 class="img-thumbnail thumbnail-image"
+                                 alt="image"
+                                 loading="lazy"
+                                 width="50"
+                                 height="50" />
+                          {% elif media.media_type == 'VIDEO' %}
+                            <div class="video-wrapper">
+                              <video class="img-thumbnail thumbnail-video">
+                                <source src="{{ media.file.url }}" type="video/mp4" />
+                              </video>
+                              <i class="fas fa-video fa-lg video-icon"></i>
+                            </div>
+                          {% endif %}
+                        </span>
+                      {% endfor %}
                     </td>
                     <td class="vertical-align-top">
                       <button type="button"
