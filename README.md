@@ -21,7 +21,7 @@ CarWebBot - это веб-сервер на Django, который обеспе�
 * Gunicorn
 * Nginx
 * Celery
-* Telegram Bot API
+* ~~Telegram Bot API~~ Telethon
 * AJAX
 * HTML
 * CSS
@@ -100,7 +100,6 @@ nano .env
 SECRET_KEY = value
 ALLOWED_HOSTS = value
 DEBUG = value
-TELEGRAM_BOT_TOKEN = value
 CHANNEL_ID = value
 CHANNEL_NAME = value
 LOGURU_PATH = value
@@ -113,7 +112,10 @@ DB_PASSWORD = value
 DB_HOST = value
 DB_PORT = value
 CELERY_BROKER_URL = value
-MEDIA_CHANNEL_ID = value
+TELETHON_API_ID = value
+TELETHON_API_HASH = value
+TELETHON_SESSION_NAME = value
+TELETHON_SYSTEM_VERSION = value
 ```
 
 Описание каждого ключа:
@@ -127,17 +129,11 @@ MEDIA_CHANNEL_ID = value
 * `DEBUG`: Этот параметр указывает, должен ли Django использовать режим отладки. Если это значение `True`, Django будет отображать подробные сообщения об ошибках.
    > Пример: `True` или `False`.
 
-* `TELEGRAM_BOT_TOKEN`: Токен вашего бота Telegram.
-   > Пример: `"your-telegram-bot-token"`.
-
 * `CHANNEL_ID`: Идентификатор канала Telegram, на который бот будет отправлять сообщения.
    > Пример: `"your-channel-id"`.
 
 * `CHANNEL_NAME`: Имя канала Telegram, на который бот будет отправлять сообщения.
    > Пример: `"your-channel-name"`.
-
-* `MEDIA_CHANNEL_ID`: Идентификатор канала Telegram, на который бот будет загружать медиафайлы.
-   > Пример: `"your-media-channel-id"`.
 
 * `LOGURU_PATH`: Путь до файла логов для Loguru, инструмента логирования Python.
    > Пример: `"/path/to/your/logfile.log"`.
@@ -168,6 +164,18 @@ MEDIA_CHANNEL_ID = value
 
 * `CELERY_BROKER_URL`: URL брокера для Celery. Celery - это асинхронная очередь задач, которую можно использовать для выполнения задач в фоновом режиме.
    > Пример: `"redis://localhost:6379"`.
+
+* `TELETHON_API_ID`: ID приложения, полученный от Telegram для работы с Telethon, библиотекой Python для работы с API Telegram.
+   > Пример: `12345`.
+
+* `TELETHON_API_HASH`: Секретный ключ приложения, полученный от Telegram для работы с Telethon.
+   > Пример: `"your-telethon-api-hash"`.
+
+* `TELETHON_SESSION_NAME`: Имя сессии для Telethon. Telethon использует имя сессии, чтобы управлять соединением с API Telegram.
+   > Пример: `"your-telethon-session-name"`.
+
+* `TELETHON_SYSTEM_VERSION`: Версия системы, которую вы хотите сообщить API Telegram при использовании Telethon. Это помогает Telegram отслеживать и управлять версиями клиентов.
+   > Пример: `4.16.30-vxCUSTOM`.
 
 Сохраните и закройте файл.
 
