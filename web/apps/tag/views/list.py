@@ -23,7 +23,7 @@ class TagListView(LoginRequiredMixin, ListView):
             context["tags"] = context["tags"].filter(name__icontains=name_filter)
 
         paginator = Paginator(context["tags"], 10)
-        page = self.request.GET.get("page")
+        page = self.request.GET.get("page", 1)
         try:
             context["tags"] = paginator.page(page)
             logger.info(f"Page {page} of tags was loaded")
