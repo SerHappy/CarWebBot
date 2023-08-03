@@ -7,3 +7,4 @@ celerybeat-schedule
 *.log
 *.zip
 tmp/
+*.session
