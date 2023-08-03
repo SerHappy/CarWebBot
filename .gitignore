@@ -8,3 +8,4 @@ celerybeat-schedule
 *.zip
 tmp/
 *.session
+*.session-journal
