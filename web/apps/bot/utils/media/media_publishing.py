@@ -1,18 +1,18 @@
-from ...bot import bot
 from ..telegram import perform_action_with_retries
-from .media_conversion import _upload_file
+from .media_conversion import create_media
 from .media_processing import create_media_list
 from .media_processing import save_media_to_db
 from apps.announcement.models import Announcement
 from apps.announcement.models import Media
 from apps.bot.models import SubchannelMessage
+from apps.bot.services import telethon
 from apps.tag.models import Tag
 from decouple import config
 from django.db.models import QuerySet
 from loguru import logger
-from telebot.types import InputMediaPhoto
-from telebot.types import InputMediaVideo
-from telebot.types import Message
+from telethon.sync import TelegramClient
+from telethon.tl.types import InputMediaPhoto
+from telethon.tl.types import InputMediaUploadedDocument
 
 
 def publish_announcement_media(announcement: Announcement) -> None:
@@ -69,27 +69,35 @@ def _send_first_media_to_subchannel(announcement: Announcement, media: Media, ta
         media (Media): Медиа для отправки.
         tag (Tag): Тег, подканал которого следует использовать для публикации.
     """
-    if media.media_type == Media.MediaType.PHOTO:
-        media_message = perform_action_with_retries(
-            bot.send_photo,
-            chat_id=tag.channel_id,
-            photo=perform_action_with_retries(_upload_file, media.file.path, "photo"),
-        )
-    elif media.media_type == Media.MediaType.VIDEO:
-        media_message = perform_action_with_retries(
-            bot.send_video,
-            chat_id=tag.channel_id,
-            video=perform_action_with_retries(_upload_file, media.file.path, "video"),
-        )
+    media_message = telethon.run_in_new_thread(_send_first_media, media, tag)
     if media_message is not None:
         SubchannelMessage.objects.create(
             announcement=announcement,
             channel_id=tag.channel_id,
-            message_id=media_message.message_id,
+            message_id=media_message.id,
             type=SubchannelMessage.MessageType.MEDIA,
             tag=tag,
             media=media,
         )
+
+
+def _send_first_media(media: Media, tag: Tag) -> None:
+    telethon.set_new_event_loop()
+    with telethon.fetch_telegram_client() as client:
+        client: TelegramClient
+        if media.media_type == Media.MediaType.PHOTO:
+            media_message = perform_action_with_retries(
+                client.send_file,
+                entity=int(tag.channel_id),
+                file=create_media(media),
+            )
+        elif media.media_type == Media.MediaType.VIDEO:
+            media_message = perform_action_with_retries(
+                client.send_file,
+                entity=int(tag.channel_id),
+                file=create_media(media),
+            )
+        return media_message
 
 
 def _send_less_than_ten_media(announcement: Announcement, media: QuerySet[Media]) -> None:
@@ -118,18 +126,46 @@ def _send_more_than_ten_media(announcement: Announcement, media: QuerySet[Media]
 
 
 def _send_media(
-    announcement: Announcement, media_to_send: list[tuple[Media, InputMediaPhoto | InputMediaVideo]]
+    announcement: Announcement, media_to_send: list[tuple[Media, InputMediaPhoto | InputMediaUploadedDocument]]
 ) -> None:
     """
     Отправляет медиа-файлы и сохраняет информацию о них в базе данных.
 
     Args:
         announcement (Announcement): Объявление, с которым связаны медиа-файлы.
-        media_to_send (list[tuple[Media, InputMediaPhoto | InputMediaVideo]]):
+        media_to_send (list[tuple[Media, InputMediaPhoto | InputMediaUploadedDocument]]):
         Список кортежей, каждый из которых содержит медиа-файл и соответствующий медиа-объект.
     """
-    media_message: list[Message] = perform_action_with_retries(
-        bot.send_media_group, chat_id=config("CHANNEL_ID"), media=[x[1] for x in media_to_send]
-    )
+    files_to_send = [x[1] for x in media_to_send]
+    logger.debug(f"Sending {files_to_send} media files to Telegram...")
+    media_message = telethon.run_in_new_thread(_send_media_to_subchannel, media_to_send=media_to_send)
+    logger.debug(f"Media message sent result: {media_message}")
     if media_message:
+        logger.debug(f"Saving media to database...")
         save_media_to_db(announcement, media_message, media_to_send)
+        logger.debug(f"Media saved to database")
+
+
+def _send_media_to_subchannel(
+    media_to_send: list[tuple[Media, InputMediaPhoto | InputMediaUploadedDocument]],
+) -> None:
+    """
+    Отправляет медиа-файлы и сохраняет информацию о них в базе данных.
+
+    Args:
+        announcement (Announcement): Объявление, с которым связаны медиа-файлы.
+        media_to_send (list[tuple[Media, InputMediaPhoto | InputMediaUploadedDocument]]):
+        Список кортежей, каждый из которых содержит медиа-файл и соответствующий медиа-объект.
+    """
+    telethon.set_new_event_loop()
+    files_to_send = [x[1] for x in media_to_send]
+    logger.debug(f"Sending {files_to_send} media files to Telegram...")
+    with telethon.fetch_telegram_client() as client:
+        client: TelegramClient
+        media_message = perform_action_with_retries(
+            client.send_file,
+            entity=int(config("CHANNEL_ID")),
+            file=files_to_send,
+        )
+        logger.debug(f"Media message sent result: {media_message}")
+        return media_message

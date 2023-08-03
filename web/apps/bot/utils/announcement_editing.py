@@ -1,12 +1,13 @@
-from ..bot import bot
 from .announcement_publishing import create_announcement_message
 from .media.media_processing import create_media
 from .telegram import perform_action_with_retries
 from apps.announcement.models import Announcement
 from apps.announcement.models import Media
 from apps.bot.models import PublishedMessage
+from apps.bot.services import telethon
 from django.db.models import QuerySet
 from loguru import logger
+from telethon.sync import TelegramClient
 
 
 def update_announcement_status(announcement: Announcement, is_published: bool, is_active: bool) -> None:
@@ -39,17 +40,33 @@ def edit_announcement_text(announcement: Announcement) -> None:
     )
     if text_message:
         new_text = create_announcement_message(announcement)
-        perform_action_with_retries(
-            bot.edit_message_text,
-            chat_id=text_message.channel_id,
-            message_id=text_message.message_id,
-            text=new_text,
-        )
+        telethon.run_in_new_thread(_edit_message, text_message, new_text)
+
         logger.debug(f"Text message {text_message.message_id} edited")
     else:
         logger.warning(f"Text message for announcement {announcement.name} not found")
 
     logger.debug(f"Text edited for announcement: {announcement.name}")
+
+
+def _edit_message(message: PublishedMessage, new_text: str) -> None:
+    """
+    Редактирует сообщение в канале.
+
+    Args:
+        message (PublishedMessage): Сообщение, которое нужно отредактировать.
+        new_text (str): Новый текст сообщения.
+    """
+    telethon.set_new_event_loop()
+    with telethon.fetch_telegram_client() as client:
+        client: TelegramClient
+        perform_action_with_retries(
+            client.edit_message,
+            entity=int(message.channel_id),
+            message=int(message.message_id),
+            text=new_text,
+        )
+    logger.debug(f"Message {message.message_id} edited")
 
 
 def edit_announcement_media(announcement: Announcement) -> None:
@@ -88,13 +105,20 @@ def _delete_announcement_message(message: PublishedMessage) -> None:
         message (PublishedMessage): Сообщение, которое нужно удалить.
     """
     logger.debug(f"Deleting message {message.message_id}")
-    perform_action_with_retries(
-        bot.delete_message,
-        chat_id=message.channel_id,
-        message_id=message.message_id,
-    )
+    telethon.run_in_new_thread(_delete_message, message)
     PublishedMessage.delete(message)
     logger.debug(f"Message {message.message_id} deleted")
+
+
+def _delete_message(message_to_delete: PublishedMessage) -> None:
+    telethon.set_new_event_loop()
+    with telethon.fetch_telegram_client() as client:
+        client: TelegramClient
+        perform_action_with_retries(
+            client.delete_messages,
+            entity=int(message_to_delete.channel_id),
+            message_ids=[int(message_to_delete.message_id)],
+        )
 
 
 def _update_announcement_media(message: PublishedMessage, new_media: Media) -> None:
@@ -106,12 +130,20 @@ def _update_announcement_media(message: PublishedMessage, new_media: Media) -> N
         new_media (Media): Новое медиа, которое будет заменять старое.
     """
     logger.debug(f"Editing media for message {message.message_id}")
-    perform_action_with_retries(
-        bot.edit_message_media,
-        chat_id=message.channel_id,
-        message_id=message.message_id,
-        media=create_media(new_media),
-    )
+    telethon.run_in_new_thread(_edit_media, message, new_media)
     logger.debug(f"Media edited for message {message.message_id}")
     PublishedMessage.objects.filter(message_id=message.message_id).update(media=new_media)
     logger.debug(f"Media saved to database for message {message.message_id}")
+
+
+def _edit_media(message_to_edit: PublishedMessage, new_media: Media) -> None:
+    """Меняет старое медиа на новое `new_media` в сообщении `message_to_edit` в канале."""
+    telethon.set_new_event_loop()
+    with telethon.fetch_telegram_client() as client:
+        client: TelegramClient
+        perform_action_with_retries(
+            client.edit_message,
+            entity=int(message_to_edit.channel_id),
+            message=int(message_to_edit.message_id),
+            file=create_media(new_media),
+        )

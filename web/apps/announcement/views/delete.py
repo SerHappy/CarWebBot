@@ -1,10 +1,12 @@
 from apps.announcement.models import Announcement
 from apps.bot.views import delete_announcement_from_channel
+from decouple import config
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from loguru import logger
 
 import os
 import shutil

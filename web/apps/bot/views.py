@@ -1,5 +1,5 @@
-from .bot import bot
 from .models import PublishedMessage
+from .services import telethon
 from .utils.announcement_editing import edit_announcement_media
 from .utils.announcement_editing import edit_announcement_text
 from .utils.announcement_editing import update_announcement_status
@@ -14,12 +14,12 @@ from .utils.subchannel_publishing import send_text_message_with_retries_to_subch
 from .utils.subchannel_publishing import update_announcement_and_save_subchannel_message
 from .utils.telegram import perform_action_with_retries
 from apps.announcement.models import Announcement
-from apps.announcement.models import Media
 from apps.bot.models import SubchannelMessage
 from apps.tag.models import Tag
 from django.db.models import Q
 from django.db.models import QuerySet
 from loguru import logger
+from telethon.sync import TelegramClient
 
 
 def publish_announcement_to_channel(announcement: Announcement) -> None:
@@ -39,11 +39,6 @@ def publish_announcement_to_channel(announcement: Announcement) -> None:
 
         for tag in announcement.tags.filter(Q(channel_id__isnull=False) & ~Q(channel_id__exact="")):
             message = create_subchannel_message(announcement)
-            logger.critical(f"Tag: {tag}")
-            logger.critical(f"Tag channel_id: {tag.channel_id}")
-            logger.critical(f"Tag channel_id type: {type(tag.channel_id)}")
-            logger.critical(f"Tag channel_id is empty: {tag.channel_id == ''}")
-            logger.critical(f"Tag channel_id len: {len(tag.channel_id)}")
             publish_subchannel_media(announcement, tag)
             text_message = send_text_message_with_retries_to_subchannel(message, tag)
             update_announcement_and_save_subchannel_message(announcement, text_message, tag)
@@ -88,30 +83,39 @@ def edit_announcement_in_channel(announcement: Announcement, old_tags: dict[Tag,
 
 
 def delete_announcement_from_channel(announcement: Announcement) -> None:
-    """
-    Удаляет данное объявление из канала и всех подканалов.
-
-    Args:
-        announcement (Announcement): Объявление, которое необходимо удалить.
-    """
     logger.info(f"Deleting announcement: {announcement.name}")
 
-    published_messages: QuerySet[PublishedMessage] = announcement.published_messages.all()
-    logger.debug(f"Deleting {published_messages.count()} messages")
-    for message in published_messages:
-        perform_action_with_retries(bot.delete_message, message.channel_id, message.message_id)
-        message.delete()
-        logger.debug(f"Message {message.message_id} deleted from channel and database")
-
-    subchannel_messages: QuerySet[SubchannelMessage] = announcement.subchannel_messages.all()
-    logger.debug(f"Deleting {subchannel_messages.count()} subchannel messages")
-    for message in subchannel_messages:
-        perform_action_with_retries(bot.delete_message, message.channel_id, message.message_id)
-        message.delete()
-        logger.debug(f"Subchannel Message {message.message_id} deleted from channel and database")
+    telethon.run_in_new_thread(_delete_messages, announcement)
 
     update_announcement_status(announcement, is_published=False, is_active=False)
     logger.info(f"Announcement {announcement.name} deleted from channel")
+
+
+def _delete_messages(announcement: Announcement) -> None:
+    telethon.set_new_event_loop()
+    with telethon.fetch_telegram_client() as client:
+        client: TelegramClient
+        published_messages: QuerySet[PublishedMessage] = announcement.published_messages.all()
+        logger.debug(f"Deleting {published_messages.count()} messages")
+        for message in published_messages:
+            perform_action_with_retries(
+                client.delete_messages,
+                entity=int(message.channel_id),
+                message_ids=[int(message.message_id)],
+            )
+            message.delete()
+            logger.debug(f"Message {message.message_id} deleted from channel and database")
+
+        subchannel_messages: QuerySet[SubchannelMessage] = announcement.subchannel_messages.all()
+        logger.debug(f"Deleting {subchannel_messages.count()} subchannel messages")
+        for message in subchannel_messages:
+            perform_action_with_retries(
+                client.delete_messages,
+                entity=int(message.channel_id),
+                message_ids=[int(message.message_id)],
+            )
+            message.delete()
+            logger.debug(f"Subchannel Message {message.message_id} deleted from channel and database")
 
 
 def delete_announcement_from_subchannel(announcement: Announcement, tag: Tag) -> None:
@@ -125,6 +129,18 @@ def delete_announcement_from_subchannel(announcement: Announcement, tag: Tag) ->
     subchannel_messages: QuerySet[SubchannelMessage] = SubchannelMessage.objects.filter(
         announcement=announcement, tag=tag
     )
+
+    telethon.run_in_new_thread(_delete_subchannels_messages, subchannel_messages)
+
+
+def _delete_subchannels_messages(subchannel_messages: QuerySet[SubchannelMessage]) -> None:
+    telethon.set_new_event_loop()
     for message in subchannel_messages:
-        perform_action_with_retries(bot.delete_message, message.channel_id, message.message_id)
+        with telethon.fetch_telegram_client() as client:
+            client: TelegramClient
+            perform_action_with_retries(
+                client.delete_messages,
+                entity=int(message.channel_id),
+                message_ids=[int(message.message_id)],
+            )
         message.delete()

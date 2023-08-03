@@ -1,8 +1,11 @@
-from ..bot import bot
 from .telegram import perform_action_with_retries
 from apps.announcement.models import Announcement
 from apps.bot.models import PublishedMessage
+from apps.bot.services import telethon
 from decouple import config
+from loguru import logger
+from telethon.sync import TelegramClient
+from telethon.tl.types import Message
 from typing import LiteralString
 
 
@@ -32,10 +35,33 @@ def send_text_message_with_retries(message: str) -> str | None:
         Optional[str]: Возвращает объект сообщения, если сообщение успешно отправлено.
                        Возвращает None, если отправка сообщения не удалась.
     """
-    return perform_action_with_retries(bot.send_message, config("CHANNEL_ID"), message)
+    logger.info(f"Sending message to channel {config('CHANNEL_NAME')}...")
+    return telethon.run_in_new_thread(_send_text_message, message)
 
 
-def update_announcement_and_save_message(announcement: Announcement, text_message: str) -> None:
+def _send_text_message(message: str) -> str | None:
+    """
+    Отправляет текстовое сообщение в Telegram.
+
+    Args:
+        message (str): Текст сообщения для отправки.
+
+    Returns:
+        Optional[str]: Возвращает объект сообщения, если сообщение успешно отправлено.
+                       Возвращает None, если отправка сообщения не удалась.
+    """
+    logger.info(f"Sending message to channel {config('CHANNEL_NAME')}...")
+    telethon.set_new_event_loop()
+    with telethon.fetch_telegram_client() as client:
+        client: TelegramClient
+        return perform_action_with_retries(
+            client.send_message,
+            entity=int(config("CHANNEL_ID")),
+            message=message,
+        )
+
+
+def update_announcement_and_save_message(announcement: Announcement, text_message: Message) -> None:
     """
     Обновляет данные объявления и сохраняет информацию о сообщении в базе данных.
 
@@ -43,13 +69,14 @@ def update_announcement_and_save_message(announcement: Announcement, text_messag
         announcement (Announcement): Объявление для обновления.
         text_message (str): Объект сообщения, информация о котором будет сохранена в базе данных.
     """
-    announcement.published_message_link = f"https://t.me/{config('CHANNEL_NAME')}/{text_message.message_id}"
+    logger.info(f"Updating announcement {announcement.id}...")
+    announcement.published_message_link = f"https://t.me/{config('CHANNEL_NAME')}/{text_message.id}"
     announcement.is_published = True
     announcement.save()
     PublishedMessage.objects.create(
         announcement=announcement,
-        channel_id=config("CHANNEL_ID"),
-        message_id=text_message.message_id,
+        channel_id=int(config("CHANNEL_ID")),
+        message_id=int(text_message.id),
         type=PublishedMessage.MessageType.TEXT,
     )
 

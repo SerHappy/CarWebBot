@@ -1,8 +1,9 @@
-from ..bot import bot
 from .telegram import perform_action_with_retries
 from apps.announcement.models import Announcement
 from apps.bot.models import SubchannelMessage
+from apps.bot.services import telethon
 from apps.tag.models import Tag
+from telethon.sync import TelegramClient
 from typing import LiteralString
 
 
@@ -34,7 +35,23 @@ def send_text_message_with_retries_to_subchannel(message: str, tag: Tag) -> str 
         Optional[str]: Возвращает объект сообщения, если сообщение успешно отправлено.
                        Возвращает None, если отправка сообщения не удалась.
     """
-    return perform_action_with_retries(bot.send_message, tag.channel_id, message)
+    return telethon.run_in_new_thread(
+        _send_message_to_subchannel,
+        message=message,
+        tag=tag,
+    )
+
+
+def _send_message_to_subchannel(message: str, tag: Tag) -> str | None:
+    """Отправляет текстовое сообщение в Telegram подканал."""
+    telethon.set_new_event_loop()
+    with telethon.fetch_telegram_client() as client:
+        client: TelegramClient
+        return perform_action_with_retries(
+            client.send_message,
+            entity=int(tag.channel_id),
+            message=message,
+        )
 
 
 def update_announcement_and_save_subchannel_message(announcement: Announcement, text_message: str, tag: Tag) -> None:
@@ -48,8 +65,8 @@ def update_announcement_and_save_subchannel_message(announcement: Announcement, 
     """
     SubchannelMessage.objects.create(
         announcement=announcement,
-        channel_id=tag.channel_id,
-        message_id=text_message.message_id,
+        channel_id=int(tag.channel_id),
+        message_id=int(text_message.id),
         type=SubchannelMessage.MessageType.TEXT,
         tag=tag,
     )
