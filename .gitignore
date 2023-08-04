@@ -9,3 +9,5 @@ celerybeat-schedule
 tmp/
 *.session
 *.session-journal
+pyrightconfig.json
+
