@@ -3,7 +3,7 @@ version: '3.9'
 services:
   db:
     image: mysql:8.1.0
-    command: --default-authentication-plugin=authentication_policy
+    command: --default-authentication-plugin=caching_sha2_password
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
@@ -52,6 +52,7 @@ services:
     volumes:
       - .:/code
     depends_on:
+      - web
       - db
       - redis
     env_file:
@@ -64,9 +65,9 @@ services:
     volumes:
       - .:/code
     depends_on:
+      - web
       - db
       - redis
-      - celery
     env_file:
       - ./.env
 
