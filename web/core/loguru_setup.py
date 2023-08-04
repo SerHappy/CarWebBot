@@ -1,5 +1,4 @@
-from decouple import config
-from loguru._defaults import LOGURU_FORMAT
+from django.conf import settings
 
 
 def setup_logger(logger, settings_dict=None) -> None:
@@ -11,11 +10,11 @@ def setup_logger(logger, settings_dict=None) -> None:
     """
     logger.remove()
     logger.add(
-        config("LOGURU_PATH"),
+        settings.LOGURU_PATH,
         rotation="0:00",
         enqueue=True,
         compression="zip",
-        level=config("LOGURU_LEVEL", default="DEBUG"),
-        format=config("LOGURU_FORMAT", default=LOGURU_FORMAT),
-        serialize=config("LOGURU_SERIALIZE", default=False, cast=bool),
+        level=settings.LOGURU_LEVEL,
+        format=settings.LOGURU_FORMAT,
+        serialize=False,
     )

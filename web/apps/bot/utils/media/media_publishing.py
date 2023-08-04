@@ -7,7 +7,7 @@ from apps.announcement.models import Media
 from apps.bot.models import SubchannelMessage
 from apps.bot.services import telethon
 from apps.tag.models import Tag
-from decouple import config
+from django.conf import settings
 from django.db.models import QuerySet
 from loguru import logger
 from telethon.sync import TelegramClient
@@ -164,7 +164,7 @@ def _send_media_to_subchannel(
         client: TelegramClient
         media_message = perform_action_with_retries(
             client.send_file,
-            entity=int(config("CHANNEL_ID")),
+            entity=settings.MAIN_CHANNEL_ID,
             file=files_to_send,
         )
         logger.debug(f"Media message sent result: {media_message}")

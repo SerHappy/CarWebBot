@@ -1,4 +1,4 @@
-from decouple import config
+from django.conf import settings
 from loguru import logger
 from telethon.sync import TelegramClient
 from typing import Any
@@ -10,10 +10,10 @@ import concurrent.futures
 def fetch_telegram_client() -> TelegramClient:
     """Возвращает клиента Telegram, заданного в env файле."""
     return TelegramClient(
-        session=config("TELETHON_SESSION_NAME"),
-        api_id=config("TELETHON_API_ID"),
-        api_hash=config("TELETHON_API_HASH"),
-        system_version=config("TELETHON_SYSTEM_VERSION"),
+        session=settings.TELETHON_SESSION_NAME,
+        api_id=settings.TELETHON_API_ID,
+        api_hash=settings.TELETHON_API_HASH,
+        system_version=settings.TELETHON_SYSTEM_VERSION,
     )
 
 
