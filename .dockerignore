@@ -1,0 +1,16 @@
+.env
+.venv
+.git
+.gitignore
+.vscode
+*.lock
+resourses/
+__pycache__/
+web/media/
+celerybeat-schedule
+*.log
+*.zip
+tmp/
+*.session
+*.session-journal
+pyrightconfig.json
