@@ -3,7 +3,7 @@ version: '3.9'
 services:
   db:
     image: mysql:8.1.0
-    command: --default-authentication-plugin=mysql_native_password
+    command: --default-authentication-plugin=authentication_policy
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
