@@ -48,20 +48,7 @@ services:
   celery:
     build: .
     working_dir: /code/web
-    command: celery -A core worker -l info
-    volumes:
-      - .:/code
-    depends_on:
-      - web
-      - db
-      - redis
-    env_file:
-      - ./.env
-
-  beat:
-    build: .
-    working_dir: /code/web
-    command: celery -A сore beat -l info
+    command: celery -A core worker --beat -l info
     volumes:
       - .:/code
     depends_on:
