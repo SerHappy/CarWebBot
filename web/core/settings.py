@@ -22,15 +22,19 @@ import os
 # BASE PATHS AND URLS
 # --------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
-LOGIN_URL = "/users/login/"
+LOGIN_URL = config("LOGIN_URL", cast=str, default="/users/login/")
 TMP_STORAGE_PATH = os.path.join(BASE_DIR, "tmp")
 
 # --------------------------------
 # SECURITY SETTINGS
 # --------------------------------
-SECRET_KEY = config("SECRET_KEY")
-DEBUG = config("DEBUG", cast=bool)
-ALLOWED_HOSTS: list[str] = config("ALLOWED_HOSTS", cast=lambda v: [s.strip() for s in v.split(",")])
+SECRET_KEY = config("SECRET_KEY", cast=str)
+DEBUG = config("DEBUG", cast=bool, default=True)
+ALLOWED_HOSTS: list[str] = config(
+    "ALLOWED_HOSTS",
+    cast=lambda v: [s.strip() for s in v.split(",")],
+    default="127.0.0.1",
+)
 if DEBUG:
     INTERNAL_IPS = ["127.0.0.1"]
 
@@ -100,12 +104,12 @@ WSGI_APPLICATION = "core.wsgi.application"
 # --------------------------------
 DATABASES = {
     "default": {
-        "ENGINE": config("DB_ENGINE"),
-        "NAME": config("DB_NAME"),
-        "USER": config("DB_USER"),
-        "PASSWORD": config("DB_PASSWORD"),
-        "HOST": config("DB_HOST"),
-        "PORT": config("DB_PORT"),
+        "ENGINE": config("DB_ENGINE", cast=str, default="django.db.backends.mysql"),
+        "NAME": config("DB_NAME", cast=str, default="db"),
+        "USER": config("DB_USER", cast=str, default="root"),
+        "PASSWORD": config("DB_PASSWORD", cast=str, default="root"),
+        "HOST": config("DB_HOST", cast=str, default="localhost"),
+        "PORT": config("DB_PORT", cast=int, default="3306"),
         "OPTIONS": {"charset": "utf8mb4"},
     }
 }
@@ -139,7 +143,7 @@ USE_TZ = True
 # --------------------------------
 # CELERY SETTINGS
 # --------------------------------
-CELERY_BROKER_URL = config("CELERY_BROKER_URL")
+CELERY_BROKER_URL = config("CELERY_BROKER_URL", cast=str, default="redis://localhost:6379")
 CELERY_TIMEZONE = "UTC"
 
 # --------------------------------
@@ -156,6 +160,23 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # --------------------------------
+# TELEGRAM SETTINGS
+# --------------------------------
+MAIN_CHANNEL_ID = config("MAIN_CHANNEL_ID", cast=int)
+MAIN_CHANNEL_NAME = config("MAIN_CHANNEL_NAME", cast=str)
+
+# --------------------------------
+# TELETHON SETTINGS
+# --------------------------------
+TELETHON_API_ID = config("TELETHON_API_ID", cast=int)
+TELETHON_API_HASH = config("TELETHON_API_HASH", cast=str)
+TELETHON_SESSION_NAME = config("TELETHON_SESSION_NAME", cast=str)
+TELETHON_SYSTEM_VERSION = config("TELETHON_SYSTEM_VERSION", cast=str, default="4.16.30-vxCUSTOM")
+
+# --------------------------------
 # LOGGER SETTINGS
 # --------------------------------
+LOGURU_PATH = config("LOGURU_PATH", cast=str, default="../../logs")
+LOGURU_LEVEL = config("LOGURU_LEVEL", cast=str, default="INFO")
+LOGURU_FORMAT = config("LOGURU_FORMAT", cast=str, default="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
 load_loguru(globals(), configure_func=setup_logger)
