@@ -8,7 +8,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
     env_file:
       - ./.env
     volumes:
@@ -16,7 +15,8 @@ services:
 
   web:
     build: .
-    command: gunicorn web.core.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    working_dir: /code/web
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 3
     volumes:
       - .:/code
     ports:
@@ -48,7 +48,7 @@ services:
   celery:
     build: .
     working_dir: /code/web
-    command: celery -A web/core worker -l info
+    command: celery -A core worker -l info
     volumes:
       - .:/code
     depends_on:
@@ -60,12 +60,13 @@ services:
   beat:
     build: .
     working_dir: /code/web
-    command: celery -A web/core beat -l info
+    command: celery -A сore beat -l info
     volumes:
       - .:/code
     depends_on:
       - db
       - redis
+      - celery
     env_file:
       - ./.env
 
