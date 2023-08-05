@@ -176,7 +176,7 @@ TELETHON_SYSTEM_VERSION = config("TELETHON_SYSTEM_VERSION", cast=str, default="4
 # --------------------------------
 # LOGGER SETTINGS
 # --------------------------------
-LOGURU_PATH = config("LOGURU_PATH", cast=str, default="logs")
+LOGURU_PATH = os.path.join(BASE_DIR, config("LOGURU_PATH", cast=str, default="logs/server.log"))
 LOGURU_LEVEL = config("LOGURU_LEVEL", cast=str, default="INFO")
 LOGURU_FORMAT = config("LOGURU_FORMAT", cast=str, default="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
 load_loguru(globals(), configure_func=setup_logger)
