@@ -25,7 +25,7 @@ if [ "$INSTALL" == "Y" ] || [ "$INSTALL" == "y" ]; then
     read -p "Directory $VENV_DIR does not exist. Create it?[Y/n] " REPLY
     if [ "$REPLY" == "Y" ] || [ "$REPLY" == "y" ]; then
       echo "Creating virtual environment..."
-      $PYTHON_VERSION -m venv $VENV_DIR
+      $PYTHON_CMD -m venv $VENV_DIR
       break
     else
       echo "Please enter a valid directory."
@@ -36,7 +36,7 @@ if [ "$INSTALL" == "Y" ] || [ "$INSTALL" == "y" ]; then
   source $VENV_DIR/bin/activate
 
   echo "Installing requirements..."
-  if ! $PYTHON_VERSION -m pip install -r requirements.txt; then
+  if ! $PYTHON_CMD -m pip install -r requirements.txt; then
     echo "Failed to install requirements. Please check your requirements.txt file."
     exit 1
   fi
@@ -45,7 +45,7 @@ if [ "$INSTALL" == "Y" ] || [ "$INSTALL" == "y" ]; then
   export DJANGO_SETTINGS_MODULE='web.core.settings'
 
   echo "Creating telethon session..."
-  $PYTHON_VERSION create_session.py
+  $PYTHON_CMD create_session.py
 
   echo "Quiting virtual environment..."
   deactivate
