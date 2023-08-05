@@ -45,7 +45,9 @@ if [ "$INSTALL" == "Y" ] || [ "$INSTALL" == "y" ]; then
   export DJANGO_SETTINGS_MODULE='web.core.settings'
 
   echo "Creating telethon session..."
+  set -e
   $PYTHON_CMD create_session.py
+  set +e
 
   echo "Quiting virtual environment..."
   deactivate
@@ -58,16 +60,21 @@ if ! docker --version &> /dev/null; then
 fi
 
 # Checking docker-compose
-if command -v "docker compose" &> /dev/null
-then
-    DOCKER_COMPOSE_COMMAND="docker compose"
-elif command -v "docker-compose" &> /dev/null
-then
-    DOCKER_COMPOSE_COMMAND="docker-compose"
-else
+DOCKER_COMPOSE_COMMAND=""
+
+if command -v docker &> /dev/null; then
+    if docker compose version &> /dev/null; then
+        DOCKER_COMPOSE_COMMAND="docker compose"
+    elif docker-compose version &> /dev/null; then
+        DOCKER_COMPOSE_COMMAND="docker-compose"
+    fi
+fi
+
+if [ -z "$DOCKER_COMPOSE_COMMAND" ]; then
     echo "Neither 'docker compose' nor 'docker-compose' is available. Please install docker-compose."
     exit 1
 fi
+
 
 echo "Using '$DOCKER_COMPOSE_COMMAND' to manage Docker containers."
 
