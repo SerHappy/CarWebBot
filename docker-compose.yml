@@ -24,8 +24,18 @@ services:
     depends_on:
       - db
       - redis
+      - migrator
     env_file:
       - ./.env
+
+  migrator:
+    build: .
+    working_dir: /code/web
+    command: python3 manage.py migrate
+    volumes:
+      - .:/code
+    depends_on:
+      - db
 
   nginx:
     image: nginx:1.25.1-alpine
