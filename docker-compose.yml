@@ -30,8 +30,8 @@ services:
   nginx:
     image: nginx:1.25.1-alpine
     volumes:
-      - ./var/www/CarWebBot/web/static/:/var/www/CarWebBot/web/static
-      - ./var/www/CarWebBot/web/media/:/var/www/CarWebBot/web/media
+      - ./web/static/:/var/www/CarWebBot/web/static
+      - ./web/media/:/var/www/CarWebBot/web/media
       - ./CarWebBot.conf:/etc/nginx/conf.d/default.conf
     ports:
       - 80:80
