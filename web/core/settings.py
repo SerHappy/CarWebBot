@@ -170,7 +170,7 @@ MAIN_CHANNEL_NAME = config("MAIN_CHANNEL_NAME", cast=str)
 # --------------------------------
 TELETHON_API_ID = config("TELETHON_API_ID", cast=int)
 TELETHON_API_HASH = config("TELETHON_API_HASH", cast=str)
-TELETHON_SESSION_NAME = os.path.join(BASE_DIR, config("TELETHON_SESSION_NAME", cast=str))
+TELETHON_SESSION_NAME = os.path.join(BASE_DIR.parent, config("TELETHON_SESSION_NAME", cast=str))
 TELETHON_SYSTEM_VERSION = config("TELETHON_SYSTEM_VERSION", cast=str, default="4.16.30-vxCUSTOM")
 
 # --------------------------------

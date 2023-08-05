@@ -13,19 +13,20 @@ tmp_storage = FileSystemStorage(location=settings.TMP_STORAGE_PATH)
 
 
 def handle_media_files(request: HttpRequest, announcement: Announcement) -> None:
+    """Обрабатывает медиа файлы из POST запроса для `announcement`"""
     upload_ids = _get_upload_ids_from_request(request)
-    if announcement.is_published:
-        _delete_media_files(upload_ids, announcement)
+    _delete_media_files(upload_ids, announcement)
     _add_new_media_files(upload_ids, announcement)
-    if announcement.is_published:
-        _update_existing_media_files_order(upload_ids, announcement)
+    _update_existing_media_files_order(upload_ids, announcement)
 
 
 def _get_upload_ids_from_request(request: HttpRequest) -> list[str]:
+    """Возвращает список загруженных медиа файлов из tmp директории из POST запроса"""
     return request.POST.getlist("uploadIds")[0].split(",")
 
 
 def _add_new_media_files(upload_ids: list[str], announcement: Announcement) -> None:
+    """Создает медиа файлы из списка `upload_ids` для `announcement`. Удаляет tmp директорию"""
     for index, upload_id in enumerate(upload_ids):
         tmp_dir = tmp_storage.path(upload_id)
         if os.path.exists(tmp_dir):
@@ -46,6 +47,7 @@ def _add_new_media_files(upload_ids: list[str], announcement: Announcement) -> N
 
 
 def _update_existing_media_files_order(upload_ids: list[str], announcement: Announcement) -> None:
+    """Обновляет порядок медиа файлов для `announcement` из списка `upload_ids`"""
     for index, upload_id in enumerate(upload_ids):
         try:
             media = Media.objects.get(file=upload_id, announcement=announcement)
@@ -56,6 +58,7 @@ def _update_existing_media_files_order(upload_ids: list[str], announcement: Anno
 
 
 def _delete_media_files(upload_ids: list[str], announcement: Announcement) -> None:
+    """Удаляет медиа файлы из `announcement`, которых нет в списке `upload_ids`"""
     existing_files = [media.file.name for media in announcement.media.all()]
     for file_name in existing_files:
         if file_name not in upload_ids:
