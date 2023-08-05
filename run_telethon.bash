@@ -81,10 +81,49 @@ echo "Using '$DOCKER_COMPOSE_COMMAND' to manage Docker containers."
 # Running docker compose
 read -p "Run '$DOCKER_COMPOSE_COMMAND'?[Y/n] " REPLY
 if [ "$REPLY" == "Y" ] || [ "$REPLY" == "y" ]; then
+  # Running server
   echo "Running '$DOCKER_COMPOSE_COMMAND'..."
   set -e
   $DOCKER_COMPOSE_COMMAND up -d --build
   set +e
   echo "Done! You can check logs with '$DOCKER_COMPOSE_COMMAND logs -f'. \
   Use '$DOCKER_COMPOSE_COMMAND down' to stop the containers."
+
+  # Dumping database
+  read -p "Do you want to dump your current database and import it into Docker? [Y/n] " DUMP_DB
+  if [ "$DUMP_DB" == "Y" ] || [ "$DUMP_DB" == "y" ]; then
+    # Enter database credentials
+    read -p "Please enter your database username: " DB_USER
+    read -s -p "Please enter your database password: " DB_PASSWORD
+    echo
+    read -p "Please enter your database name: " DB_NAME
+
+    # Dumping database
+    echo "Dumping the current database..."
+    set -e
+    mysqldump -u $DB_USER -p$DB_PASSWORD $DB_NAME > mydatabase.sql
+    set +e
+    echo "Database dumped."
+
+    # Copying the dump file into the Docker container
+    echo "Copying the dump file into the Docker container..."
+    set -e
+    $DOCKER_COMPOSE_COMMAND cp mydatabase.sql db:/mydatabase.sql
+    set +e
+    echo "Dump file copied."
+
+    # Importing the dump into the Docker DB
+    echo "Importing the dump into the Docker database..."
+    set -e
+    $DOCKER_COMPOSE_COMMAND exec db bash -c "mysql -u $DB_USER -p$DB_PASSWORD $DB_NAME < mydatabase.sql"
+    set +e
+    echo "Dump imported."
+
+    # Removing the dump file
+    echo "Removing the dump file..."
+    set -e
+    rm mydatabase.sql
+    set +e
+    echo "Dump file removed."
+  fi
 fi
