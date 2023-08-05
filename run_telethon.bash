@@ -1,12 +1,15 @@
 #!/bin/bash
 
 # Checking python version
-PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
-PYTHON_VERSION_REQUIRED="3.11"
-if [ "$(printf '%s\n' "$PYTHON_VERSION" "$PYTHON_VERSION_REQUIRED" | sort -V | head -n1)" == "$PYTHON_VERSION" ]; then
-    echo "Python version $PYTHON_VERSION is too old. Please update to $PYTHON_VERSION_REQUIRED or newer."
+PYTHON_CMD="python3.11"
+if ! command -v $PYTHON_CMD &> /dev/null; then
+    echo "Python 3.11 or newer is not installed. Please install Python 3.11 or newer."
     exit 1
 fi
+
+# Now use $PYTHON_CMD instead of `python3`
+PYTHON_VERSION=$($PYTHON_CMD --version 2>&1 | awk '{print $2}')
+echo "Using Python $PYTHON_VERSION"
 
 # Installing virtual environment and Telethon
 read -p "Install virtual environment and Telethon? [Y/n] " INSTALL
@@ -22,7 +25,7 @@ if [ "$INSTALL" == "Y" ] || [ "$INSTALL" == "y" ]; then
     read -p "Directory $VENV_DIR does not exist. Create it?[Y/n] " REPLY
     if [ "$REPLY" == "Y" ] || [ "$REPLY" == "y" ]; then
       echo "Creating virtual environment..."
-      python3 -m venv $VENV_DIR
+      $PYTHON_VERSION -m venv $VENV_DIR
       break
     else
       echo "Please enter a valid directory."
@@ -33,7 +36,7 @@ if [ "$INSTALL" == "Y" ] || [ "$INSTALL" == "y" ]; then
   source $VENV_DIR/bin/activate
 
   echo "Installing requirements..."
-  if ! python3 -m pip install -r requirements.txt; then
+  if ! $PYTHON_VERSION -m pip install -r requirements.txt; then
     echo "Failed to install requirements. Please check your requirements.txt file."
     exit 1
   fi
@@ -42,7 +45,7 @@ if [ "$INSTALL" == "Y" ] || [ "$INSTALL" == "y" ]; then
   export DJANGO_SETTINGS_MODULE='web.core.settings'
 
   echo "Creating telethon session..."
-  python3 create_session.py
+  $PYTHON_VERSION create_session.py
 
   echo "Quiting virtual environment..."
   deactivate
