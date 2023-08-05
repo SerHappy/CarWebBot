@@ -1,15 +1,11 @@
 from apps.announcement.models import Announcement
 from apps.announcement.models import Media
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
+from apps.announcement.storage import tmp_storage
 from django.http import HttpRequest
 
 import mimetypes
 import os
 import shutil
-
-
-tmp_storage = FileSystemStorage(location=settings.TMP_STORAGE_PATH)
 
 
 def handle_media_files(request: HttpRequest, announcement: Announcement) -> None:

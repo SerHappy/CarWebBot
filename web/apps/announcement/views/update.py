@@ -8,7 +8,6 @@ from apps.bot.views import edit_announcement_in_channel
 from apps.tag.models import Tag
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.files.storage import FileSystemStorage
 from django.core.serializers import serialize
 from django.http import HttpRequest
 from django.http import HttpResponse
@@ -19,9 +18,6 @@ from django.urls import reverse
 from django.views.generic import View
 
 import os
-
-
-tmp_storage = FileSystemStorage(location=settings.TMP_STORAGE_PATH)
 
 
 class AnnouncementUpdateView(LoginRequiredMixin, View):

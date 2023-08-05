@@ -1,7 +1,4 @@
-from apps.bot.views import delete_announcement_from_channel
-from apps.bot.views import edit_announcement_in_channel
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
+from ..storage import tmp_storage
 from django.http import JsonResponse
 from django.views.generic import View
 from loguru import logger
@@ -10,9 +7,6 @@ from urllib.parse import unquote
 import os
 import shutil
 import uuid
-
-
-tmp_storage = FileSystemStorage(location=settings.TMP_STORAGE_PATH)
 
 
 class MediaUploadView(View):

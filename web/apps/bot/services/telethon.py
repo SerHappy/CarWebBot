@@ -26,6 +26,12 @@ def run_in_new_thread(func, *args, **kwargs) -> Any:
         return future.result()
 
 
+def set_new_event_loop() -> None:
+    """Создает новый event loop для asyncio."""
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+
 def _check_future_status(future: concurrent.futures.Future) -> None:
     """Проверяет статус задачи `future`, запущенной в отдельном потоке."""
     if future.cancelled():
@@ -45,9 +51,3 @@ def _check_future_status(future: concurrent.futures.Future) -> None:
     if future.running():
         logger.info("Task is running")
         return
-
-
-def set_new_event_loop() -> None:
-    """Создает новый event loop для asyncio."""
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)

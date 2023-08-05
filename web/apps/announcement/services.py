@@ -1,5 +1,4 @@
 from .models import Announcement
-from django.utils import timezone
 from typing import Literal
 
 
