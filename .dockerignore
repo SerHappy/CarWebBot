@@ -6,13 +6,10 @@ env/
 *.lock
 resourses/
 __pycache__/
-web/media/
-celerybeat-schedule
 *.log
 *.zip
-tmp/
 *.session-journal
 pyrightconfig.json
 .env.example
-.run_telethon.bash
-create_session.py
+initial_setup.bash
+create_telethon_session.py
