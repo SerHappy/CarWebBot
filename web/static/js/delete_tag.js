@@ -9,7 +9,7 @@ $(document).ready(function () {
             let csrfToken = cookie.substring(cookie.indexOf('=') + 1);
             $.ajax({
                 url: deleteUrl,
-                type: 'POST',
+                type: 'DELETE',
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader("X-CSRFToken", csrfToken);
                 },

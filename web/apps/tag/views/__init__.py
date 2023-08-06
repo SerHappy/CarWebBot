@@ -1,5 +1,5 @@
-from .check import check_tag
+from .check import TagCheckView
 from .create import TagCreateView
-from .delete import delete_tag
+from .delete import TagDeleteView
 from .list import TagListView
 from .update import TagUpdateView

@@ -1,12 +1,8 @@
 from apps.tag.models import Tag
+from apps.tag.services import tag_service
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.paginator import EmptyPage
-from django.core.paginator import InvalidPage
-from django.core.paginator import PageNotAnInteger
-from django.core.paginator import Paginator
 from django.views.generic import ListView
-from loguru import logger
 from typing import Any
 
 
@@ -16,27 +12,19 @@ class TagListView(LoginRequiredMixin, ListView):
     template_name = "tag/tag_list.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context["tags"] = Tag.objects.all()
-        name_filter = self.request.GET.get("nameFilter", None)
-        if name_filter:
-            context["tags"] = context["tags"].filter(name__icontains=name_filter)
+        """
+        Получает контекст данных для отображения списка тегов. Применяет фильтрацию и пагинацию, если необходимо.
 
-        paginator = Paginator(context["tags"], 10)
-        page = self.request.GET.get("page", 1)
-        try:
-            context["tags"] = paginator.page(page)
-            logger.info(f"Page {page} of tags was loaded")
-        except (PageNotAnInteger, ValueError):
-            logger.warning(f"Page {page} of tags was not an integer")
-            context["tags"] = paginator.page(1)
-            logger.info(f"Page 1 of tags was loaded")
-        except EmptyPage:
-            logger.warning(f"Page {page} of tags was empty")
-            context["tags"] = paginator.page(paginator.num_pages)
-            logger.info(f"Last page of tags was loaded")
-        except InvalidPage:
-            logger.warning(f"Page {page} of tags was invalid")
-            context["tags"] = paginator.page(1)
-            logger.info(f"Page 1 of tags was loaded")
+        Args:
+            **kwargs: Дополнительные аргументы для контекста.
+
+        Returns:
+            dict[str, Any]: Словарь с контекстом для отображения списка тегов.
+        """
+        service = tag_service.TagService()
+        context = super().get_context_data(**kwargs)
+        context["tags"] = service.fetch_all_tags_from_db()
+        name_filter = self.request.GET.get("nameFilter", None)
+        page_number = self.request.GET.get("page", 1)
+        context["tags"] = service.get_paginated_tags(name_filter=name_filter, page=page_number)
         return context
