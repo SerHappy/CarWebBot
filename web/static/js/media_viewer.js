@@ -1,22 +1,20 @@
-$(document).ready(function () {
-    var currentMediaIndex = -1;
-    var currentRowId = null;
-    var mediaMap = {};
+var currentMediaIndex = -1;
+var currentRowId = null;
+var mediaMap = {};
 
-    function updateMediaMap() {
-        mediaMap = {};
-        $(".media-links").each(function () {
-            var rowId = $(this).data("announcement-id");
-            if (!(rowId in mediaMap)) {
-                mediaMap[rowId] = [];
-            }
-            mediaMap[rowId].push($(this).data("src"));
-        });
-    }
+function updateMediaMap() {
+    mediaMap = {};
+    $(".media-links").each(function () {
+        var rowId = $(this).data("announcement-id");
+        if (!(rowId in mediaMap)) {
+            mediaMap[rowId] = [];
+        }
+        mediaMap[rowId].push($(this).data("src"));
+    });
+}
 
-    updateMediaMap();
 
-    $("#previous").on("click", function () {
+$("#previous").on("click", function () {
     if (currentMediaIndex > 0) {
         currentMediaIndex--;
         loadMedia(mediaMap[currentRowId][currentMediaIndex]);
@@ -64,16 +62,15 @@ $("#mediaModal").on("show.bs.modal", function (event) {
     loadMedia(src);
     checkButtonStatus();
 });
-});
-$(document).keydown(function(e) {
-    switch(e.which) {
-        case 37: // left arrow key
+$(document).keydown(function (e) {
+    switch (e.which) {
+        case 37:
             $("#previous").trigger('click');
             break;
-        case 39: // right arrow key
+        case 39:
             $("#next").trigger('click');
             break;
-        default: return; // exit this handler for other keys
+        default: return;
     }
-    e.preventDefault(); // prevent the default action (scroll / move caret)
+    e.preventDefault();
 });

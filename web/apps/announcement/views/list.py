@@ -36,7 +36,7 @@ class AnnouncementListView(LoginRequiredMixin, ListView):
         if tag_filter:
             context["announcements"] = context["announcements"].filter(tags__name__icontains=tag_filter)
 
-        paginator = Paginator(context["announcements"], 5)
+        paginator = Paginator(context["announcements"], settings.ANNOUNCEMENT_LIST_PER_PAGE)
         page = self.request.GET.get("page")
         try:
             context["announcements"] = paginator.page(page)

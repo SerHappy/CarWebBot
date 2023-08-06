@@ -1,4 +1,4 @@
-window.executeAjax = function(page) {
+window.executeAjax = function (page) {
     console.log("Inside executeAjax function");
 
     var nameFilter = $("#nameFilter").val();
@@ -37,9 +37,9 @@ window.executeAjax = function(page) {
 
 function debounce(func, wait, immediate) {
     var timeout;
-    return function() {
+    return function () {
         var context = this, args = arguments;
-        var later = function() {
+        var later = function () {
             timeout = null;
             if (!immediate) func.apply(context, args);
         };
@@ -53,7 +53,7 @@ function debounce(func, wait, immediate) {
 var executeAjaxDebounced = debounce(executeAjax, 250);
 
 
-window.handlePaginationEvents = function() {
+window.handlePaginationEvents = function () {
     console.log("Inside handlePaginationEvents function");
 
     $("#pagination").on("click", "a", function (e) {
@@ -68,7 +68,7 @@ window.handlePaginationEvents = function() {
         var page = $("#pagination .active").text();
         executeAjaxDebounced(page);
     });
-  $("#tagFilter").on("input", function () {
+    $("#tagFilter").on("input", function () {
         console.log("Tag filter input detected");
         var page = $("#pagination .active").text();
         executeAjaxDebounced(page);

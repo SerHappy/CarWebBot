@@ -23,8 +23,11 @@ class TagListView(LoginRequiredMixin, ListView):
         """
         service = tag_service.TagService()
         context = super().get_context_data(**kwargs)
-        context["tags"] = service.fetch_all_tags_from_db()
         name_filter = self.request.GET.get("nameFilter", None)
         page_number = self.request.GET.get("page", 1)
-        context["tags"] = service.get_paginated_tags(name_filter=name_filter, page=page_number)
+        context["tags"] = service.get_paginated_tags(
+            name_filter=name_filter,
+            page=page_number,
+            page_size=settings.TAG_LIST_PER_PAGE,
+        )
         return context
