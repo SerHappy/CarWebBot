@@ -311,8 +311,13 @@ class TagService:
         if not validation_result.is_success():
             return validation_result
 
+        old_channel_id = None
+
         try:
             tag = self.fetch_tag_from_db(tag_to_update.tag_id)
+
+            old_channel_id = tag.channel_id
+
             tag.name = tag_to_update.name
             tag.type = tag_to_update.tag_type
             tag.channel_id = tag_to_update.channel_id
@@ -320,6 +325,18 @@ class TagService:
         except Exception as e:
             logger.critical(f"Got highly unexpected exception while updating tag: {e}. Fix it ASAP!")
             return ValidationResult.failure(str(e))
+
+        # TODO: Метод слишком много делает. Нужно разбить на несколько методов.
+        # TODO: Не соответствует SRP.
+        # TODO: Логика редактирования объявлений должна быть в другом месте.
+        announcements = tag.announcements.filter(is_published=True).order_by("publication_date")
+
+        for announcement in announcements:
+            current_tags = announcement.tags.all()
+
+            old_tags = {t: old_channel_id if t == tag else t.channel_id for t in current_tags}
+
+            edit_announcement_in_channel(announcement, old_tags)
         return validation_result
 
     # TODO: Метод слишком много делает. Нужно разбить на несколько методов.

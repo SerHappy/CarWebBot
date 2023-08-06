@@ -68,7 +68,6 @@ class AnnouncementUpdateView(LoginRequiredMixin, View):
         old_tags = {tag: tag.channel_id for tag in announcement.tags.all()}
         tags_handler.handle_tags(tag_ids, announcement)
 
-        # media_handler._delete_media_files(request, announcement)
         media_handler.handle_media_files(request, announcement)
 
         if announcement.is_published:

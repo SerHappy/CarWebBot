@@ -44,6 +44,7 @@ def publish_announcement_to_channel(announcement: Announcement) -> None:
             update_announcement_and_save_subchannel_message(announcement, text_message, tag)
 
 
+# TODO: Переработать полностью, добавить бизнес-логику ко всему приложению
 def edit_announcement_in_channel(announcement: Announcement, old_tags: dict[Tag, str]) -> None:
     """
     Редактирует объявление в канале и подканалах, обновляя все связанные медиа и текстовые сообщения.
@@ -71,6 +72,12 @@ def edit_announcement_in_channel(announcement: Announcement, old_tags: dict[Tag,
             delete_announcement_from_subchannel(announcement, tag.id)
 
     for tag, channel_id in current_tags.items():
+        try:
+            if isinstance(list(old_tags.keys())[0], str):
+                continue
+        except Exception as e:
+            logger.error(e)
+            pass
         old_channel_id = old_tags.get(tag)
         if old_channel_id != channel_id and channel_id or (tag not in old_tags and channel_id):
             message = create_subchannel_message(announcement)
