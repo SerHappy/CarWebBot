@@ -71,8 +71,7 @@
                         {{ announcement.name }}
                       </a>
                     </td>
-                    <td
-                        data-toggle="tooltip"
+                    <td data-toggle="tooltip"
                         data-placement="top"
                         title="{{ announcement.text }}">{{ announcement.text|truncatechars:50 }}</td>
                     <td>
@@ -163,15 +162,14 @@
   </section>
   {% include "announcement/includes/modal_viewer.html" %}
   {% include "announcement/includes/republish_modal.html" %}
+  <script src="{% static "js/media_viewer.js" %}"></script>
   <script src="{% static 'js/pagination_and_filters.js' %}"></script>
   <script src="{% static 'js/status_update.js' %}"></script>
-  <script src="{% static "js/media_viewer.js" %}"></script>
   <script src="{% static 'js/announcement_actions.js' %}"></script>
   <script>
   $(document).ready(function () {
     console.log("ready!");
     updateStatuses();
-    handlePaginationEvents();
     setInterval(updateStatuses, 60 * 1000);
     $(".copy-button").click(function() {
       var announcementRow = $(this).closest(".announcement-row");
@@ -188,6 +186,7 @@
 
   document.body.removeChild(tempElement);
 });
+handlePaginationEvents();
   });
   $(document).ajaxStop(function () {
     console.log("ajaxStop!");
