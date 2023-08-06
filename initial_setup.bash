@@ -46,7 +46,7 @@ if [ "$INSTALL" == "Y" ] || [ "$INSTALL" == "y" ]; then
 
   echo "Creating telethon session..."
   set -e
-  $PYTHON_CMD create_session.py
+  $PYTHON_CMD create_telethon_session.py
   set +e
 
   echo "Quiting virtual environment..."
