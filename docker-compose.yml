@@ -6,11 +6,13 @@ services:
     command: --default-authentication-plugin=caching_sha2_password
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
     env_file:
       - ./.env
     volumes:
+      - ./my.cnf:/etc/mysql/my.cnf
       - dbdata:/var/lib/mysql
 
   web:
