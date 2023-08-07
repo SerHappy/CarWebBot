@@ -10,4 +10,4 @@ urlpatterns = [
     path("logout/", LogoutView.as_view(), name="logout"),
 ]
 if settings.DEBUG:
-    urlpatterns += path("register/", RegisterView.as_view(), name="register")
+    urlpatterns.append(path("register/", RegisterView.as_view(), name="register"))
