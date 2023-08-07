@@ -18,6 +18,7 @@ window.updateStatuses = async function () {
 
             let status = data.status.toLowerCase();
             console.log(`Получен статус для объявления ${announcementId}: ${status}`);
+            let published_message_link = data.published_message_link;
 
             console.log(`Поиск элементов на странице для объявления с ID: ${announcementId}`);
             const copyButton = $row.find(".copy-button");
@@ -26,21 +27,31 @@ window.updateStatuses = async function () {
             const statusText = $row.find(`#status_text_${announcementId}`);
 
             console.log(`Обработка статуса для объявления с ID: ${announcementId}`);
+            console.log(`Текущая ссылка на сообщение для объявления с ID: ${announcementId}: ${$row.attr("data-published-message-link")}`);
             if (status.startsWith("опубликовано")) {
                 console.log(`Статус опубликовано для объявления с ID: ${announcementId}`);
                 copyButton.show();
                 takeoffButton.show();
                 statusIcon.removeClass('status-awaiting status-removed').addClass('status-published');
+                $row.removeAttr("data-published-message-link");
+                $row.attr("data-published-message-link", published_message_link);
+                console.log($row);
+                console.log(`Новая ссылка на сообщение для объявления с ID: ${announcementId}: ${published_message_link}`);
             } else if (status.startsWith("ожидает публикации")) {
                 console.log(`Статус ожидает публикации для объявления с ID: ${announcementId}`);
+                copyButton.hide();
                 takeoffButton.show();
                 statusIcon.removeClass('status-published status-removed').addClass('status-awaiting');
+                console.log(`Удалена ссылка на сообщение для объявления с ID: ${announcementId}`);
+                $row.removeAttr("data-published-message-link");
             } else if (status.startsWith("снято с публикации")) {
                 console.log(`Статус снято с публикации для объявления с ID: ${announcementId}`);
                 copyButton.hide();
                 takeoffButton.hide();
                 statusIcon.removeClass('status-published status-awaiting').addClass('status-removed');
                 $row.addClass('inactive-row');
+                console.log(`Удалена ссылка на сообщение для объявления с ID: ${announcementId}`);
+                $row.removeAttr("data-published-message-link");
             } else {
                 $row.removeClass('inactive-row');
             }

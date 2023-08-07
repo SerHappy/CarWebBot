@@ -172,19 +172,21 @@
     updateStatuses();
     setInterval(updateStatuses, 60 * 1000);
     $(".copy-button").click(function() {
-      var announcementRow = $(this).closest(".announcement-row");
-  var publishedMessageLink = announcementRow.data("published-message-link");
-  var tempElement = document.createElement("textarea");
-  tempElement.value = publishedMessageLink;
-  document.body.appendChild(tempElement);
-  tempElement.select();
-  try {
-    document.execCommand("copy");
-  } catch (err) {
-   alert("Не удалось скопировать ссылку: " + err);
-  }
+    var announcementRow = $(this).closest(".announcement-row");
+    console.log(announcementRow);
+    var publishedMessageLink = announcementRow.attr("data-published-message-link"); // Изменен этот ряд
+    console.log("publishedMessageLink: " + publishedMessageLink);
+    var tempElement = document.createElement("textarea");
+    tempElement.value = publishedMessageLink;
+    document.body.appendChild(tempElement);
+    tempElement.select();
+    try {
+        document.execCommand("copy");
+    } catch (err) {
+        alert("Не удалось скопировать ссылку: " + err);
+    }
 
-  document.body.removeChild(tempElement);
+    document.body.removeChild(tempElement);
 });
 handlePaginationEvents();
   });
