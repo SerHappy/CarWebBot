@@ -92,11 +92,20 @@ if [ "$REPLY" == "Y" ] || [ "$REPLY" == "y" ]; then
   # Dumping database
   read -p "Do you want to dump your current database and import it into Docker? [Y/n] " DUMP_DB
   if [ "$DUMP_DB" == "Y" ] || [ "$DUMP_DB" == "y" ]; then
-    # Enter database credentials
-    read -p "Please enter your database username: " DB_USER
-    read -s -p "Please enter your database password: " DB_PASSWORD
-    echo
-    read -p "Please enter your database name: " DB_NAME
+   while true; do
+      # Enter database credentials
+      read -p "Please enter your database username: " DB_USER
+      read -s -p "Please enter your database password: " DB_PASSWORD
+      echo
+      read -p "Please enter your database name: " DB_NAME
+
+      # Check if the credentials are valid
+      if mysql -u $DB_USER -p$DB_PASSWORD -e "USE $DB_NAME" &>/dev/null; then
+        break
+      else
+        echo "Invalid credentials or database name. Please try again."
+      fi
+    done
 
     # Dumping database
     echo "Dumping the current database..."
