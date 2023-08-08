@@ -24,6 +24,7 @@
   <!-- Main content -->
   <section class="content">
     <div class="container-fluid">
+      {% include "includes/django_messages.html" %}
       <div class="card mx-0">
         <!-- /.card-header -->
         <div class="card-body">
@@ -166,6 +167,7 @@
   <script src="{% static 'js/pagination_and_filters.js' %}"></script>
   <script src="{% static 'js/status_update.js' %}"></script>
   <script src="{% static 'js/announcement_actions.js' %}"></script>
+  <script src="{% static 'js/tag/general/message_fadeout.js' %}"></script>
   <script>
   $(document).ready(function () {
     console.log("ready!");

@@ -1,8 +1,9 @@
 from .forms import UserLoginForm
 from .forms import UserRegisterForm
-from .models import User
-from django.contrib.auth import authenticate
-from django.contrib.auth import login
+from .services import LoginService
+from .services import RegistrationService
+from .services import UserData
+from django.contrib import messages
 from django.contrib.auth import logout
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -16,11 +17,27 @@ class RegisterView(FormView):
     form_class = UserRegisterForm
     success_url = reverse_lazy("login")
 
+    def post(self, request, *args, **kwargs) -> HttpResponse:
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            error_message = "Form is not valid: " + ", ".join([str(err) for err in form.errors])
+            messages.error(request, error_message)
+            return self.form_invalid(form)
+
     def form_valid(self, form) -> HttpResponse:
         cleaned_data = form.cleaned_data
         cleaned_data.pop("password_confirmation")
-        User.objects.create_user(**cleaned_data)
-        return super().form_valid(form)
+        user_to_register = UserData(**cleaned_data)
+        service = RegistrationService()
+        result = service.register(user_to_register)
+        if result.is_successful():
+            messages.success(self.request, result.message)
+            return super().form_valid(form)
+        else:
+            messages.error(self.request, result.message)
+            return redirect("register")
 
 
 class LoginView(FormView):
@@ -34,12 +51,24 @@ class LoginView(FormView):
         else:
             return super().get(request, *args, **kwargs)
 
+    def post(self, request, *args, **kwargs) -> HttpResponse:
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            error_message = "Form is not valid: " + ", ".join([str(err) for err in form.errors])
+            messages.error(request, error_message)
+            return self.form_invalid(form)
+
     def form_valid(self, form) -> HttpResponse | None:
-        user = authenticate(self.request, username=form.cleaned_data["email"], password=form.cleaned_data["password"])
-        if user is not None:
-            login(self.request, user)
+        user_to_login = UserData(**form.cleaned_data)
+        service = LoginService()
+        result = service.login(self.request, user_to_login)
+        if result.is_successful():
+            messages.success(self.request, result.message)
             return super().form_valid(form)
         else:
+            messages.error(self.request, result.message)
             return redirect("login")
 
 
