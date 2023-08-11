@@ -8,6 +8,7 @@ from django.core.paginator import InvalidPage
 from django.core.paginator import Page
 from django.core.paginator import PageNotAnInteger
 from django.core.paginator import Paginator
+from django.db.models import QuerySet
 from loguru import logger
 
 
@@ -208,14 +209,14 @@ class TagService:
     Класс для работы с тегами.
     """
 
-    def fetch_all_tags_from_db(self) -> list[Tag]:
+    def _fetch_all_tags_from_db(self) -> QuerySet[Tag]:
         """
-        Возвращает список всех тегов из базы данных.
+        Извлекает все теги из базы данных.
 
         Returns:
-            list[Tag]: Список всех тегов.
+            QuerySet[Tag]: QuerySet со всеми тегами.
         """
-        return list(Tag.objects.all())
+        return Tag.objects.all()
 
     def fetch_tag_from_db(self, pk: int) -> Tag | None:
         """
@@ -232,36 +233,64 @@ class TagService:
         except Tag.DoesNotExist:
             return None
 
-    def get_paginated_tags(self, name_filter: str | None = None, page: int = 1, page_size: int = 10) -> Page:
+    def get_tags_for_display(self, name_filter: str | None = None, page: int = 1, page_size: int = 10) -> Page:
         """
-        Возвращает текущую страницу тегов. Если передан `name_filter`, то производится фильтрация по имени.
+        Получает список тегов для отображения, применяя фильтрацию и пагинацию.
 
         Args:
-            name_filter (str, optional): Имя для фильтрации.
+            name_filter (str | None): Имя для фильтрации.
 
-            page (int, optional): Номер страницы.
+            page (int): Номер страницы. По умолчанию 1.
 
-            page_size (int, optional): Количество тегов на странице.
+            page_size (int): Количество тегов на странице. По умолчанию 10.
 
         Returns:
-            list[Tag]: Список тегов.
+            Page: Объект Page, содержащий теги для текущей страницы.
         """
-        tags = self.fetch_all_tags_from_db()
-        if name_filter:
-            tags = tags.filter(name__icontains=name_filter)
+        filtered_tags = self._filter_tags_by_name(name_filter)
+        return self._paginate_tags(filtered_tags, page, page_size)
 
+    def _filter_tags_by_name(self, name: str | None) -> QuerySet[Tag]:
+        """
+        Фильтрует теги, имя которых содержит переданное `name`. Регистр символов не учитывается.
+
+        Args:
+            name (str): Имя для фильтрации.
+
+        Returns:
+            QuerySet[Tag]: QuerySet с тегами, соответствующими критерию фильтрации.
+        """
+        if name is None:
+            return self._fetch_all_tags_from_db()
+
+        return Tag.objects.filter(name__icontains=name)
+
+    def _paginate_tags(self, tags: QuerySet[Tag], page_number: int, page_size: int) -> Page:
+        """
+        Пагинирует список тегов.
+
+        Args:
+            tags (QuerySet[Tag]): Список тегов для пагинации.
+
+            page_number (int): Номер страницы.
+
+            page_size (int): Количество тегов на странице.
+
+        Returns:
+            Page: Пагинированный список тегов.
+        """
         paginator = Paginator(tags, page_size)
 
         try:
-            return paginator.page(page)
+            return paginator.page(page_number)
         except PageNotAnInteger:
-            logger.warning(f"Page {page} of tags was not an integer. Defaulting to page 1.")
+            logger.warning(f"Page {page_number} of tags was not an integer. Defaulting to page 1.")
             return paginator.page(1)
         except EmptyPage:
-            logger.warning(f"Page {page} of tags was empty. Defaulting to page 1.")
+            logger.warning(f"Page {page_number} of tags was empty. Defaulting to page 1.")
             return paginator.page(1)
         except InvalidPage:
-            logger.warning(f"Page {page} of tags was invalid. Defaulting to page 1.")
+            logger.warning(f"Page {page_number} of tags was invalid. Defaulting to page 1.")
             return paginator.page(1)
 
     def create_tag(self, tag_to_create: TagData) -> ValidationResult:
