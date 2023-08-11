@@ -46,6 +46,15 @@
                      autocomplete="off"
                      placeholder="Введите тег" />
             </div>
+            <div class="col-md-4">
+              <label for="statusFilter">Фильтр по статусу:</label>
+              <select name="statusFilter" id="statusFilter" class="form-control">
+                <option value="all" selected>Все</option>
+                <option value="published">Опубликованные</option>
+                <option value="waiting">Ожидают публикации</option>
+                <option value="takenoff">Снятые с публикации</option>
+              </select>
+            </div>
           </div>
           <!-- Таблица -->
           <table class="table table-hover table-bordered" id="announcementsTable">
@@ -171,6 +180,7 @@
   <script>
   $(document).ready(function () {
     console.log("ready!");
+     $("#statusFilter").val("all");
     updateStatuses();
     setInterval(updateStatuses, 60 * 1000);
     $(".copy-button").click(function() {

@@ -3,9 +3,11 @@ window.executeAjax = function (page) {
 
     var nameFilter = $("#nameFilter").val();
     var tagFilter = $("#tagFilter").val();
+    var statusFilter = $("#statusFilter").val();
     console.log("Selected page:", page);
     console.log("Name filter:", nameFilter);
     console.log("Tag filter:", tagFilter);
+    console.log("Status filter:", statusFilter);
     $.ajax({
         type: "GET",
         url: "/announcements/all",
@@ -13,6 +15,7 @@ window.executeAjax = function (page) {
             page: page,
             nameFilter: nameFilter,
             tagFilter: tagFilter,
+            statusFilter: statusFilter,
         },
         dataType: "html",
         success: function (data) {
@@ -70,6 +73,11 @@ window.handlePaginationEvents = function () {
     });
     $("#tagFilter").on("input", function () {
         console.log("Tag filter input detected");
+        var page = $("#pagination .active").text();
+        executeAjaxDebounced(page);
+    });
+    $("#statusFilter").on("change", function () {
+        console.log("Status filter input detected");
         var page = $("#pagination .active").text();
         executeAjaxDebounced(page);
     });
