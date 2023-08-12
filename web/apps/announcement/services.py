@@ -13,3 +13,7 @@ def get_status(announcement: Announcement) -> Literal["Снято с публи�
         return "Опубликовано"
     if announcement.processing_status == announcement.ProcessingStatus.AWAITING_PUBLICATION:
         return "Ожидает публикации"
+    if announcement.processing_status == announcement.ProcessingStatus.PROCESSING:
+        return "Ожидает публикации"
+    if announcement.processing_status == announcement.ProcessingStatus.ERROR:
+        return "Ошибка публикации"

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block content %}
+  {% load static %}
+  <div class="container-fluid">
+    <div class="card-body">
+      {% include "includes/django_messages.html" %}
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Настройки</h3>
+            </div>
+            <!-- /.card-header -->
+            {% if form.instance.unpublish_date %}
+              <div class="alert alert-info">
+                Текущая дата, после которой объявления снимаются с публикации: <span id="display_date"></span>
+              </div>
+            {% else %}
+              <div class="alert alert-warning">Настройки пока не установлены.</div>
+            {% endif %}
+            <!-- form start -->
+            <form role="form" method="post">
+              {% csrf_token %}
+              <div class="card-body">
+                <!-- Specific input for publication_date -->
+                <div class="form-group">
+                  <label>Дата, после которой объявления снимаются с публикации:</label>
+                  <div class="input-group date"
+                       id="reservationdatetime"
+                       data-target-input="nearest">
+                    {{ form.unpublish_date }}
+                    <div class="input-group-append"
+                         data-target="#reservationdatetime"
+                         data-toggle="datetimepicker">
+                      <div class="input-group-text">
+                        <i class="fa fa-calendar"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <input type="hidden" id="timezone" name="timezone" />
+                </div>
+                <!-- For the rest of the form fields -->
+                {% for field in form %}
+                  {% if not forloop.first %}
+                    <div class="form-group">
+                      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                      <input type="{{ field.field.widget.input_type }}"
+                             name="{{ field.name }}"
+                             id="{{ field.id_for_label }}"
+                             class="form-control"
+                             value="{{ field.value|default:'' }}" />
+                      {% if field.errors %}<p class="text-danger">{{ field.errors.0 }}</p>{% endif %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              <!-- /.card-body -->
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/static/js/timezone.js"></script>
+  <script src="{% static 'js/tag/general/message_fadeout.js' %}"></script>
+  <script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    if ($("#display_date").length) {
+      console.log($("#display_date"))
+      let unpublishDateUTC = "{{ unpublish_date_utc }}";
+        let unpublishDateWithClientTimezone = new Date(unpublishDateUTC);
+
+        let day = unpublishDateWithClientTimezone.getDate().toString().padStart(2, "0");
+        let month = (unpublishDateWithClientTimezone.getMonth() + 1).toString().padStart(2, "0");
+        let year = unpublishDateWithClientTimezone.getFullYear();
+        let hours = unpublishDateWithClientTimezone.getHours().toString().padStart(2, "0");
+        let minutes = unpublishDateWithClientTimezone.getMinutes().toString().padStart(2, "0");
+
+        document.querySelector("#display_date").innerText = `${day}.${month}.${year} ${hours}:${minutes}`;
+    }
+});
+        $(document).ready(function() {
+            $('#reservationdatetime').datetimepicker({
+              icons: { time: "far fa-clock" },
+              format: 'DD.MM.YYYY HH:mm',
+            });
+// Получение текущей даты и времени
+var currentDate = new Date();
+
+// Функция для форматирования чисел с добавлением ведущего нуля
+function addLeadingZero(number) {
+  return number < 10 ? "0" + number : number;
+}
+
+// Форматирование даты и времени в нужном формате
+var currentDateTime =
+  addLeadingZero(currentDate.getDate()) +
+  "." +
+  addLeadingZero(currentDate.getMonth() + 1) +
+  "." +
+  currentDate.getFullYear() +
+  " " +
+  addLeadingZero(currentDate.getHours()) +
+  ":" +
+  addLeadingZero(currentDate.getMinutes());
+
+// Установка текущего времени в поле ввода
+$("#unpublish_date").val(currentDateTime);
+        });
+  </script>
+{% endblock content %}

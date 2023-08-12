@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "apps.tag",
     "apps.users",
     "apps.bot",
+    "apps.settings",
 ]
 MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",

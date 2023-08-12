@@ -13,6 +13,7 @@ class Announcement(models.Model):
         UNPUBLISHED = "UNPUBLISHED", "Unpublished"
         INACTIVE = "INACTIVE", "Inactive"
         PROCESSING = "PROCESSING", "Processing"
+        ERROR = "ERROR", "Error"
 
     name: str = models.CharField(max_length=255, null=False)
     text: str = models.TextField(null=True)

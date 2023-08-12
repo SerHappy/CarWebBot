@@ -27,9 +27,12 @@ def publish_announcements() -> None:
         try:
             publish_announcement_to_channel(announcement)
             logger.debug("Announcement published")
-            announcement.processing_status = Announcement.ProcessingStatus.DONE
+            announcement.processing_status = Announcement.ProcessingStatus.PUBLISHED
             announcement.save()
-            logger.debug("Announcement status changed to DONE")
+            logger.debug("Announcement status changed to PUBLISHED")
         except Exception as e:
             logger.error(f"Error while publishing announcement: {e}")
+            announcement.processing_status = Announcement.ProcessingStatus.ERROR
+            announcement.save()
+            logger.debug("Announcement status changed to ERROR")
     logger.debug("After loop")

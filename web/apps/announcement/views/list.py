@@ -23,7 +23,7 @@ class AnnouncementListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["announcements"] = Announcement.objects.annotate(
             custom_order=Case(
-                When(processing_status="AWAITING", then=Value(1)),
+                When(Q(processing_status="AWAITING") | Q(processing_status="PROCESSING"), then=Value(1)),
                 When(processing_status="PUBLISHED", then=Value(2)),
                 When(Q(processing_status="UNPUBLISHED") | Q(processing_status="INACTIVE"), then=Value(3)),
                 default=Value(4),
@@ -47,7 +47,9 @@ class AnnouncementListView(LoginRequiredMixin, ListView):
             elif status_filter == "published":
                 context["announcements"] = context["announcements"].filter(processing_status="PUBLISHED")
             elif status_filter == "waiting":
-                context["announcements"] = context["announcements"].filter(processing_status="AWAITING")
+                context["announcements"] = context["announcements"].filter(
+                    Q(processing_status="AWAITING") | Q(processing_status="PROCESSING")
+                )
 
         paginator = Paginator(context["announcements"], settings.ANNOUNCEMENT_LIST_PER_PAGE)
         page = self.request.GET.get("page")
