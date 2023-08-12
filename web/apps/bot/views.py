@@ -94,7 +94,7 @@ def delete_announcement_from_channel(announcement: Announcement) -> None:
 
     telethon.run_in_new_thread(_delete_messages, announcement)
 
-    update_announcement_status(announcement, is_published=False, is_active=False)
+    update_announcement_status(announcement, Announcement.ProcessingStatus.UNPUBLISHED)
     logger.info(f"Announcement {announcement.name} deleted from channel")
 
 

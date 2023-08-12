@@ -17,7 +17,7 @@ import pytz
 @login_required(login_url=settings.LOGIN_URL)
 def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     announcement = get_object_or_404(Announcement, pk=pk)
-    if announcement.is_published:
+    if announcement.processing_status == Announcement.ProcessingStatus.PUBLISHED:
         delete_announcement_from_channel(announcement)
 
     new_date = request.POST.get("datetime")
@@ -41,8 +41,6 @@ def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
     if request.POST.get("uploadIds"):
         media_handler.handle_media_files(request, announcement)
 
-    announcement.processing_status = Announcement.ProcessingStatus.PENDING
-    announcement.is_published = False
-    announcement.is_active = True
+    announcement.processing_status = Announcement.ProcessingStatus.AWAITING_PUBLICATION
     announcement.save()
     return HttpResponse(status=200)

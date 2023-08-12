@@ -8,9 +8,11 @@ import uuid
 
 class Announcement(models.Model):
     class ProcessingStatus(models.TextChoices):
-        PENDING = "P", "Pending"
-        PROCESSING = "R", "Processing"
-        DONE = "D", "Done"
+        AWAITING_PUBLICATION = "AWAITING", "Awaiting Publication"
+        PUBLISHED = "PUBLISHED", "Published"
+        UNPUBLISHED = "UNPUBLISHED", "Unpublished"
+        INACTIVE = "INACTIVE", "Inactive"
+        PROCESSING = "PROCESSING", "Processing"
 
     name: str = models.CharField(max_length=255, null=False)
     text: str = models.TextField(null=True)
@@ -19,24 +21,21 @@ class Announcement(models.Model):
     status: str = models.CharField(max_length=50, null=True)
     media: "Media"
     note: str = models.TextField(null=True)
-    is_published: bool = models.BooleanField(default=False)
-    is_active: bool = models.BooleanField(default=True)
     processing_status = models.CharField(
-        max_length=1,
+        max_length=20,
         choices=ProcessingStatus.choices,
-        default=ProcessingStatus.PENDING,
+        default=ProcessingStatus.AWAITING_PUBLICATION,
     )
     published_message_link: str = models.CharField(max_length=255, null=True)
-    publication_date: str = models.DateTimeField(auto_now_add=False, null=True)
-    modified_count: int = models.IntegerField(default=0)
-    modified_at: str = models.DateTimeField(auto_now=True)
+    publication_date: str = models.DateTimeField(null=True)
+    unpublished_date: str = models.DateTimeField(null=True, blank=True)
     created_at: str = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-publication_date"]
 
     def __str__(self) -> str:
-        return f"Announcement {self.name}. Published: {self.is_published}. Date: {self.publication_date}"
+        return f"Announcement {self.name}. Status: {self.processing_status}. Date: {self.publication_date}"
 
 
 @deconstructible

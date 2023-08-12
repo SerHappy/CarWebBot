@@ -10,7 +10,7 @@ from loguru import logger
 from telethon.sync import TelegramClient
 
 
-def update_announcement_status(announcement: Announcement, is_published: bool, is_active: bool) -> None:
+def update_announcement_status(announcement: Announcement, status: Announcement.ProcessingStatus) -> None:
     """
     Обновляет статус объявления в базе данных.
 
@@ -19,8 +19,7 @@ def update_announcement_status(announcement: Announcement, is_published: bool, i
         is_published (bool): Статус публикации объявления.
         is_active (bool): Статус активности объявления.
     """
-    announcement.is_published = is_published
-    announcement.is_active = is_active
+    announcement.processing_status = status
     announcement.save()
     logger.info(f"Announcement {announcement.name} status updated in database")
 

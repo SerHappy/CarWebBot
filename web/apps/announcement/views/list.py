@@ -23,9 +23,9 @@ class AnnouncementListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["announcements"] = Announcement.objects.annotate(
             custom_order=Case(
-                When(is_active=True, is_published=False, processing_status="P", then=Value(1)),
-                When(is_active=True, is_published=True, processing_status="D", then=Value(2)),
-                When(is_active=False, is_published=False, processing_status="P", then=Value(3)),
+                When(processing_status="AWAITING", then=Value(1)),
+                When(processing_status="PUBLISHED", then=Value(2)),
+                When(Q(processing_status="UNPUBLISHED") | Q(processing_status="INACTIVE"), then=Value(3)),
                 default=Value(4),
                 output_field=IntegerField(),
             )
@@ -41,15 +41,13 @@ class AnnouncementListView(LoginRequiredMixin, ListView):
             if status_filter == "all":
                 context["announcements"] = context["announcements"]
             elif status_filter == "takenoff":
-                context["announcements"] = context["announcements"].filter(is_active=False)
+                context["announcements"] = context["announcements"].filter(
+                    Q(processing_status="UNPUBLISHED") | Q(processing_status="INACTIVE")
+                )
             elif status_filter == "published":
-                context["announcements"] = context["announcements"].filter(
-                    Q(is_published=True) & Q(is_active=True) & Q(processing_status="D")
-                )
+                context["announcements"] = context["announcements"].filter(processing_status="PUBLISHED")
             elif status_filter == "waiting":
-                context["announcements"] = context["announcements"].filter(
-                    Q(is_published=False) & Q(is_active=True) & Q(processing_status="P")
-                )
+                context["announcements"] = context["announcements"].filter(processing_status="AWAITING")
 
         paginator = Paginator(context["announcements"], settings.ANNOUNCEMENT_LIST_PER_PAGE)
         page = self.request.GET.get("page")

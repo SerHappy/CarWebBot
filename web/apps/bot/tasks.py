@@ -16,9 +16,7 @@ def publish_announcements() -> None:
     now = timezone.now()
     announcements_to_publish = Announcement.objects.filter(
         publication_date__lte=now,
-        is_published=False,
-        is_active=True,
-        processing_status=Announcement.ProcessingStatus.PENDING,
+        processing_status=Announcement.ProcessingStatus.AWAITING_PUBLICATION,
     )
     logger.info(f"Announcements to publish: {announcements_to_publish.count()}")
     logger.debug("Before loop")

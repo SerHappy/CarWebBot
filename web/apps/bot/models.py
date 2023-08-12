@@ -12,7 +12,7 @@ class PublishedMessage(models.Model):
 
     announcement = models.ForeignKey(Announcement, related_name="published_messages", on_delete=models.CASCADE)
     message_id = models.CharField(max_length=255, null=False)
-    channel_id = models.CharField(max_length=255, null=False, default=settings.MAIN_CHANNEL_ID)
+    channel_id = models.CharField(max_length=255, null=False)
     type = models.CharField(max_length=20, choices=MessageType.choices, null=False)
     media = models.ForeignKey(Media, related_name="published_messages", on_delete=models.SET_NULL, null=True)
     modified_at = models.DateTimeField(auto_now=True, null=False)
