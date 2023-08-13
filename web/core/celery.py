@@ -16,4 +16,8 @@ app.conf.beat_schedule = {
         "task": "apps.bot.tasks.publish_announcements",
         "schedule": crontab(),
     },
+    "unpublish_every_minute": {
+        "task": "apps.bot.tasks.unpublish_announcements",
+        "schedule": crontab(),
+    },
 }

@@ -44,8 +44,8 @@ window.updateStatuses = async function () {
                 statusIcon.removeClass('status-published status-removed').addClass('status-awaiting');
                 console.log(`Удалена ссылка на сообщение для объявления с ID: ${announcementId}`);
                 $row.removeAttr("data-published-message-link");
-            } else if (status.startsWith("снято с публикации")) {
-                console.log(`Статус снято с публикации для объявления с ID: ${announcementId}`);
+            } else if (status.startsWith("снято с публикации") || status.startsWith("не было опубликовано")) {
+                console.log(`Статус снято с публикации или не опубликовано для объявления с ID: ${announcementId}`);
                 copyButton.hide();
                 takeoffButton.hide();
                 statusIcon.removeClass('status-published status-awaiting').addClass('status-removed');
@@ -56,8 +56,8 @@ window.updateStatuses = async function () {
                 $row.removeClass('inactive-row');
             }
 
-            if (!status.startsWith("снято с публикации")) {
-                console.log(`Статус не снято с публикации для объявления с ID: ${announcementId}`);
+            if (!status.startsWith("снято с публикации") && !status.startsWith("не было опубликовано")) {
+                console.log(`Статус не снято с публикации и не не опубликовано для объявления с ID: ${announcementId}`);
                 $row.removeClass('table-secondary');
             }
 
@@ -65,6 +65,13 @@ window.updateStatuses = async function () {
             if (["опубликовано", "ожидает публикации"].includes(status)) {
                 console.log(`Добавление времени публикации к статусу для объявления с ID: ${announcementId}`);
                 status += ` ${publicationDate}`;
+            }
+            const unpublishedDate = formatDate(new Date(data.unpublished_date));
+            console.log()
+            console.log(`Время снятия с публикации для объявления с ID: ${announcementId}: ${unpublishedDate}`);
+            if (status.startsWith("снято с публикации")) {
+                console.log(`Добавление времени снятия с публикации к статусу для объявления с ID: ${announcementId}`);
+                status += ` ${unpublishedDate}`;
             }
 
             console.log(`Обновление текста статуса на странице для объявления с ID: ${announcementId}`);
