@@ -13,7 +13,7 @@
             <!-- /.card-header -->
             {% if form.instance.unpublish_date %}
               <div class="alert alert-info">
-                Текущая дата, после которой объявления снимаются с публикации: <span id="display_date"></span>
+                Текущая дата, старше которой объявления снимаются с публикации: <span id="display_date"></span>
               </div>
             {% else %}
               <div class="alert alert-warning">Настройки пока не установлены.</div>
@@ -24,7 +24,7 @@
               <div class="card-body">
                 <!-- Specific input for publication_date -->
                 <div class="form-group">
-                  <label>Дата, после которой объявления снимаются с публикации:</label>
+                  <label>Cнять с публикации объявления старше этой даты (включительно):</label>
                   <div class="input-group date"
                        id="reservationdatetime"
                        data-target-input="nearest">
