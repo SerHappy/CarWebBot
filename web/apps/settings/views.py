@@ -1,6 +1,8 @@
 from .forms import SettingsForm
 from .models import Setting
+from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import FormView
@@ -8,7 +10,8 @@ from django.views.generic import FormView
 import pytz
 
 
-class SettingsFormView(FormView):
+class SettingsFormView(LoginRequiredMixin, FormView):
+    login_url = settings.LOGIN_URL
     template_name = "settings/settings.html"
     form_class = SettingsForm
     success_url = reverse_lazy("settings")
