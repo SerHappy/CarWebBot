@@ -58,7 +58,7 @@ def _edit_message(message: PublishedMessage, new_text: str) -> None:
     """
     telethon.set_new_event_loop()
     with telethon.fetch_telegram_client() as client:
-        client: TelegramClient
+        client: TelegramClient  # type: ignore[no-redef]
         perform_action_with_retries(
             client.edit_message,
             entity=int(message.channel_id),
@@ -112,7 +112,7 @@ def _delete_announcement_message(message: PublishedMessage) -> None:
 def _delete_message(message_to_delete: PublishedMessage) -> None:
     telethon.set_new_event_loop()
     with telethon.fetch_telegram_client() as client:
-        client: TelegramClient
+        client: TelegramClient  # type: ignore[no-redef]
         perform_action_with_retries(
             client.delete_messages,
             entity=int(message_to_delete.channel_id),
@@ -139,7 +139,7 @@ def _edit_media(message_to_edit: PublishedMessage, new_media: Media) -> None:
     """Меняет старое медиа на новое `new_media` в сообщении `message_to_edit` в канале."""
     telethon.set_new_event_loop()
     with telethon.fetch_telegram_client() as client:
-        client: TelegramClient
+        client: TelegramClient  # type: ignore[no-redef]
         perform_action_with_retries(
             client.edit_message,
             entity=int(message_to_edit.channel_id),

@@ -53,7 +53,7 @@ def _send_text_message(message: str) -> str | None:
     logger.info(f"Sending message to channel {settings.MAIN_CHANNEL_NAME}...")
     telethon.set_new_event_loop()
     with telethon.fetch_telegram_client() as client:
-        client: TelegramClient
+        client: TelegramClient  # type: ignore[no-redef]
         return perform_action_with_retries(
             client.send_message,
             entity=settings.MAIN_CHANNEL_ID,

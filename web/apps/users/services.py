@@ -16,11 +16,11 @@ class ServiceResult(ABC):
         return self.is_success
 
     @abstractmethod
-    def successful() -> "ServiceResult":
+    def successful(self) -> "ServiceResult":
         pass
 
     @abstractmethod
-    def failure(error_message: str) -> "ServiceResult":
+    def failure(self, error_message: str) -> "ServiceResult":
         return ServiceResult(False, error_message)
 
 

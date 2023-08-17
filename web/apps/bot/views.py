@@ -144,7 +144,7 @@ def _delete_subchannels_messages(subchannel_messages: QuerySet[SubchannelMessage
     telethon.set_new_event_loop()
     for message in subchannel_messages:
         with telethon.fetch_telegram_client() as client:
-            client: TelegramClient
+            client: TelegramClient  # type: ignore[no-redef]
             perform_action_with_retries(
                 client.delete_messages,
                 entity=int(message.channel_id),

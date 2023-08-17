@@ -1,10 +1,4 @@
 {
-    "mypy.configFile": "pyproject.toml",
-    "flake8.args": [
-        "--config=../.flake8"
-    ],
-    "mypy.dmypyExecutable": "/usr/bin/dmypy",
-    // "mypy.dmypyExecutable": "/run/media/serhappy/Data/Projects/Python/CarWebBot/.venv/bin/dmypy",
     "isort.args": [
         "--profile",
         "black"
@@ -30,6 +24,5 @@
         "editor.defaultFormatter": "monosans.djlint"
     },
     "git.decorations.enabled": true,
-    "python.linting.flake8Enabled": false,
     "python.analysis.typeCheckingMode": "off",
 }

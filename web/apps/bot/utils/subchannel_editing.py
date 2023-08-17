@@ -53,7 +53,7 @@ def _edit_text_message(subchannel_text_message: SubchannelMessage, new_text: str
     """Редактирует текстовое сообщение `subchannel_text_message` новым текстом `new_text` в подканале."""
     telethon.set_new_event_loop()
     with telethon.fetch_telegram_client() as client:
-        client: TelegramClient
+        client: TelegramClient  # type: ignore[no-redef]
         perform_action_with_retries(
             client.edit_message,
             entity=int(subchannel_text_message.channel_id),
@@ -103,7 +103,7 @@ def _edit_first_media(subchannel_media_message, media) -> None:
     """Редактирует первое медиа объявления в подканале."""
     telethon.set_new_event_loop()
     with telethon.fetch_telegram_client() as client:
-        client: TelegramClient
+        client: TelegramClient  # type: ignore[no-redef]
         perform_action_with_retries(
             client.edit_message,
             entity=int(subchannel_media_message.channel_id),

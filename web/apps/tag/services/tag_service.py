@@ -39,7 +39,7 @@ class DeleteResult:
         return self.success
 
     @staticmethod
-    def successful() -> bool:
+    def successful() -> "DeleteResult":
         return DeleteResult(True)
 
     @staticmethod
@@ -384,7 +384,7 @@ class TagService:
 
         tag_to_delete = self.fetch_tag_from_db(tag_id)
         if tag_to_delete is None:
-            return DeleteResult.failure(f"Тег для удаления не найден")
+            return DeleteResult.failure("Тег для удаления не найден")
 
         tag_announcements = list(tag_to_delete.announcements.all())
         old_channel_id = tag_to_delete.channel_id

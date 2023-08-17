@@ -8,7 +8,7 @@ with TelegramClient(
     api_hash=settings.TELETHON_API_HASH,
     system_version=settings.TELETHON_SYSTEM_VERSION,
 ) as client:
-    client: TelegramClient
+    client: TelegramClient  # type: ignore[no-redef]
     try:
         print("Success!")
         print(client.get_me().stringify())
