@@ -2,8 +2,8 @@
 exclude =.git,__pycache__,deprecated,env,venv,migrations,alembic
 ignore = B305, D100, D104
 
-max-complexity = 10
+max-complexity = 9
 max-line-length = 120
 
-application-import-names = bot
+application-import-names = apps
 inline-quotes = "
