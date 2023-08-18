@@ -3,9 +3,9 @@ from django.conf import settings
 import os
 
 
-def setup_logger(logger, settings_dict=None) -> None:
+def setup_logger(logger) -> None:
     """
-    Setup logger with settings from .env file
+    Set up logger with settings from .env file.
 
     All log files are stored in LOGURU_FOLDER directory.
     Every day at midnight log files are rotated and compressed.

@@ -1,7 +1,6 @@
 from ..models import Tag
 from apps.bot.views import delete_announcement_from_subchannel
 from apps.bot.views import edit_announcement_in_channel
-from apps.tag.models import Tag
 from dataclasses import dataclass
 from django.core.paginator import EmptyPage
 from django.core.paginator import InvalidPage
@@ -32,32 +31,72 @@ class TagData:
 
 @dataclass
 class DeleteResult:
-    success: bool
-    message: str = ""
+    """
+    Класс, представляющий результат удаления.
+
+    Хранит состояние успешности удаления и возможное сообщение об ошибке.
+
+    Attributes:
+        success (bool): Успешность удаления.
+        error_message (str, optional): Сообщение об ошибке, если удаление не удалось.
+    """
+
+    def __init__(self, success: bool, error_message: str | None = None) -> None:
+        """
+        Инициализирует объект результата удаления.
+
+        Args:
+            success (bool): Успешность удаления.
+            error_message (str, optional): Сообщение об ошибке, если есть.
+        """
+        self.success = success
+        self.error_message = error_message
 
     def is_success(self) -> bool:
+        """
+        Проверяет успешность удаления.
+
+        Returns:
+            bool: True, если удаление успешно, иначе False.
+        """
         return self.success
 
     @staticmethod
     def successful() -> "DeleteResult":
+        """
+        Создает объект результата удаления с состоянием успеха.
+
+        Returns:
+            DeleteResult: Объект с успешным результатом удаления.
+        """
         return DeleteResult(True)
 
     @staticmethod
     def failure(message: str) -> "DeleteResult":
+        """
+        Создает объект результата удаления с состоянием неудачи.
+
+        Args:
+            message (str): Сообщение об ошибке.
+
+        Returns:
+            DeleteResult: Объект с неудачным результатом удаления и сообщением об ошибке.
+        """
         return DeleteResult(False, message)
 
 
 class ValidationResult:
     """
-    Класс, представляющий результат валидации. Хранит состояние успешности
-    валидации и возможное сообщение об ошибке.
+    Класс, представляющий результат валидации.
+
+    Хранит состояние успешности валидации и возможное сообщение об ошибке.
 
     Attributes:
         success (bool): Успешность валидации.
         error_message (str, optional): Сообщение об ошибке, если валидация не пройдена.
     """
 
-    def __init__(self, success: bool, error_message: str = None) -> None:
+    def __init__(self, success: bool, error_message: str | None = None) -> None:
         """
         Инициализирует объект результата валидации.
 
@@ -123,6 +162,7 @@ class TagValidator:
     def check_is_tag_name_taken(self, tag_name: str, tag_id: int | None = None) -> bool:
         """
         Проверяет, существует ли тег с указанным именем в базе данных.
+
         Исключает тег с переданным ID из проверки.
 
         Args:
@@ -205,9 +245,7 @@ class TagValidator:
 
 
 class TagService:
-    """
-    Класс для работы с тегами.
-    """
+    """Класс для работы с тегами."""
 
     def _fetch_all_tags_from_db(self) -> QuerySet[Tag]:
         """
@@ -301,7 +339,8 @@ class TagService:
         Если валидация проходит успешно, метод создаёт новый тег в базе данных.
 
         Args:
-            tag_to_create (TagData): Объект, содержащий данные для создания нового тега, включая имя тега, тип и ID канала.
+            tag_to_create (TagData): Объект, содержащий данные для создания нового тега, включая имя тега,
+            тип и ID канала.
 
         Returns:
             ValidationResult: Объект с результатом валидации, содержащий информацию об успехе или ошибке.
@@ -330,7 +369,8 @@ class TagService:
         Если валидация проходит успешно, метод обновляет тег в базе данных.
 
         Args:
-            tag_to_update (TagData): Объект, содержащий данные для обновления тега, включая имя тега, тип, ID канала и ID тега.
+            tag_to_update (TagData): Объект, содержащий данные для обновления тега, включая имя тега, тип,
+            ID канала и ID тега.
 
         Returns:
             ValidationResult: Объект с результатом валидации, содержащий информацию об успехе или ошибке.
@@ -343,13 +383,18 @@ class TagService:
         old_channel_id = None
 
         try:
+            if tag_to_update.tag_id is None:
+                return ValidationResult.failure("Tag ID is required to update a tag.")
             tag = self.fetch_tag_from_db(tag_to_update.tag_id)
+            if tag is None:
+                return ValidationResult.failure(f"Tag with ID {tag_to_update.tag_id} does not exist.")
 
             old_channel_id = tag.channel_id
 
             tag.name = tag_to_update.name
             tag.type = tag_to_update.tag_type
-            tag.channel_id = tag_to_update.channel_id
+            if tag_to_update.channel_id is not None:
+                tag.channel_id = tag_to_update.channel_id
             tag.save()
         except Exception as e:
             logger.critical(f"Got highly unexpected exception while updating tag: {e}. Fix it ASAP!")
@@ -381,7 +426,6 @@ class TagService:
         Returns:
             DeleteResult: Объект с результатом удаления, содержащий информацию об успехе или ошибке.
         """
-
         tag_to_delete = self.fetch_tag_from_db(tag_id)
         if tag_to_delete is None:
             return DeleteResult.failure("Тег для удаления не найден")

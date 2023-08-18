@@ -4,6 +4,7 @@ from apps.bot.models import SubchannelMessage
 from apps.bot.services import telethon
 from apps.tag.models import Tag
 from telethon.sync import TelegramClient
+from telethon.tl.types import Message
 from typing import LiteralString
 
 
@@ -23,7 +24,7 @@ def create_subchannel_message(announcement: Announcement) -> str:
     )
 
 
-def send_text_message_with_retries_to_subchannel(message: str, tag: Tag) -> str | None:
+def send_text_message_with_retries_to_subchannel(message: str, tag: Tag) -> Message | None:
     """
     Отправляет текстовое сообщение в Telegram подканал с несколькими попытками.
 
@@ -32,7 +33,7 @@ def send_text_message_with_retries_to_subchannel(message: str, tag: Tag) -> str 
         tag (Tag): Тег, подканал которого следует использовать для отправки.
 
     Returns:
-        Optional[str]: Возвращает объект сообщения, если сообщение успешно отправлено.
+        Optional[Message]: Возвращает объект сообщения, если сообщение успешно отправлено.
                        Возвращает None, если отправка сообщения не удалась.
     """
     return telethon.run_in_new_thread(
@@ -42,11 +43,11 @@ def send_text_message_with_retries_to_subchannel(message: str, tag: Tag) -> str 
     )
 
 
-def _send_message_to_subchannel(message: str, tag: Tag) -> str | None:
+def _send_message_to_subchannel(message: str, tag: Tag) -> Message | None:
     """Отправляет текстовое сообщение в Telegram подканал."""
     telethon.set_new_event_loop()
     with telethon.fetch_telegram_client() as client:
-        client: TelegramClient
+        client: TelegramClient  # type: ignore[no-redef]
         return perform_action_with_retries(
             client.send_message,
             entity=int(tag.channel_id),
@@ -54,7 +55,9 @@ def _send_message_to_subchannel(message: str, tag: Tag) -> str | None:
         )
 
 
-def update_announcement_and_save_subchannel_message(announcement: Announcement, text_message: str, tag: Tag) -> None:
+def update_announcement_and_save_subchannel_message(
+    announcement: Announcement, text_message: Message, tag: Tag
+) -> None:
     """
     Обновляет данные объявления и сохраняет информацию о сообщении в базе данных для подканала.
 

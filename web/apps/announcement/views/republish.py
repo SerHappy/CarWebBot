@@ -16,6 +16,7 @@ import pytz
 
 @login_required(login_url=settings.LOGIN_URL)
 def republish_announcement(request: HttpRequest, pk: int) -> HttpResponse:
+    """Снимает объявление с публикации и ставит его в очередь на публикацию."""
     announcement = get_object_or_404(Announcement, pk=pk)
     if announcement.processing_status == Announcement.ProcessingStatus.PUBLISHED:
         delete_announcement_from_channel(announcement)

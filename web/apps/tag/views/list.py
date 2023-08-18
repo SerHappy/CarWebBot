@@ -7,6 +7,8 @@ from typing import Any
 
 
 class TagListView(LoginRequiredMixin, ListView):
+    """Класс для отображения списка тегов."""
+
     login_url = settings.LOGIN_URL
     model = Tag
     template_name = "tag/tag_list.html"
@@ -23,7 +25,7 @@ class TagListView(LoginRequiredMixin, ListView):
         """
         service = tag_service.TagService()
         context = super().get_context_data(**kwargs)
-        name_filter = self.request.GET.get("nameFilter", None)
+        name_filter = self.request.GET.get("nameFilter")
         page_number = self.request.GET.get("page", 1)
         context["tags"] = service.get_tags_for_display(
             name_filter=name_filter,

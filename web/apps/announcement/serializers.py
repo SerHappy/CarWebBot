@@ -2,7 +2,7 @@ import json
 
 
 def serialize_media(media_objects) -> str:
-    """Serialize media objects to JSON."""
+    """Сериализует медиа-объекты `media_objects` в JSON."""
     media_json = [
         {
             "media_type": media.media_type,

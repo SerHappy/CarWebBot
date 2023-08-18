@@ -21,9 +21,12 @@ import os
 
 
 class AnnouncementUpdateView(LoginRequiredMixin, View):
+    """Класс для обработки запроса на редактирование объявления."""
+
     login_url = settings.LOGIN_URL
 
     def get(self, request: HttpRequest, pk: int) -> HttpResponse:
+        """Обработка GET запроса на редактирование объявления."""
         announcement = get_object_or_404(Announcement, pk=pk)
         announcement_tags = announcement.tags.all()
         announcement_media = announcement.media.all().order_by("order")
@@ -62,6 +65,7 @@ class AnnouncementUpdateView(LoginRequiredMixin, View):
             media.save()
 
     def post(self, request: HttpRequest, pk: int) -> HttpResponse:
+        """Обработка POST запроса на редактирование объявления."""
         announcement = Announcement.objects.get(pk=pk)
         announcement, tag_ids = form_data_handler.handle_form_data(request, announcement)
 

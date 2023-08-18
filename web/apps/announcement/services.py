@@ -12,7 +12,7 @@ def get_status(
     "Ошибка публикации",
     "Неизвестный статус",
 ]:
-    """Get publication status of a given announcement"""
+    """Возвращает статус объявления в виде строки."""
     match announcement.processing_status:
         case announcement.ProcessingStatus.INACTIVE:
             return "Не было опубликовано"

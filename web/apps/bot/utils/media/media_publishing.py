@@ -25,7 +25,6 @@ def publish_announcement_media(announcement: Announcement) -> None:
     Args:
         announcement (Announcement): Объявление, медиа которого необходимо опубликовать.
     """
-
     logger.debug("Starting media publishing process...")
 
     media: QuerySet[Media] = announcement.media.all()
@@ -84,14 +83,8 @@ def _send_first_media_to_subchannel(announcement: Announcement, media: Media, ta
 def _send_first_media(media: Media, tag: Tag) -> None:
     telethon.set_new_event_loop()
     with telethon.fetch_telegram_client() as client:
-        client: TelegramClient
-        if media.media_type == Media.MediaType.PHOTO:
-            media_message = perform_action_with_retries(
-                client.send_file,
-                entity=int(tag.channel_id),
-                file=create_media(media),
-            )
-        elif media.media_type == Media.MediaType.VIDEO:
+        client: TelegramClient  # type: ignore[no-redef]
+        if media.media_type == Media.MediaType.PHOTO or media.media_type == Media.MediaType.VIDEO:
             media_message = perform_action_with_retries(
                 client.send_file,
                 entity=int(tag.channel_id),
@@ -141,9 +134,9 @@ def _send_media(
     media_message = telethon.run_in_new_thread(_send_media_to_subchannel, media_to_send=media_to_send)
     logger.debug(f"Media message sent result: {media_message}")
     if media_message:
-        logger.debug(f"Saving media to database...")
+        logger.debug("Saving media to database...")
         save_media_to_db(announcement, media_message, media_to_send)
-        logger.debug(f"Media saved to database")
+        logger.debug("Media saved to database")
 
 
 def _send_media_to_subchannel(
@@ -161,7 +154,7 @@ def _send_media_to_subchannel(
     files_to_send = [x[1] for x in media_to_send]
     logger.debug(f"Sending {files_to_send} media files to Telegram...")
     with telethon.fetch_telegram_client() as client:
-        client: TelegramClient
+        client: TelegramClient  # type: ignore[no-redef]
         media_message = perform_action_with_retries(
             client.send_file,
             entity=settings.MAIN_CHANNEL_ID,

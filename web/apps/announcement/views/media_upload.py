@@ -10,7 +10,10 @@ import uuid
 
 
 class MediaUploadView(View):
+    """Класс для загрузки медиа."""
+
     def post(self, request) -> JsonResponse:
+        """Ендпоинт для загрузки медиа на сервер через Dropzone."""
         files = list(request.FILES.values())
         upload_ids = []
 
@@ -25,6 +28,7 @@ class MediaUploadView(View):
         return JsonResponse({"uploadId": upload_id})
 
     def delete(self, request, upload_id) -> JsonResponse:
+        """Ендпоинт для удаления медиа с сервера."""
         upload_id = unquote(upload_id)
         if "/" in upload_id:
             return JsonResponse(

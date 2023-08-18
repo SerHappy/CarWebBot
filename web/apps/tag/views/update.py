@@ -27,7 +27,7 @@ class TagUpdateView(LoginRequiredMixin, View):
 
     def get(self, request: HttpRequest, pk: int) -> HttpResponse | HttpResponseRedirect:
         """
-        Возвращает страницу обновления тега
+        Возвращает страницу обновления тега.
 
         Args:
             request (HttpRequest): объект запроса
@@ -47,8 +47,9 @@ class TagUpdateView(LoginRequiredMixin, View):
 
     def post(self, request: HttpRequest, pk: int) -> HttpResponseRedirect:
         """
-        Обрабатывает форму обновления тега. Получает данные из POST-запроса, валидирует их
-        и, если данные корректны, обновляет тег с переданным id.
+        Обрабатывает форму обновления тега.
+
+        Получает данные из POST-запроса, валидирует их и, если данные корректны, обновляет тег с переданным id.
 
         Если валидация прошла успешно:
             - выводит сообщение об успехе

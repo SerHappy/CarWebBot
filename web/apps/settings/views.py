@@ -11,12 +11,15 @@ import pytz
 
 
 class SettingsFormView(LoginRequiredMixin, FormView):
+    """Класс представления формы настроек."""
+
     login_url = settings.LOGIN_URL
     template_name = "settings/settings.html"
     form_class = SettingsForm
     success_url = reverse_lazy("settings")
 
     def get(self, request, *args, **kwargs):
+        """Метод GET для представления формы настроек."""
         settings = Setting.objects.first()
         form = self.form_class(instance=settings)
 
@@ -28,6 +31,7 @@ class SettingsFormView(LoginRequiredMixin, FormView):
         return self.render_to_response(self.get_context_data(form=form, unpublish_date_utc=unpublish_date_utc))
 
     def post(self, request, *args, **kwargs):
+        """Метод POST для представления формы настроек."""
         form = self.form_class(request.POST)
         if form.is_valid():
             if form.cleaned_data["unpublish_date"] is None:

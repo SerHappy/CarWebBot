@@ -7,13 +7,14 @@ from django.views import View
 
 
 class TagCheckView(LoginRequiredMixin, View):
-    """View для проверки, существует ли тег с таким именем в базе данных. Этот класс обрабатывает только GET метод"""
+    """View для проверки, существует ли тег с таким именем в базе данных. Этот класс обрабатывает только GET метод."""
 
     login_url = settings.LOGIN_URL
 
     def get(self, request: HttpRequest) -> JsonResponse:
         """
         Получает имя тега и проверяет, существует ли он в базе данных.
+
         Если передан id тега, то исключает его из проверки.
 
         Args:
@@ -23,8 +24,8 @@ class TagCheckView(LoginRequiredMixin, View):
             JsonResponse:
             JSON-объект с ключом is_taken, который содержит True, если тег с таким именем существует, иначе False
         """
-        tag_name = request.GET.get("tag_name", None)
-        tag_id = request.GET.get("tag_id", None)
+        tag_name = request.GET.get("tag_name")
+        tag_id = request.GET.get("tag_id")
         validator = tag_service.TagValidator()
         is_tag_taken = validator.check_is_tag_name_taken(tag_name, tag_id)
         return JsonResponse({"is_taken": is_tag_taken})

@@ -27,7 +27,7 @@ class TagCreateView(LoginRequiredMixin, View):
 
     def get(self, request: HttpRequest) -> HttpResponse:
         """
-        Возвращает страницу создания тега
+        Возвращает страницу создания тега.
 
         Args:
             request (HttpRequest): объект запроса
@@ -39,8 +39,9 @@ class TagCreateView(LoginRequiredMixin, View):
 
     def post(self, request: HttpRequest) -> HttpResponseRedirect:
         """
-        Обрабатывает форму создания тега. Получает данные из POST-запроса, валидирует их
-        и, если данные корректны, создает новый тег.
+        Обрабатывает форму создания тега.
+
+        Получает данные из POST-запроса, валидирует их и, если данные корректны, создает новый тег.
 
         Если валидация прошла успешно:
             - выводит сообщение об успехе

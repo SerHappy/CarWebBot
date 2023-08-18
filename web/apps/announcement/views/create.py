@@ -13,9 +13,12 @@ from django.views.generic import View
 
 
 class AnnouncementCreateView(LoginRequiredMixin, View):
+    """Класс для создания объявления."""
+
     login_url = settings.LOGIN_URL
 
     def get(self, request: HttpRequest) -> HttpResponse:
+        """Обработчик GET-запроса."""
         tags = Tag.objects.all()
         action_url = reverse("announcement-add")
         ctx = {
@@ -26,6 +29,7 @@ class AnnouncementCreateView(LoginRequiredMixin, View):
         return render(request, "announcement/create/announcement_create.html", ctx)
 
     def post(self, request: HttpRequest) -> HttpResponse:
+        """Обработчик POST-запроса."""
         announcement, tags = form_data_handler.handle_form_data(request)
         media_handler.handle_media_files(request, announcement)
         tags_handler.handle_tags(tags, announcement)

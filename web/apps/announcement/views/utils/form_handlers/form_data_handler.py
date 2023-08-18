@@ -7,13 +7,24 @@ import pytz
 
 
 def handle_form_data(request: HttpRequest, announcement: Announcement = None) -> tuple[Announcement, list[str]]:
+    """
+    Обрабатывает данные формы.
+
+    Args:
+        request (HttpRequest): Запрос.
+
+        announcement (Announcement, optional): Объявление. По умолчанию None.
+
+    Returns:
+        tuple[Announcement, list[str]]: Объявление и список его тегов.
+    """
     name = request.POST.get("name")
     text = request.POST.get("text")
     tag_str = request.POST.get("tags")
     tag_ids = sorted(tag_str.split(",") if tag_str else [])
     price = request.POST.get("price")
     status = request.POST.get("status")
-    note = request.POST.get("note", None)
+    note = request.POST.get("note")
 
     if announcement:
         announcement.name = name

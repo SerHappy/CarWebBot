@@ -13,6 +13,7 @@ setup_logger(logger)
 
 @shared_task
 def publish_announcements() -> None:
+    """Публикует все объявления, которые готовы к публикации."""
     logger.info("Publishing announcements...")
 
     now = timezone.now()
@@ -43,6 +44,7 @@ def publish_announcements() -> None:
 
 @shared_task
 def unpublish_announcements() -> None:
+    """Снимает с публикации все объявления, которые готовы к снятию с публикации."""
     logger.info("Unpublishing old announcements...")
     settings = Setting.objects.first()
     if settings is None:

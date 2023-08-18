@@ -8,6 +8,12 @@ from django.views.generic import View
 
 
 class TagDeleteView(LoginRequiredMixin, View):
+    """
+    Класс для удаления тега.
+
+    Этот класс обрабатывает только DELETE метод.
+    """
+
     login_url = settings.LOGIN_URL
 
     def delete(self, request: HttpRequest, pk: int) -> HttpResponse:

@@ -5,7 +5,10 @@ from typing import Literal
 
 
 class UserManager(BaseUserManager):
+    """Класс для управления моделью `User`."""
+
     def create_user(self, email, password=None) -> "User":
+        """Создает и возвращает пользователя с указанными email и паролем."""
         if not email:
             raise ValueError("Users must have an email address")
 
@@ -15,9 +18,10 @@ class UserManager(BaseUserManager):
 
         user.set_password(password)
         user.save(using=self._db)
-        return user  # type: ignore
+        return user
 
     def create_superuser(self, email, password=None) -> "User":
+        """Создает и возвращает суперпользователя с указанными email и паролем."""
         user = self.create_user(
             email,
             password=password,
@@ -28,6 +32,8 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
+    """Модель пользователя."""
+
     email: str = models.EmailField(
         verbose_name="email address",
         max_length=255,
@@ -40,15 +46,25 @@ class User(AbstractBaseUser):
 
     USERNAME_FIELD = "email"
 
+    class Meta:
+        """Мета-класс для модели пользователя."""
+
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
+
     def __str__(self) -> str:
+        """Строковое представление модели пользователя."""
         return self.email
 
     def has_perm(self, perm, obj=None) -> Literal[True]:
+        """Проверяет, имеет ли пользователь указанный набор прав."""
         return True
 
     def has_module_perms(self, app_label) -> Literal[True]:
+        """Проверяет, имеет ли пользователь права на доступ к приложению `app_label`."""
         return True
 
     @property
     def is_staff(self) -> bool:
+        """Проверяет, является ли пользователь администратором."""
         return self.is_admin

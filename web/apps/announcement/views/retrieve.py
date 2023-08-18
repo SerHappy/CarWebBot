@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 
 @login_required(login_url=settings.LOGIN_URL)
 def get_announcement_status(request: HttpRequest, pk: int) -> JsonResponse:
+    """Ендпоинт для получения статуса объявления."""
     announcement = get_object_or_404(Announcement, pk=pk)
     status = get_status(announcement)
     publication_date = announcement.publication_date

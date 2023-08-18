@@ -13,11 +13,14 @@ from django.views.generic.edit import FormView
 
 
 class RegisterView(FormView):
+    """Класс для регистрации пользователя."""
+
     template_name = "register/register.html"
     form_class = UserRegisterForm
     success_url = reverse_lazy("login")
 
     def post(self, request, *args, **kwargs) -> HttpResponse:
+        """Обработка POST-запроса."""
         form = self.get_form()
         if form.is_valid():
             return self.form_valid(form)
@@ -27,6 +30,7 @@ class RegisterView(FormView):
             return self.form_invalid(form)
 
     def form_valid(self, form) -> HttpResponse:
+        """Валидация формы."""
         cleaned_data = form.cleaned_data
         cleaned_data.pop("password_confirmation")
         user_to_register = UserData(**cleaned_data)
@@ -41,17 +45,21 @@ class RegisterView(FormView):
 
 
 class LoginView(FormView):
+    """Класс для входа пользователя."""
+
     template_name = "login/login.html"
     form_class = UserLoginForm
     success_url = reverse_lazy("announcement-list")
 
     def get(self, request, *args, **kwargs) -> HttpResponse:
+        """Обработка GET-запроса."""
         if request.user.is_authenticated:
             return redirect("announcement-list")
         else:
             return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs) -> HttpResponse:
+        """Обработка POST-запроса."""
         form = self.get_form()
         if form.is_valid():
             return self.form_valid(form)
@@ -61,6 +69,7 @@ class LoginView(FormView):
             return self.form_invalid(form)
 
     def form_valid(self, form) -> HttpResponse | None:
+        """Валидация формы."""
         user_to_login = UserData(**form.cleaned_data)
         service = LoginService()
         result = service.login(self.request, user_to_login)
@@ -73,8 +82,11 @@ class LoginView(FormView):
 
 
 class LogoutView(RedirectView):
+    """Класс для выхода пользователя."""
+
     url = reverse_lazy("login")
 
     def get(self, request, *args, **kwargs) -> HttpResponse:
+        """Обработка GET-запроса."""
         logout(request)
         return super().get(request, *args, **kwargs)

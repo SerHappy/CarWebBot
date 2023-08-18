@@ -61,6 +61,27 @@ def edit_announcement_in_channel(announcement: Announcement, old_tags: dict[Tag,
 
     current_tags = {tag: tag.channel_id for tag in announcement.tags.all()}
 
+    _handle_old_tags(announcement, current_tags, old_tags)
+
+    for tag, channel_id in current_tags.items():
+        try:
+            if isinstance(list(old_tags.keys())[0], str):
+                continue
+        except Exception as e:
+            logger.error(e)
+            pass
+        new_old_channel_id = old_tags.get(tag)
+        if new_old_channel_id != channel_id and channel_id or (tag not in old_tags and channel_id):
+            message = create_subchannel_message(announcement)
+            publish_subchannel_media(announcement, tag)
+            text_message = send_text_message_with_retries_to_subchannel(message, tag)
+            if text_message:
+                update_announcement_and_save_subchannel_message(announcement, text_message, tag)
+
+    logger.info(f"Announcement {announcement.name} edited")
+
+
+def _handle_old_tags(announcement: Announcement, current_tags: dict, old_tags: dict) -> None:
     for tag, old_channel_id in old_tags.items():
         if isinstance(tag, str):
             continue
@@ -71,25 +92,9 @@ def edit_announcement_in_channel(announcement: Announcement, old_tags: dict[Tag,
         else:
             delete_announcement_from_subchannel(announcement, tag.id)
 
-    for tag, channel_id in current_tags.items():
-        try:
-            if isinstance(list(old_tags.keys())[0], str):
-                continue
-        except Exception as e:
-            logger.error(e)
-            pass
-        old_channel_id = old_tags.get(tag)
-        if old_channel_id != channel_id and channel_id or (tag not in old_tags and channel_id):
-            message = create_subchannel_message(announcement)
-            publish_subchannel_media(announcement, tag)
-            text_message = send_text_message_with_retries_to_subchannel(message, tag)
-            if text_message:
-                update_announcement_and_save_subchannel_message(announcement, text_message, tag)
-
-    logger.info(f"Announcement {announcement.name} edited")
-
 
 def delete_announcement_from_channel(announcement: Announcement) -> None:
+    """Удаляет объявление из канала и подканалов."""
     logger.info(f"Deleting announcement: {announcement.name}")
 
     telethon.run_in_new_thread(_delete_messages, announcement)
@@ -101,7 +106,7 @@ def delete_announcement_from_channel(announcement: Announcement) -> None:
 def _delete_messages(announcement: Announcement) -> None:
     telethon.set_new_event_loop()
     with telethon.fetch_telegram_client() as client:
-        client: TelegramClient
+        client: TelegramClient  # type: ignore[no-redef]
         published_messages: QuerySet[PublishedMessage] = announcement.published_messages.all()
         logger.debug(f"Deleting {published_messages.count()} messages")
         for message in published_messages:

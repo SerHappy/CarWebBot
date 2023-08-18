@@ -12,6 +12,7 @@ import shutil
 
 @login_required(login_url=settings.LOGIN_URL)
 def takeoff_announcement(request: HttpRequest, pk: int) -> HttpResponse:
+    """Снимает объявление с публикации с id `pk`."""
     announcement = get_object_or_404(Announcement, pk=pk)
     delete_announcement_from_channel(announcement)
     return HttpResponse(status=200)
@@ -19,6 +20,7 @@ def takeoff_announcement(request: HttpRequest, pk: int) -> HttpResponse:
 
 @login_required(login_url=settings.LOGIN_URL)
 def delete_announcement(request: HttpRequest, pk: int) -> HttpResponse:
+    """Удаляет объявление из канала и базы данных с id `pk`."""
     announcement = get_object_or_404(Announcement, pk=pk)
     delete_announcement_from_channel(announcement)
     media = announcement.media.all()
