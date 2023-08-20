@@ -73,7 +73,7 @@
             <tbody>
               {% if announcements|length > 0 %}
                 {% for announcement in announcements %}
-                  <tr class="announcement-row {% if not announcement.is_active %}table-secondary{% endif %}"
+                  <tr class="announcement-row {% if announcement.processing_status == "INACTIVE" or announcement.processing_status == "UNPUBLISHED" %}table-secondary{% endif %}"
                       data-id="{{ announcement.id }}"
                       data-announcement-id="{{ announcement.id }}"
                       data-published-message-link="{{ announcement.published_message_link }}">

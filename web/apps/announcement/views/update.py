@@ -74,7 +74,7 @@ class AnnouncementUpdateView(LoginRequiredMixin, View):
 
         media_handler.handle_media_files(request, announcement)
 
-        if announcement.is_published:
+        if announcement.processing_status == Announcement.ProcessingStatus.PUBLISHED:
             edit_announcement_in_channel(announcement, old_tags)
 
         return redirect("announcement-list")

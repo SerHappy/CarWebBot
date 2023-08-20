@@ -1,5 +1,5 @@
 [flake8]
-exclude =.git,__pycache__,deprecated,env,venv,migrations,alembic
+exclude =.git,__pycache__,deprecated,env,venv,apps/announcement/migrations,migrations,alembic
 ignore = B305, D100, D104, E203
 
 max-complexity = 9

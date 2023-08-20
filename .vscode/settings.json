@@ -25,4 +25,7 @@
     },
     "git.decorations.enabled": true,
     "python.analysis.typeCheckingMode": "off",
+    "flake8.args": [
+        "--config=.flake8",
+    ],
 }

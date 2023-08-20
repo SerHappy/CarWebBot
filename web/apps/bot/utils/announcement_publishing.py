@@ -71,7 +71,6 @@ def update_announcement_and_save_message(announcement: Announcement, text_messag
     """
     logger.info(f"Updating announcement {announcement.id}...")
     announcement.published_message_link = f"https://t.me/{settings.MAIN_CHANNEL_NAME}/{text_message.id}"
-    announcement.is_published = True
     announcement.save()
     PublishedMessage.objects.create(
         announcement=announcement,

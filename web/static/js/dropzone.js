@@ -354,14 +354,14 @@ class MyDropzone {
       let announcementData = editButton.getAttribute('data-announcement');
       let announcement = JSON.parse(announcementData);
       console.log("announcement: ", announcement);
-      console.log(announcement[0].fields.is_published);
+      console.log(announcement[0].fields.processing_status);
       if (currentFileCount > initialFileCount) {
         console.log("File count more than initialFileCount, disabling editButton");
         editButton.setAttribute('disabled', 'disabled');
         editButton.setAttribute('title', 'Количество файлов увеличилось, редактирование невозможно. Было: ' + initialFileCount + ', стало ' + currentFileCount + '');
       }
       else {
-        if (announcement[0].fields.is_published == false) {
+        if (announcement[0].fields.processing_status != "PUBLISHED") {
           console.log("Announcement is not published, disabling editButton");
           editButton.setAttribute('disabled', 'disabled');
           editButton.setAttribute('title', 'Объявление не опубликовано, редактирование невозможно');
