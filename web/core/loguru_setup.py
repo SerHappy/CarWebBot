@@ -1,9 +1,11 @@
 from django.conf import settings
+from loguru import Logger
+from typing import Any
 
 import os
 
 
-def setup_logger(logger) -> None:
+def setup_logger(logger: Logger, logger_settings: Any = None) -> None:
     """
     Set up logger with settings from .env file.
 

@@ -12,6 +12,6 @@ class Setting(models.Model):
         verbose_name = "Настройка"
         verbose_name_plural = "Настройки"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Строковое представление настроек."""
         return f"Настройки. Дата снятии с публикации: {self.unpublish_date}"

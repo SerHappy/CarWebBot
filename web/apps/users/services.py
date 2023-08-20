@@ -4,6 +4,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from django.contrib.auth import authenticate
 from django.contrib.auth import login
+from django.http import HttpRequest
 from loguru import logger
 
 
@@ -84,7 +85,7 @@ class RegistrationService:
 class LoginService:
     """Класс для входа пользователя."""
 
-    def login(self, request, user_data: UserData) -> LoginResult:
+    def login(self, request: HttpRequest, user_data: UserData) -> LoginResult:
         """Логинит пользователя и возвращает результат входа."""
         user = authenticate(request, username=user_data.email, password=user_data.password)
         if user is not None:

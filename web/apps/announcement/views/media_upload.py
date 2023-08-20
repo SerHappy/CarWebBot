@@ -1,4 +1,5 @@
 from ..storage import tmp_storage
+from django.http import HttpRequest
 from django.http import JsonResponse
 from django.views.generic import View
 from loguru import logger
@@ -12,7 +13,7 @@ import uuid
 class MediaUploadView(View):
     """Класс для загрузки медиа."""
 
-    def post(self, request) -> JsonResponse:
+    def post(self, request: HttpRequest) -> JsonResponse:
         """Ендпоинт для загрузки медиа на сервер через Dropzone."""
         files = list(request.FILES.values())
         upload_ids = []
@@ -27,7 +28,7 @@ class MediaUploadView(View):
 
         return JsonResponse({"uploadId": upload_id})
 
-    def delete(self, request, upload_id) -> JsonResponse:
+    def delete(self, request: HttpRequest, upload_id: str) -> JsonResponse:
         """Ендпоинт для удаления медиа с сервера."""
         upload_id = unquote(upload_id)
         if "/" in upload_id:

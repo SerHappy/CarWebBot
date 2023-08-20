@@ -5,11 +5,14 @@ from .services import RegistrationService
 from .services import UserData
 from django.contrib import messages
 from django.contrib.auth import logout
+from django.forms import Form
+from django.http import HttpRequest
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic.base import RedirectView
 from django.views.generic.edit import FormView
+from typing import Any
 
 
 class RegisterView(FormView):
@@ -19,7 +22,7 @@ class RegisterView(FormView):
     form_class = UserRegisterForm
     success_url = reverse_lazy("login")
 
-    def post(self, request, *args, **kwargs) -> HttpResponse:
+    def post(self, request: HttpRequest, *args: Any, **kwargs: dict[str, Any]) -> HttpResponse:
         """Обработка POST-запроса."""
         form = self.get_form()
         if form.is_valid():
@@ -29,7 +32,7 @@ class RegisterView(FormView):
             messages.error(request, error_message)
             return self.form_invalid(form)
 
-    def form_valid(self, form) -> HttpResponse:
+    def form_valid(self, form: Form) -> HttpResponse:
         """Валидация формы."""
         cleaned_data = form.cleaned_data
         cleaned_data.pop("password_confirmation")
@@ -51,14 +54,14 @@ class LoginView(FormView):
     form_class = UserLoginForm
     success_url = reverse_lazy("announcement-list")
 
-    def get(self, request, *args, **kwargs) -> HttpResponse:
+    def get(self, request: HttpRequest, *args: Any, **kwargs: dict[str, Any]) -> HttpResponse:
         """Обработка GET-запроса."""
         if request.user.is_authenticated:
             return redirect("announcement-list")
         else:
             return super().get(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs) -> HttpResponse:
+    def post(self, request: HttpRequest, *args: Any, **kwargs: dict[str, Any]) -> HttpResponse:
         """Обработка POST-запроса."""
         form = self.get_form()
         if form.is_valid():
@@ -68,7 +71,7 @@ class LoginView(FormView):
             messages.error(request, error_message)
             return self.form_invalid(form)
 
-    def form_valid(self, form) -> HttpResponse | None:
+    def form_valid(self, form: Form) -> HttpResponse | None:
         """Валидация формы."""
         user_to_login = UserData(**form.cleaned_data)
         service = LoginService()
@@ -86,7 +89,7 @@ class LogoutView(RedirectView):
 
     url = reverse_lazy("login")
 
-    def get(self, request, *args, **kwargs) -> HttpResponse:
+    def get(self, request: HttpRequest, *args: Any, **kwargs: dict[str, Any]) -> HttpResponse:
         """Обработка GET-запроса."""
         logout(request)
         return super().get(request, *args, **kwargs)

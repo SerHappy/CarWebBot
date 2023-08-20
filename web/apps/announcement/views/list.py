@@ -23,7 +23,7 @@ class AnnouncementListView(LoginRequiredMixin, ListView):
     model = Announcement
     template_name = "announcement/announcement_list.html"
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
+    def get_context_data(self, **kwargs: dict[str, Any]) -> dict[str, Any]:
         """Получение контекста для шаблона."""
         context = super().get_context_data(**kwargs)
         context["announcements"] = Announcement.objects.annotate(

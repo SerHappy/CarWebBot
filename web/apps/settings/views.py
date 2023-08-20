@@ -3,9 +3,14 @@ from .models import Setting
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpRequest
+from django.http import HttpResponse
+from django.http import HttpResponsePermanentRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import FormView
+from typing import Any
 
 import pytz
 
@@ -18,7 +23,7 @@ class SettingsFormView(LoginRequiredMixin, FormView):
     form_class = SettingsForm
     success_url = reverse_lazy("settings")
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args: Any, **kwargs: dict[str, Any]) -> HttpResponse:
         """Метод GET для представления формы настроек."""
         settings = Setting.objects.first()
         form = self.form_class(instance=settings)
@@ -30,7 +35,9 @@ class SettingsFormView(LoginRequiredMixin, FormView):
 
         return self.render_to_response(self.get_context_data(form=form, unpublish_date_utc=unpublish_date_utc))
 
-    def post(self, request, *args, **kwargs):
+    def post(
+        self, request: HttpRequest, *args: Any, **kwargs: dict[str, Any]
+    ) -> HttpResponseRedirect | HttpResponsePermanentRedirect | HttpResponse:
         """Метод POST для представления формы настроек."""
         form = self.form_class(request.POST)
         if form.is_valid():

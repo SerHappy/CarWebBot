@@ -2,6 +2,7 @@ from django.conf import settings
 from loguru import logger
 from telethon.sync import TelegramClient
 from typing import Any
+from typing import Callable
 
 import asyncio
 import concurrent.futures
@@ -17,7 +18,7 @@ def fetch_telegram_client() -> TelegramClient:
     )
 
 
-def run_in_new_thread(func, *args, **kwargs) -> Any:
+def run_in_new_thread(func: Callable, *args: Any, **kwargs: dict[str, Any]) -> Any:
     """Запускает функцию `func` в отдельном потоке."""
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.submit(func, *args, **kwargs)

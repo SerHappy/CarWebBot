@@ -1,5 +1,6 @@
 from .models import User
 from django import forms
+from typing import Any
 
 
 class UserRegisterForm(forms.ModelForm):
@@ -17,7 +18,7 @@ class UserRegisterForm(forms.ModelForm):
         model = User
         fields = ["email", "password"]
 
-    def clean(self):
+    def clean(self) -> dict[str, Any]:
         """Очищает данные формы и проверяет пароли на совпадение."""
         cleaned_data = super().clean()
         password = cleaned_data.get("password")

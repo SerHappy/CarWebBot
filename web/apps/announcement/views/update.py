@@ -59,7 +59,7 @@ class AnnouncementUpdateView(LoginRequiredMixin, View):
                 media.delete()
         return valid_media, missing_files
 
-    def _update_media_order(self, media_list) -> None:
+    def _update_media_order(self, media_list: list[Media]) -> None:
         for i, media in enumerate(media_list):
             media.order = i
             media.save()

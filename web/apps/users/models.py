@@ -1,13 +1,14 @@
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import BaseUserManager
 from django.db import models
+from typing import Any
 from typing import Literal
 
 
 class UserManager(BaseUserManager):
     """Класс для управления моделью `User`."""
 
-    def create_user(self, email, password=None) -> "User":
+    def create_user(self, email: str, password: str | None = None) -> "User":
         """Создает и возвращает пользователя с указанными email и паролем."""
         if not email:
             raise ValueError("Users must have an email address")
@@ -20,7 +21,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password=None) -> "User":
+    def create_superuser(self, email: str, password: str | None = None) -> "User":
         """Создает и возвращает суперпользователя с указанными email и паролем."""
         user = self.create_user(
             email,
@@ -56,11 +57,11 @@ class User(AbstractBaseUser):
         """Строковое представление модели пользователя."""
         return self.email
 
-    def has_perm(self, perm, obj=None) -> Literal[True]:
+    def has_perm(self, perm: Any, obj: Any | None = None) -> Literal[True]:
         """Проверяет, имеет ли пользователь указанный набор прав."""
         return True
 
-    def has_module_perms(self, app_label) -> Literal[True]:
+    def has_module_perms(self, app_label: Any) -> Literal[True]:
         """Проверяет, имеет ли пользователь права на доступ к приложению `app_label`."""
         return True
 

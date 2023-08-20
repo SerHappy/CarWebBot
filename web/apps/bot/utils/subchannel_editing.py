@@ -99,7 +99,7 @@ def _edit_first_media_in_subchannel(media: Media, subchannel_media_message: Subc
     telethon.run_in_new_thread(_edit_first_media, subchannel_media_message, media)
 
 
-def _edit_first_media(subchannel_media_message, media) -> None:
+def _edit_first_media(subchannel_media_message: SubchannelMessage, media: Media) -> None:
     """Редактирует первое медиа объявления в подканале."""
     telethon.set_new_event_loop()
     with telethon.fetch_telegram_client() as client:
