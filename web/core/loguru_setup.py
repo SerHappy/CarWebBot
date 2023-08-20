@@ -1,5 +1,5 @@
 from django.conf import settings
-from loguru import Logger
+from loguru._logger import Logger
 from typing import Any
 
 import os
