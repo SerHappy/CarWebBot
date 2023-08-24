@@ -16,8 +16,7 @@ def update_announcement_status(announcement: Announcement, status: Announcement.
 
     Args:
         announcement (Announcement): Объявление, статус которого необходимо обновить.
-        is_published (bool): Статус публикации объявления.
-        is_active (bool): Статус активности объявления.
+        status: Новый статус объявления.
     """
     announcement.processing_status = status
     announcement.save()

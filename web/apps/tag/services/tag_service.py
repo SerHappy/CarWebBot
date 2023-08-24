@@ -1,4 +1,5 @@
 from ..models import Tag
+from apps.announcement.models import Announcement
 from apps.bot.views import delete_announcement_from_subchannel
 from apps.bot.views import edit_announcement_in_channel
 from dataclasses import dataclass
@@ -403,7 +404,9 @@ class TagService:
         # TODO: Метод слишком много делает. Нужно разбить на несколько методов.
         # TODO: Не соответствует SRP.
         # TODO: Логика редактирования объявлений должна быть в другом месте.
-        announcements = tag.announcements.filter(is_published=True).order_by("publication_date")
+        announcements = tag.announcements.filter(processing_status=Announcement.ProcessingStatus.PUBLISHED).order_by(
+            "publication_date"
+        )
 
         for announcement in announcements:
             current_tags = announcement.tags.all()
