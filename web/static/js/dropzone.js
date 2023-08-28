@@ -121,7 +121,10 @@ class MyDropzone {
 
   displayExistingFile(file, url) {
     console.log("Display existing file triggered");
-    console.log("File: " + file.name + " url: " + url);
+    console.log("File: ");
+    console.log(file);
+    console.log("Url: ");
+    console.log(url);
     this.myDropzone.displayExistingFile(file, url);
   }
 
@@ -179,71 +182,64 @@ class MyDropzone {
     console.log("Current uploadIds array:");
     console.log(this.uploadIds);
     console.log("Current file.type: " + file.type);
-    if (file.type == "VIDEO" || file.type.startsWith("video")) {
-      if (file.type == "VIDEO") {
-        console.log("File is a video");
-        file.previewElement.classList.add('dz-video-preview');
-        let videoIcon = document.createElement('i');
-        videoIcon.classList.add('fas', 'fa-video', 'video-icon');
-        file.previewElement.appendChild(videoIcon);
-        var videoUrl = file.name;
-        var video = document.createElement("video");
-        var canvas = document.createElement("canvas");
-        var context = canvas.getContext("2d");
 
-        // Загружаем видео
-        video.src = videoUrl;
-        video.addEventListener("loadeddata", function () {
-          // Get the size of the preview container
-          var previewWidth = file.previewElement.querySelector(".dz-image").offsetWidth;
-          var previewHeight = file.previewElement.querySelector(".dz-image").offsetHeight;
-
-          // Set the size of the canvas to match the size of the preview container
-          canvas.width = previewWidth;
-          canvas.height = previewHeight;
-
-          // Draw the video frame on the canvas
-          context.drawImage(video, 0, 0, previewWidth, previewHeight);
-
-          // Create a URL for the image from the canvas
-          var imageUrl = canvas.toDataURL();
-
-          // Replace the video preview with an image
-          file.previewElement.querySelector(".dz-image").innerHTML = '<img src="' + imageUrl + '" />';
-        });
-      } else if (file.type.startsWith("video")) {
-        // Обработка новых видео
-        console.log("File is a video");
-        // Создаем URL для файла видео
-        var videoUrl = URL.createObjectURL(file);
-
-        // Создаем элементы video и canvas
-        var video = document.createElement("video");
-        var canvas = document.createElement("canvas");
-        var context = canvas.getContext("2d");
-
-        // Загружаем видео
-        video.src = videoUrl;
-        video.addEventListener("loadeddata", function () {
-          // Get the size of the preview container
-          var previewWidth = file.previewElement.querySelector(".dz-image").offsetWidth;
-          var previewHeight = file.previewElement.querySelector(".dz-image").offsetHeight;
-
-          // Set the size of the canvas to match the size of the preview container
-          canvas.width = previewWidth;
-          canvas.height = previewHeight;
-
-          // Draw the video frame on the canvas
-          context.drawImage(video, 0, 0, previewWidth, previewHeight);
-
-          // Create a URL for the image from the canvas
-          var imageUrl = canvas.toDataURL();
-
-          // Replace the video preview with an image
-          file.previewElement.querySelector(".dz-image").innerHTML = '<img src="' + imageUrl + '" />';
-        });
-      }
+    if (file.type.startsWith("video") || file.type.startsWith("VIDEO")) {
+      file.previewElement.classList.add('dz-video-preview');
+      let videoIcon = document.createElement('i');
+      videoIcon.classList.add('fas', 'fa-video', 'video-icon');
+      file.previewElement.appendChild(videoIcon);
     }
+
+    if (file.type.startsWith("video")) {
+      console.log("Это видео");
+
+      // Создаем Blob и временный URL для видео
+      const blob = new Blob([file], { type: 'video/mp4' });
+      const url = URL.createObjectURL(blob);
+      console.log(`Создан временный URL для видео: ${url}`);
+
+      // Создаем элементы video и canvas
+      const video = document.createElement('video');
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Задаем исходный URL для video
+      video.src = url;
+
+      // Когда метаданные видео загружены
+      video.addEventListener('loadedmetadata', function () {
+        console.log(`Метаданные загружены`);
+
+        // Получаем размеры элемента превью
+        const previewWidth = file.previewElement.querySelector(".dz-image").offsetWidth;
+        const previewHeight = file.previewElement.querySelector(".dz-image").offsetHeight;
+
+        // Устанавливаем размеры холста согласно размерам превью
+        canvas.width = previewWidth;
+        canvas.height = previewHeight;
+
+        video.currentTime = 1; // Переход к 1-й секунде
+      });
+
+      // Когда видео готово к отрисовке на холсте
+      video.addEventListener('seeked', function () {
+        // Рисуем изображение на холсте с учетом размеров превью
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imgDataUrl = canvas.toDataURL();
+
+        // Заменяем превью видео изображением
+        file.previewElement.querySelector(".dz-image").innerHTML = `<img src="${imgDataUrl}" />`;
+        console.log(`Превью создано`);
+      });
+
+      // Обработка ошибок
+      video.addEventListener('error', function (e) {
+        console.log(`Ошибка при обработке видео: ${file.name}`);
+        console.log('Детали ошибки:', e);
+      });
+      file.previewElement.classList.remove("dz-file-preview");
+    }
+
 
     if (this.myDropzone.files.length > 0) {
       console.log("Files exist, hiding dz-message");
@@ -374,58 +370,70 @@ class MyDropzone {
     }
   }
 
-    updateFileOrderInDropzone() {
-      console.log("Updating file order in dropzone");
+  updateFileOrderInDropzone() {
+    console.log("Updating file order in dropzone");
 
-      // Define a new array to hold the updated upload ids
-      let updatedUploadIds = new Array(this.myDropzone.files.length);
+    // Define a new array to hold the updated upload ids
+    let updatedUploadIds = new Array(this.myDropzone.files.length);
 
-      this.uploadIds = this.getOrderedUploadIds();
-      console.log(this.uploadIds);
+    this.uploadIds = this.getOrderedUploadIds();
+    console.log(this.uploadIds);
 
-      // Use an arrow function to preserve `this`
-      this.myDropzone.files.forEach((file) => {
-        file.order = $(file.previewElement).index() - 1;
-        console.log("File " + file.name + " index: " + this.myDropzone.files.indexOf(file) + " order: " + file.order);
+    // Use an arrow function to preserve `this`
+    this.myDropzone.files.forEach((file) => {
+      file.order = $(file.previewElement).index() - 1;
+      console.log("File " + file.name + " index: " + this.myDropzone.files.indexOf(file) + " order: " + file.order);
 
-        // Update the uploadIds array according to the new order
-        updatedUploadIds[file.order] = this.uploadIds[this.myDropzone.files.indexOf(file)];
-        console.log("Updated uploadIds array:");
-        console.log(updatedUploadIds);
-      });
-
-      // Replace the old uploadIds array with the updated one
-      this.uploadIds = updatedUploadIds;
+      // Update the uploadIds array according to the new order
+      updatedUploadIds[file.order] = this.uploadIds[this.myDropzone.files.indexOf(file)];
       console.log("Updated uploadIds array:");
-      console.log(this.uploadIds);
-      console.log("Updated files in myDropzone.files:");
-      console.log(this.getOrderedUploadIds());
-    }
+      console.log(updatedUploadIds);
+    });
 
-    getOrderedUploadIds() {
-      return this.myDropzone.files.sort((a, b) => a.order - b.order).map(file => file.uploadId);
-    }
-
-    initialize() {
-      console.log("Initializing Dropzone");
-      Dropzone.autoDiscover = false;
-      this.myDropzone = new Dropzone("#dropzoneForm", this.dropzoneOptions);
-
-      this.myDropzone.on("queuecomplete", () => this.queueComplete());
-      this.myDropzone.on("addedfile", (file) => this.addedFile(file));
-      this.myDropzone.on("removedfile", (file) => this.removedFile(file));
-      this.myDropzone.on("error", (file, message) => this.handleError(file, message));
-      this.myDropzone.on("sending", function (file, xhr, formData) {
-        // Get the order of current file
-        let fileOrder = file.order;
-        console.log("Sending file order: " + fileOrder);
-        // Append the order to the form data
-        formData.append("order", fileOrder);
-      });
-      this.addEventListener();
-      console.log("Initial files in myDropzone.files:");
-      console.log(this.myDropzone.files);
-      console.log("Initializing tooltips");
-      $('[data-toggle="tooltip"]').tooltip();
-    }
+    // Replace the old uploadIds array with the updated one
+    this.uploadIds = updatedUploadIds;
+    console.log("Updated uploadIds array:");
+    console.log(this.uploadIds);
+    console.log("Updated files in myDropzone.files:");
+    console.log(this.getOrderedUploadIds());
   }
+
+  getOrderedUploadIds() {
+    return this.myDropzone.files.sort((a, b) => a.order - b.order).map(file => file.uploadId);
+  }
+
+  removeAllFiles() {
+    let files = [...this.myDropzone.files];
+    for (let file of files) {
+      this.myDropzone.removeFile(file);
+    }
+    document.getElementById("removeAllFiles").blur();
+  }
+
+
+
+  initialize() {
+    console.log("Initializing Dropzone");
+    Dropzone.autoDiscover = false;
+    this.myDropzone = new Dropzone("#dropzoneForm", this.dropzoneOptions);
+
+    this.myDropzone.on("queuecomplete", () => this.queueComplete());
+    this.myDropzone.on("addedfile", (file) => this.addedFile(file));
+    this.myDropzone.on("removedfile", (file) => this.removedFile(file));
+    this.myDropzone.on("error", (file, message) => this.handleError(file, message));
+    this.myDropzone.on("sending", function (file, xhr, formData) {
+      let fileOrder = file.order;
+      console.log("Sending file order: " + fileOrder);
+      formData.append("order", fileOrder);
+    });
+
+    document.getElementById("removeAllFiles").addEventListener("click", () => this.removeAllFiles());
+
+    this.addEventListener();
+    console.log("Initial files in myDropzone.files:");
+    console.log(this.myDropzone.files);
+    console.log("Initializing tooltips");
+    $('[data-toggle="tooltip"]').tooltip();
+  }
+
+}

@@ -1,6 +1,6 @@
 <div class="form-group">
   <label for="file-upload">Загрузка изображений и видео</label>
-  <div id="dropzoneForm" class="dropzone">
+  <div id="dropzoneForm" class="dropzone mb-3">
     <div class="dz-message" data-dz-message>
       <span>Перетащите файлы сюда или кликните для загрузки</span>
     </div>
@@ -10,5 +10,10 @@
          name="media"
          style="display: none"
          multiple />
+  <div class="d-flex justify-content-end">
+    <button id="removeAllFiles" class="btn btn-danger btn-sm" type="button">
+      <i class="fas fa-trash-alt"></i> Удалить все файлы
+    </button>
+  </div>
   <input type="hidden" id="existing-files" name="existing_files" value="" />
 </div>

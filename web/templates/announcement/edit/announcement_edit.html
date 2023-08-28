@@ -56,8 +56,8 @@
   {% include "announcement/includes/create_tag_modal.html" %}
   {% include "announcement/includes/delete_modal.html" %}
   {% include "announcement/includes/republish_modal.html" %}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"
-          integrity="sha512-U2WE1ktpMTuRBPoCFDzomoIorbOyUv0sP8B+INA3EzNAhehbzED1rOJg6bCqPf/Tuposxb5ja/MAUnC8THSbLQ=="
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.js"
+          integrity="sha512-9e9rr82F9BPzG81+6UrwWLFj8ZLf59jnuIA/tIf8dEGoQVu7l5qvr02G/BiAabsFOYrIUTMslVN+iDYuszftVQ=="
           crossorigin="anonymous"
           referrerpolicy="no-referrer"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.min.js"
@@ -96,6 +96,7 @@
 
     if (announcement != null) {
       populateFormFields(announcement);
+      console.log("Populating existing files...");
       populateExistingFiles(myDropzoneInstance, announcement);
     }
 
@@ -202,17 +203,20 @@
 
     Promise.all(mediaPromises)
   .then((loadedFiles) => {
+    console.log("Все промисы успешно разрешены");
     loadedFiles.forEach((file) => {
       if (file.src) {
+        console.log('Файл добавляется в Dropzone: ', file, file.src);
         myDropzoneInstance.displayExistingFile(file, file.src);
         myDropzoneInstance.myDropzone.files.push(file);
       } else {
-        console.error('Не удалось загрузить файл: ', file);
+        console.error('Не удалось добавить файл: ', file);
       }
     });
   })
   .catch((error) => {
-    console.error(error);
+    console.log("Ошибка в одном из промисов");
+    console.log('Детали ошибки:', error);
     let mockFile = {
       name: "Ошибка",
       size: 0,
@@ -257,33 +261,56 @@
   }
 
  function loadFileAndDisplay(file, url, myDropzoneInstance) {
+  console.log(`Загрузка файла с типом: ${file.type}`);
   return new Promise((resolve, reject) => {
     if (file.type.startsWith('PHOTO')) {
       // Загружаем и отображаем изображение
       let image = new Image();
       image.src = url;
       image.onload = function() {
+        console.log(`Изображение успешно загружено: ${file.name}`);
         resolve({...file, src: this.src});
       };
-      image.onerror = function() {
+      image.onerror = function(error) {
+        console.log(`Ошибка при загрузке изображения: ${file.name}`);
+        console.log('Детали ошибки:', error);
         reject('Ошибка при загрузке изображения: ' + url);
       };
     } else if (file.type.startsWith('VIDEO')) {
-      // Загружаем и отображаем видео
-      let video = document.createElement('video');
+      console.log('Загружаем видео');
+      const video = document.createElement('video');
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
       video.src = url;
-      video.onloadeddata = function() {
-        resolve({...file, src: this.src});
-      };
-      video.onerror = function() {
+
+      video.addEventListener('loadedmetadata', function() {
+        console.log(`Метаданные видео загружены: ${file.name}`);
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        video.currentTime = 1;  // Переходим к 1-й секунде видео
+      });
+
+      video.addEventListener('seeked', function() {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imgDataUrl = canvas.toDataURL();
+
+        console.log(`Превью видео создано: ${file.name}`);
+        resolve({...file, src: imgDataUrl});
+      });
+
+      video.addEventListener('error', function(e) {
+        console.log(`Ошибка при загрузке видео: ${file.name}`);
+        console.log('Детали ошибки:', e);
         reject('Ошибка при загрузке видео: ' + url);
-      };
+      });
     } else {
       // Неизвестный тип файла
       reject('Неизвестный тип файла: ' + file.type);
     }
   });
 }
+
   });
   </script>
 {% endblock content %}
